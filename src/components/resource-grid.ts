@@ -1,8 +1,10 @@
 import { el } from "../lib/dom";
 import { colorSlot, monogram } from "../lib/monogram";
+import { t } from "../lib/i18n";
 import type { Resource } from "../lib/types";
 
 const COLORS = 6; // --module-1 … --module-6
+/** Stored category name (data, so not translated); shown as t("links.lectureNotes"). */
 export const LECTURE_NOTES = "Lecture notes";
 
 function host(url: string): string {
@@ -62,8 +64,10 @@ export function moduleLinks(module: string, resources: Resource[]): HTMLUListEle
   const own = resources.filter((r) => r.module === module).sort(byTitle);
   const items = own.map(linkCard);
   if (!own.some((r) => r.category === LECTURE_NOTES))
-    items.unshift(emptySlot(LECTURE_NOTES, "Add the link", addLinkHref({ module, category: LECTURE_NOTES, title: `${module} notes` })));
-  items.push(emptySlot("Another link", "Exercises, past exams…", addLinkHref({ module })));
+    items.unshift(
+      emptySlot(t("links.lectureNotes"), t("links.addTheLink"), addLinkHref({ module, category: LECTURE_NOTES, title: t("links.notesTitle", { module }) })),
+    );
+  items.push(emptySlot(t("links.another"), t("links.anotherHint"), addLinkHref({ module })));
   return linkGrid(items);
 }
 
@@ -78,6 +82,6 @@ export function generalGroups(resources: Resource[]): HTMLElement[] {
     return section;
   });
   const add = el("section", "link-group");
-  add.append(linkGrid([emptySlot("Add a link", "Not tied to a module", addLinkHref())]));
+  add.append(linkGrid([emptySlot(t("links.add"), t("links.notTied"), addLinkHref())]));
   return [...sections, add];
 }

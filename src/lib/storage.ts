@@ -1,9 +1,10 @@
+import { t } from "./i18n";
 import { SEED, upgradeSeed } from "./seed";
 import { storageArea } from "./storage-area";
 import type { StoredData } from "./types";
 
 type Key = keyof StoredData;
-const KEYS: Key[] = ["exams", "resources", "settings", "focusLog"];
+const KEYS: Key[] = ["exams", "resources", "settings", "focusLog", "checklists"];
 
 /*
  * chrome.storage.sync (extension) allows only 8 KB per item, which a few exams
@@ -39,6 +40,7 @@ export async function loadAll(): Promise<StoredData> {
     resources: (decode(all, "resources") as StoredData["resources"] | undefined) ?? SEED.resources,
     settings: { ...SEED.settings, ...(decode(all, "settings") as Partial<StoredData["settings"]> | undefined) },
     focusLog: (decode(all, "focusLog") as StoredData["focusLog"] | undefined) ?? [],
+    checklists: (decode(all, "checklists") as StoredData["checklists"] | undefined) ?? {},
   };
 }
 
@@ -70,7 +72,7 @@ export function onDataChanged(listener: (data: StoredData) => void): () => void 
 /** Turns storage quota errors into a sentence a person can act on. */
 export function describeSaveError(err: unknown): string {
   const msg = err instanceof Error ? `${err.name} ${err.message}` : String(err);
-  if (/QUOTA_BYTES|quota/i.test(msg)) return "Storage is full. Shorten some notes or delete old exams.";
-  if (/MAX_WRITE_OPERATIONS/i.test(msg)) return "Too many saves in a short time. Wait a minute and try again.";
-  return `Couldn't save: ${err instanceof Error ? err.message : msg}`;
+  if (/QUOTA_BYTES|quota/i.test(msg)) return t("err.storageFull");
+  if (/MAX_WRITE_OPERATIONS/i.test(msg)) return t("err.tooManyWrites");
+  return t("err.couldntSave", { message: err instanceof Error ? err.message : msg });
 }

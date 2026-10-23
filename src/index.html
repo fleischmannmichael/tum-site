@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
-    <title>Exam countdown</title>
+    <title data-i18n-doc-title="page.title">Exam countdown</title>
     <meta name="description" content="Countdown to my TUM exams, with dates, rules and study links." />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./home/home.css" />
@@ -12,22 +12,22 @@
   <body>
     <header class="topbar">
       <div class="topbar__inner">
-        <nav aria-label="Sections" class="nav">
+        <nav aria-label="Sections" data-i18n-aria-label="nav.sections" class="nav">
           <ul class="pill-nav glass-card">
-            <li><a class="pill-nav__item" href="#countdown" aria-current="page">Countdown</a></li>
+            <li><a class="pill-nav__item" href="#countdown" aria-current="page" data-i18n="nav.countdown">Countdown</a></li>
             <!-- Click: overview of all modules. Hover or keyboard focus: quick list. -->
             <li class="nav-modules" id="nav-modules">
               <a class="pill-nav__item" id="modules-link" href="#modules">
-                Modules<svg class="pill-nav__chevron" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                <span data-i18n="nav.modules">Modules</span><svg class="pill-nav__chevron" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
               </a>
               <div id="modules-menu" class="modules-menu">
-                <ul id="modules-menu-list" class="modules-menu__list glass-card" aria-label="Modules"></ul>
+                <ul id="modules-menu-list" class="modules-menu__list glass-card" aria-label="Modules" data-i18n-aria-label="nav.modulesList"></ul>
               </div>
             </li>
-            <li><a class="pill-nav__item" id="focus-link" href="#focus">Focus</a></li>
+            <li><a class="pill-nav__item" id="focus-link" href="#focus" data-i18n="nav.focus">Focus</a></li>
           </ul>
         </nav>
-        <a class="gear glass-card" href="settings/index.html" aria-label="Settings" title="Settings">
+        <a class="gear glass-card" href="settings/index.html" aria-label="Settings" title="Settings" data-i18n-aria-label="nav.settings" data-i18n-title="nav.settings">
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
@@ -53,10 +53,10 @@
           </section>
 
           <section class="exams" aria-labelledby="exams-title">
-            <h2 id="exams-title" class="visually-hidden">All exams</h2>
+            <h2 id="exams-title" class="visually-hidden" data-i18n="cd.allExams">All exams</h2>
             <ul id="exam-grid" class="exam-grid exam-grid--columns"></ul>
             <details id="done-section" class="done-list" hidden>
-              <summary class="done-list__summary">Done (<span id="done-count">0</span>)</summary>
+              <summary class="done-list__summary" id="done-summary">Done (0)</summary>
               <ul id="done-grid" class="exam-grid"></ul>
             </details>
           </section>
@@ -66,15 +66,15 @@
 
         <div id="view-modules" class="view" hidden>
           <section class="overview" aria-labelledby="modules-title">
-            <h1 id="modules-title" class="countdown__title overview__title" tabindex="-1">Modules</h1>
+            <h1 id="modules-title" class="countdown__title overview__title" tabindex="-1" data-i18n="nav.modules">Modules</h1>
             <ul id="modules-overview" class="overview__grid"></ul>
           </section>
         </div>
 
         <div id="view-focus" class="view" hidden>
           <section class="focus" aria-labelledby="focus-title">
-            <p class="countdown__eyebrow">Pomodoro · light up the tower</p>
-            <h1 id="focus-title" class="countdown__title focus__title" tabindex="-1">Focus</h1>
+            <p class="countdown__eyebrow" data-i18n="focus.eyebrow">Pomodoro · study log</p>
+            <h1 id="focus-title" class="countdown__title focus__title" tabindex="-1" data-i18n="focus.title">Focus</h1>
 
             <div class="focus__grid">
               <div class="focus__timer glass-card">
@@ -97,49 +97,78 @@
                 <p id="focus-status" class="focus__status" role="status" aria-live="polite"></p>
                 <div class="focus__controls">
                   <button type="button" class="focus__btn focus__btn--primary" id="focus-start">Start</button>
-                  <button type="button" class="focus__btn" id="focus-reset">Reset</button>
-                  <button type="button" class="focus__btn" id="focus-skip">Skip</button>
+                  <button type="button" class="focus__btn" id="focus-reset" data-i18n="focus.reset">Reset</button>
+                  <button type="button" class="focus__btn" id="focus-skip" data-i18n="focus.skip">Skip</button>
                 </div>
-                <p class="focus__keys">Space start/pause · R reset · S skip</p>
+                <p class="focus__keys" data-i18n="focus.keys">Space start/pause · R reset · S skip</p>
               </div>
 
               <div class="focus__side">
                 <section class="glass-card focus__card" aria-labelledby="studying-title">
-                  <h2 id="studying-title" class="focus__card-title">Studying</h2>
+                  <h2 id="studying-title" class="focus__card-title" data-i18n="focus.studying">Studying</h2>
                   <div id="focus-modules" class="chips" role="radiogroup" aria-labelledby="studying-title"></div>
                 </section>
 
-                <section class="glass-card focus__card" aria-labelledby="today-title">
-                  <h2 id="today-title" class="focus__card-title">Today</h2>
-                  <div class="tower" aria-hidden="true">
-                    <div class="tower__roof"></div>
-                    <div id="tower-windows" class="tower__windows"></div>
-                  </div>
-                  <p id="today-text" class="focus__today"></p>
-                </section>
-
-                <section class="glass-card focus__card" aria-labelledby="week-title">
-                  <h2 id="week-title" class="focus__card-title">This week</h2>
-                  <ul id="week-list" class="week"></ul>
-                </section>
-
-                <section class="glass-card focus__card focus__options" aria-labelledby="timer-title">
-                  <h2 id="timer-title" class="focus__card-title">Timer</h2>
-                  <div class="chips" role="radiogroup" aria-labelledby="timer-title">
-                    <label class="chip"><input type="radio" name="focus-preset" value="classic" /><span>Classic 25 · 5</span></label>
-                    <label class="chip"><input type="radio" name="focus-preset" value="deep" /><span>Deep work 50 · 10</span></label>
-                  </div>
-                  <label class="check"><input type="checkbox" id="focus-sound" /><span>Tower bell when a phase ends</span></label>
+                <section class="glass-card focus__card" aria-labelledby="timer-title">
+                  <h2 id="timer-title" class="focus__card-title" data-i18n="focus.timer">Timer</h2>
+                  <div id="focus-options" class="timer-options"></div>
                 </section>
               </div>
             </div>
+
+            <!-- Study log: a year as a heatmap, the picked day, logging by hand, upload/download. -->
+            <section class="heat glass-card" aria-labelledby="heat-title">
+              <div class="heat__head">
+                <h2 id="heat-title" class="focus__card-title" data-i18n="heat.title">Study log</h2>
+                <p id="heat-summary" class="heat__summary"></p>
+              </div>
+              <div class="heat__scroll">
+                <div class="heat__map">
+                  <div class="heat__weekdays" aria-hidden="true"><span></span><span>Mo</span><span></span><span>Mi</span><span></span><span>Fr</span><span></span></div>
+                  <div class="heat__body">
+                    <div id="heat-months" class="heat__months" aria-hidden="true"></div>
+                    <div id="heat-grid" class="heat__grid" role="group" aria-labelledby="heat-title" aria-describedby="heat-legend-text"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="heat__legend">
+                <span data-i18n="heat.less">Less</span>
+                <span class="heat__cell heat--0" aria-hidden="true"></span><span class="heat__cell heat--1" aria-hidden="true"></span><span class="heat__cell heat--2" aria-hidden="true"></span><span class="heat__cell heat--3" aria-hidden="true"></span><span class="heat__cell heat--4" aria-hidden="true"></span><span class="heat__cell heat--5" aria-hidden="true"></span>
+                <span data-i18n="heat.more">More</span>
+                <span id="heat-legend-text" class="visually-hidden" data-i18n="heat.legend"></span>
+              </div>
+
+              <div class="heat__panels">
+                <section class="heat-day" aria-labelledby="heat-day-title">
+                  <h3 id="heat-day-title" class="heat-day__title"></h3>
+                  <ul id="heat-day-list" class="heat-day__list"></ul>
+                </section>
+
+                <form id="heat-form" class="heat-form" novalidate>
+                  <h3 class="heat-day__title" data-i18n="heat.log">Log studying</h3>
+                  <div class="heat-form__fields">
+                    <label class="heat-form__field"><span data-i18n="heat.date">Date</span><input id="heat-date" type="date" required /></label>
+                    <label class="heat-form__field"><span data-i18n="heat.minutes">Time</span><input id="heat-time" inputmode="numeric" autocomplete="off" placeholder="45 / 1:30" data-i18n-title="heat.minutesHint" /></label>
+                    <label class="heat-form__field"><span data-i18n="heat.module">Module</span><select id="heat-module"></select></label>
+                  </div>
+                  <div class="heat-form__actions">
+                    <button type="submit" class="focus__btn focus__btn--primary" data-i18n="heat.add">Add to log</button>
+                    <label class="focus__btn heat-form__upload" for="heat-upload" data-i18n="heat.upload">Upload log…</label>
+                    <input id="heat-upload" type="file" accept=".csv,.json,.txt,text/csv,application/json,text/plain" class="visually-hidden" />
+                    <button type="button" class="focus__btn" id="heat-export" data-i18n="heat.export">Download CSV</button>
+                  </div>
+                  <p class="heat-form__hint" data-i18n="heat.uploadHint"></p>
+                  <p id="heat-message" class="heat-form__message" role="status" aria-live="polite"></p>
+                </form>
+              </div>
+            </section>
           </section>
         </div>
 
         <div id="view-general" class="view" hidden>
           <section class="general" aria-labelledby="general-title">
-            <h1 id="general-title" class="countdown__title general__title" tabindex="-1">General links</h1>
-            <p class="general__intro">Portals and links that aren't tied to one module. Module links live on each module's page.</p>
+            <h1 id="general-title" class="countdown__title general__title" tabindex="-1" data-i18n="general.title">General links</h1>
+            <p class="general__intro" data-i18n="general.intro">Portals and links that aren't tied to one module. Module links live on each module's page.</p>
             <div id="general-groups" class="general__groups"></div>
           </section>
         </div>
@@ -151,7 +180,6 @@
           <button class="detail__close" aria-label="Close">✕</button>
         </form>
         <div class="detail__body"></div>
-        <a class="detail__edit" id="detail-edit" href="settings/index.html">Edit in settings</a>
       </div>
     </dialog>
     <script type="module" src="./home/main.ts"></script>

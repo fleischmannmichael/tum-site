@@ -29,15 +29,27 @@ saved **in your browser** (localStorage on the website, Chrome sync storage in
 the extension) — use Settings → Backup to export/import them or move them to
 another browser.
 
-## Focus
+## Using it
 
-`#focus` is a Pomodoro timer drawn as the Thiersch tower clock: the gold arc
-fills and the hand sweeps once per phase (25 · 5 or 50 · 10, a long break
-after four rounds). Pick the module you're studying; every finished focus
-session lights one window of the tower for the day, and "This week" sums your
-minutes per module. Keys: Space start/pause, R reset, S skip. The running timer
-survives reloads and stays in step across open tabs; a soft synthesised bell
-marks the end of a phase (can be turned off).
+- **Countdown** — every exam as a tile; click one for its pop-out: the live
+  clock, date, room, retake, what you can bring, notes and the module's links.
+- **Modules** — one page per module with a **checklist of its contents**: add
+  topics (paste a list — bullets, numbers and Markdown `- [x]` work), tick them
+  off as you learn them, see progress on the Modules overview.
+- **Focus** — a Pomodoro timer drawn as the Thiersch tower clock: Classic
+  25 · 5, Deep work 50 · 10, or your own focus/break lengths and rounds. Below
+  it, a **study log heatmap** of the last year. Finished sessions are logged
+  automatically; you can also log time by hand, click a day to see or remove
+  its entries, and **upload** your own records as CSV or JSON (date, minutes
+  or hours or h:mm, optional module — German headers and `23.10.2026` dates
+  work too) or download the log as CSV. Keys: Space start/pause, R reset,
+  S skip. The timer survives reloads and stays in step across tabs.
+- **Settings** — grouped like the site: Countdown (exams, headline, seconds),
+  Modules (links, checklists), Focus (timer, study log), General (language,
+  accent colour, backup).
+- **English / Deutsch** — Settings → General → Language switches the whole
+  interface (and the motivational lines and quotes). Exam details stay as
+  entered.
 
 ## Extension (optional)
 

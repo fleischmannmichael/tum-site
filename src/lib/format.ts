@@ -1,3 +1,5 @@
+import { t } from "./i18n";
+
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** "2026-10-23" → "23.10.2026" */
@@ -7,7 +9,7 @@ export function formatDateDE(isoDate: string): string {
 }
 
 export function formatDays(days: number): string {
-  return `${days} ${days === 1 ? "day" : "days"}`;
+  return `${days} ${days === 1 ? t("clock.day") : t("clock.days")}`;
 }
 
 /** Remaining time as "111d 23:00:00" (or without seconds). */

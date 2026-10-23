@@ -84,8 +84,9 @@ describe("backup", () => {
   it("keeps the study log and focus settings, skipping broken log entries", () => {
     const data = {
       ...SEED,
-      settings: { showSeconds: true, focus: { focusMin: 50, shortMin: 10, longMin: 30, rounds: 4, sound: false } },
-      focusLog: [{ day: "2026-11-02", module: "Analysis 1", minutes: 50 }, { day: "2026-11-02", module: null, minutes: 25 }],
+      settings: { showSeconds: true, language: "de" as const, focus: { focusMin: 40, shortMin: 7, longMin: 20, rounds: 3, sound: false } },
+      focusLog: [{ day: "2026-11-02", module: "Analysis 1", minutes: 50 }, { day: "2026-11-02", module: null, minutes: 300 }],
+      checklists: { "Analysis 1": [{ id: "c1", text: "Folgen und Reihen", done: true }, { id: "c2", text: "Stetigkeit", done: false }] },
     };
     expect(parseBackup(toBackup(data))).toEqual({ ok: true, value: data });
     const broken = JSON.parse(toBackup(data));
@@ -93,9 +94,19 @@ describe("backup", () => {
     expect(parseBackup(JSON.stringify(broken))).toMatchObject({ ok: true, value: { focusLog: data.focusLog } });
   });
 
-  it("reads backups from before the study log existed", () => {
+  it("reads backups from before the study log and checklists existed", () => {
     const old = JSON.stringify({ format: "exam-tab-backup", version: 1, exams: [], resources: [], settings: { showSeconds: true } });
-    expect(parseBackup(old)).toMatchObject({ ok: true, value: { focusLog: [] } });
+    expect(parseBackup(old)).toMatchObject({ ok: true, value: { focusLog: [], checklists: {} } });
+  });
+
+  it("skips empty checklist items and an unknown language", () => {
+    const file = JSON.stringify({
+      format: "exam-tab-backup", version: 1, exams: [], resources: [], settings: { showSeconds: false, language: "fr" },
+      checklists: { A: [{ id: "a", text: "  ", done: true }, { text: "Ok" }, 5], B: "nope" },
+    });
+    const r = parseBackup(file);
+    expect(r.ok && r.value.settings.language).toBeUndefined();
+    expect(r.ok && r.value.checklists).toEqual({ A: [{ id: expect.any(String), text: "Ok", done: false }] });
   });
 
   it("gives duplicate ids fresh ones", () => {

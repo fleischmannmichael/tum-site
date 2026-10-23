@@ -30,8 +30,12 @@ export type Resource = {
   category: string;
 };
 
+export type Language = "en" | "de";
+
 export type Settings = {
   showSeconds: boolean;
+  /** Interface language; exam data stays as entered. */
+  language?: Language;
   accent?: string;
   /** What the big headline says: exam count (default), own text, motivation or quotes. */
   headline?: { mode: "count" | "custom" | "motivation" | "quotes"; custom?: string };
@@ -39,12 +43,17 @@ export type Settings = {
   focus?: { focusMin: number; shortMin: number; longMin: number; rounds: number; sound: boolean };
 };
 
-/** One finished focus session; `day` is the Munich date it ended on. */
+/** Minutes studied on one Munich date for one module (null = no module); one entry per day and module. */
 export type FocusEntry = { day: string; module: string | null; minutes: number };
+
+/** One topic of a module's contents, ticked off when learned. */
+export type ChecklistItem = { id: string; text: string; done: boolean };
 
 export type StoredData = {
   exams: Exam[];
   resources: Resource[];
   settings: Settings;
   focusLog: FocusEntry[];
+  /** Module name → its contents checklist. */
+  checklists: Record<string, ChecklistItem[]>;
 };

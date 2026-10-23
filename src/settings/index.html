@@ -4,68 +4,119 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
-    <title>Settings · Exam countdown</title>
+    <title data-i18n-doc-title="settings.docTitle">Settings · Exam countdown</title>
     <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./settings.css" />
   </head>
   <body>
     <div class="page">
       <header class="topbar">
-        <a class="back" href="../index.html">← Countdown</a>
-        <h1 class="topbar__title">Settings</h1>
+        <a class="back" href="../index.html" data-i18n="settings.back">← Countdown</a>
+        <h1 class="topbar__title" data-i18n="settings.title">Settings</h1>
       </header>
 
-      <main class="sections">
-        <section class="panel glass-card" aria-labelledby="exams-title">
-          <div class="panel__head">
-            <h2 id="exams-title" class="panel__title">Exams</h2>
-            <button type="button" class="btn btn--primary" id="add-exam">Add exam</button>
-          </div>
-          <ul id="exam-list" class="item-list"></ul>
-        </section>
+      <!-- One tab per part of the site; the URL hash remembers which (#countdown, #modules, #focus, #general). -->
+      <div class="tabs glass-card" role="tablist" aria-label="Settings sections" data-i18n-aria-label="settings.tabs">
+        <button type="button" class="tabs__tab" role="tab" id="tab-countdown" aria-controls="panel-countdown" data-i18n="settings.tab.countdown">Countdown</button>
+        <button type="button" class="tabs__tab" role="tab" id="tab-modules" aria-controls="panel-modules" data-i18n="settings.tab.modules">Modules</button>
+        <button type="button" class="tabs__tab" role="tab" id="tab-focus" aria-controls="panel-focus" data-i18n="settings.tab.focus">Focus</button>
+        <button type="button" class="tabs__tab" role="tab" id="tab-general" aria-controls="panel-general" data-i18n="settings.tab.general">General</button>
+      </div>
 
-        <section class="panel glass-card" aria-labelledby="resources-title">
-          <div class="panel__head">
-            <h2 id="resources-title" class="panel__title">Resources</h2>
-            <button type="button" class="btn btn--primary" id="add-resource">Add link</button>
-          </div>
-          <ul id="resource-list" class="item-list"></ul>
-        </section>
-
-        <section class="panel glass-card" aria-labelledby="display-title">
-          <h2 id="display-title" class="panel__title">Display</h2>
-          <label class="check">
-            <input type="checkbox" id="show-seconds" />
-            <span>Show seconds in the countdown</span>
-          </label>
-          <div class="accent-row">
-            <label for="accent">Accent colour</label>
-            <input type="color" id="accent" />
-            <button type="button" class="btn btn--quiet" id="accent-reset">Use default</button>
-          </div>
-          <fieldset class="fieldset headline-choice">
-            <legend>Headline on the countdown</legend>
-            <label class="check"><input type="radio" name="headline" value="count" /><span>Exams ahead (“6 exams ahead”)</span></label>
-            <label class="check"><input type="radio" name="headline" value="motivation" /><span>Motivational messages, a new one each visit</span></label>
-            <label class="check"><input type="radio" name="headline" value="quotes" /><span>Quotes from scientists and writers, a new one each visit</span></label>
-            <label class="check"><input type="radio" name="headline" value="custom" /><span>My own message</span></label>
-            <div class="field headline-custom">
-              <label for="headline-custom" class="visually-hidden">Your message</label>
-              <input id="headline-custom" type="text" maxlength="80" placeholder="e.g. Du schaffst das." autocomplete="off" />
-              <p class="field__hint">Up to 80 characters. Saved when you leave the field.</p>
+      <main>
+        <div class="sections" role="tabpanel" id="panel-countdown" aria-labelledby="tab-countdown" tabindex="0">
+          <section class="panel glass-card" aria-labelledby="exams-title">
+            <div class="panel__head">
+              <h2 id="exams-title" class="panel__title" data-i18n="settings.exams">Exams</h2>
+              <button type="button" class="btn btn--primary" id="add-exam" data-i18n="settings.addExam">Add exam</button>
             </div>
-          </fieldset>
-        </section>
+            <ul id="exam-list" class="item-list"></ul>
+          </section>
 
-        <section class="panel glass-card" aria-labelledby="backup-title">
-          <h2 id="backup-title" class="panel__title">Backup</h2>
-          <p class="panel__text" id="storage-note">Your exams are saved in this browser. Export a file to back them up or to move them to another browser.</p>
-          <div class="btn-row">
-            <button type="button" class="btn" id="export">Export JSON</button>
-            <label class="btn" for="import-file">Import JSON…</label>
-            <input type="file" id="import-file" accept="application/json,.json" class="visually-hidden" />
-          </div>
-        </section>
+          <section class="panel glass-card" aria-labelledby="display-title">
+            <h2 id="display-title" class="panel__title" data-i18n="settings.display">Countdown display</h2>
+            <label class="check">
+              <input type="checkbox" id="show-seconds" />
+              <span data-i18n="settings.showSeconds">Show seconds in the countdown</span>
+            </label>
+            <fieldset class="fieldset headline-choice">
+              <legend data-i18n="settings.headline">Headline on the countdown</legend>
+              <label class="check"><input type="radio" name="headline" value="count" /><span data-i18n="settings.headline.count">Exams ahead</span></label>
+              <label class="check"><input type="radio" name="headline" value="motivation" /><span data-i18n="settings.headline.motivation">Motivational messages</span></label>
+              <label class="check"><input type="radio" name="headline" value="quotes" /><span data-i18n="settings.headline.quotes">Quotes</span></label>
+              <label class="check"><input type="radio" name="headline" value="custom" /><span data-i18n="settings.headline.custom">My own message</span></label>
+              <div class="field headline-custom">
+                <label for="headline-custom" class="visually-hidden" data-i18n="settings.headline.customLabel">Your message</label>
+                <input id="headline-custom" type="text" maxlength="80" autocomplete="off" data-i18n-placeholder="settings.headline.placeholder" />
+                <p class="field__hint" data-i18n="settings.headline.hint"></p>
+              </div>
+            </fieldset>
+          </section>
+        </div>
+
+        <div class="sections" role="tabpanel" id="panel-modules" aria-labelledby="tab-modules" tabindex="0" hidden>
+          <section class="panel glass-card" aria-labelledby="resources-title">
+            <div class="panel__head">
+              <h2 id="resources-title" class="panel__title" data-i18n="settings.links">Links</h2>
+              <button type="button" class="btn btn--primary" id="add-resource" data-i18n="settings.addLink">Add link</button>
+            </div>
+            <ul id="resource-list" class="item-list"></ul>
+          </section>
+
+          <section class="panel glass-card" aria-labelledby="checklists-title">
+            <h2 id="checklists-title" class="panel__title" data-i18n="settings.checklists">Module checklists</h2>
+            <p class="panel__text" data-i18n="settings.checklistsText"></p>
+            <ul id="checklist-list" class="item-list"></ul>
+          </section>
+        </div>
+
+        <div class="sections" role="tabpanel" id="panel-focus" aria-labelledby="tab-focus" tabindex="0" hidden>
+          <section class="panel glass-card" aria-labelledby="timer-title">
+            <h2 id="timer-title" class="panel__title" data-i18n="settings.timer">Timer</h2>
+            <p class="panel__text" data-i18n="settings.timerText"></p>
+            <div id="timer-options" class="timer-options"></div>
+          </section>
+
+          <section class="panel glass-card" aria-labelledby="log-title">
+            <h2 id="log-title" class="panel__title" data-i18n="settings.studyLog">Study log</h2>
+            <p class="panel__text" id="log-text"></p>
+            <div class="btn-row">
+              <a class="btn" href="../index.html#focus" data-i18n="nav.focus">Focus</a>
+              <button type="button" class="btn" id="log-export" data-i18n="heat.export">Download CSV</button>
+              <button type="button" class="btn btn--danger" id="log-clear" data-i18n="settings.studyLogClear">Delete study log</button>
+            </div>
+          </section>
+        </div>
+
+        <div class="sections" role="tabpanel" id="panel-general" aria-labelledby="tab-general" tabindex="0" hidden>
+          <section class="panel glass-card" aria-labelledby="language-title">
+            <h2 id="language-title" class="panel__title" data-i18n="settings.language">Language</h2>
+            <p class="panel__text" data-i18n="settings.languageText"></p>
+            <div class="chips" role="radiogroup" aria-labelledby="language-title">
+              <label class="chip"><input type="radio" name="language" value="en" /><span lang="en">English</span></label>
+              <label class="chip"><input type="radio" name="language" value="de" /><span lang="de">Deutsch</span></label>
+            </div>
+          </section>
+
+          <section class="panel glass-card" aria-labelledby="appearance-title">
+            <h2 id="appearance-title" class="panel__title" data-i18n="settings.appearance">Appearance</h2>
+            <div class="accent-row">
+              <label for="accent" data-i18n="settings.accent">Accent colour</label>
+              <input type="color" id="accent" />
+              <button type="button" class="btn btn--quiet" id="accent-reset" data-i18n="settings.accentReset">Use default</button>
+            </div>
+          </section>
+
+          <section class="panel glass-card" aria-labelledby="backup-title">
+            <h2 id="backup-title" class="panel__title" data-i18n="settings.backup">Backup</h2>
+            <p class="panel__text" id="storage-note"></p>
+            <div class="btn-row">
+              <button type="button" class="btn" id="export" data-i18n="settings.export">Export JSON</button>
+              <label class="btn" for="import-file" data-i18n="settings.import">Import JSON…</label>
+              <input type="file" id="import-file" accept="application/json,.json" class="visually-hidden" />
+            </div>
+          </section>
+        </div>
       </main>
     </div>
 
@@ -73,85 +124,85 @@
 
     <dialog id="exam-dialog" class="form-dialog glass-card" aria-labelledby="exam-form-title">
       <form id="exam-form" class="form" novalidate>
-        <h2 id="exam-form-title" class="form__title">Exam</h2>
+        <h2 id="exam-form-title" class="form__title" data-i18n="form.examTitle">Exam</h2>
         <p class="form__error" data-error="_form" hidden></p>
 
         <div class="field-row">
           <div class="field">
-            <label for="f-module">Module <span aria-hidden="true">*</span></label>
+            <label for="f-module"><span data-i18n="form.module">Module</span> <span aria-hidden="true">*</span></label>
             <input id="f-module" name="module" required maxlength="60" autocomplete="off" />
             <p class="field__error" data-error="module" hidden></p>
           </div>
           <div class="field">
-            <label for="f-label">Label</label>
-            <input id="f-label" name="label" maxlength="30" autocomplete="off" placeholder="e.g. Midterm" />
-            <p class="field__hint">To tell exams of one module apart.</p>
+            <label for="f-label" data-i18n="form.label">Label</label>
+            <input id="f-label" name="label" maxlength="30" autocomplete="off" data-i18n-placeholder="form.labelPlaceholder" />
+            <p class="field__hint" data-i18n="form.labelHint">To tell exams of one module apart.</p>
             <p class="field__error" data-error="label" hidden></p>
           </div>
         </div>
         <div class="field-row">
           <div class="field">
-            <label for="f-date">Date</label>
+            <label for="f-date" data-i18n="form.date">Date</label>
             <input id="f-date" name="date" type="date" />
-            <p class="field__hint">Leave empty while it's TBA.</p>
+            <p class="field__hint" data-i18n="form.dateHint">Leave empty while it's TBA.</p>
             <p class="field__error" data-error="date" hidden></p>
           </div>
           <div class="field">
-            <label for="f-time">Start time</label>
+            <label for="f-time" data-i18n="form.time">Start time</label>
             <input id="f-time" name="time" type="time" />
             <p class="field__error" data-error="time" hidden></p>
           </div>
         </div>
         <div class="field-row">
           <div class="field">
-            <label for="f-room">Room</label>
+            <label for="f-room" data-i18n="form.room">Room</label>
             <input id="f-room" name="room" maxlength="80" />
             <p class="field__error" data-error="room" hidden></p>
           </div>
           <div class="field">
-            <label for="f-duration">Duration (minutes)</label>
+            <label for="f-duration" data-i18n="form.duration">Duration (minutes)</label>
             <input id="f-duration" name="durationMin" type="number" min="1" max="600" step="1" inputmode="numeric" />
             <p class="field__error" data-error="durationMin" hidden></p>
           </div>
         </div>
         <div class="field">
-          <label for="f-deadline">Registration deadline</label>
+          <label for="f-deadline" data-i18n="form.deadline">Registration deadline</label>
           <input id="f-deadline" name="registrationDeadline" type="date" />
           <p class="field__error" data-error="registrationDeadline" hidden></p>
         </div>
         <fieldset class="fieldset">
-          <legend>Retake</legend>
+          <legend data-i18n="form.retake">Retake</legend>
           <div class="field-row field-row--3">
             <div class="field">
-              <label for="f-retake-date">Date</label>
+              <label for="f-retake-date" data-i18n="form.retakeDate">Date</label>
               <input id="f-retake-date" name="retakeDate" type="date" />
               <p class="field__error" data-error="retakeDate" hidden></p>
             </div>
             <div class="field">
-              <label for="f-retake-time">Time</label>
+              <label for="f-retake-time" data-i18n="form.retakeTime">Time</label>
               <input id="f-retake-time" name="retakeTime" type="time" />
               <p class="field__error" data-error="retakeTime" hidden></p>
             </div>
             <div class="field">
-              <label for="f-retake-room">Room</label>
+              <label for="f-retake-room" data-i18n="form.retakeRoom">Room</label>
               <input id="f-retake-room" name="retakeRoom" maxlength="80" />
               <p class="field__error" data-error="retakeRoom" hidden></p>
             </div>
           </div>
         </fieldset>
         <div class="field">
-          <label for="f-aids">What you can bring</label>
+          <label for="f-aids" data-i18n="form.aids">What you can bring</label>
           <textarea id="f-aids" name="allowedAids" rows="3"></textarea>
-          <p class="field__hint">One item per line.</p>
+          <p class="field__hint" data-i18n="form.aidsHint">One item per line.</p>
           <p class="field__error" data-error="allowedAids" hidden></p>
         </div>
         <div class="field">
-          <label for="f-description">About</label>
+          <label for="f-description" data-i18n="form.about">About</label>
           <textarea id="f-description" name="description" rows="3" maxlength="2000"></textarea>
           <p class="field__error" data-error="description" hidden></p>
         </div>
         <div class="field">
-          <label for="f-notes">Notes</label>
+          <label for="f-notes" data-i18n="form.notes">Notes</label>
           <textarea id="f-notes" name="notes" rows="2" maxlength="2000"></textarea>
           <p class="field__error" data-error="notes" hidden></p>
         </div>
@@ -159,55 +210,55 @@
           <div class="field">
             <label class="check">
               <input type="checkbox" name="customColor" id="f-custom-color" />
-              <span>Own dot colour</span>
+              <span data-i18n="form.ownColor">Own dot colour</span>
             </label>
-            <input type="color" name="colorPick" id="f-color" aria-label="Dot colour" />
+            <input type="color" name="colorPick" id="f-color" aria-label="Dot colour" data-i18n-aria-label="form.dotColor" />
             <p class="field__error" data-error="color" hidden></p>
           </div>
           <div class="field">
             <label class="check">
               <input type="checkbox" name="done" />
-              <span>Mark as done</span>
+              <span data-i18n="form.markDone">Mark as done</span>
             </label>
           </div>
         </div>
 
         <div class="form__actions">
-          <button type="button" class="btn btn--quiet" data-close>Cancel</button>
-          <button type="submit" class="btn btn--primary">Save exam</button>
+          <button type="button" class="btn btn--quiet" data-close data-i18n="form.cancel">Cancel</button>
+          <button type="submit" class="btn btn--primary" data-i18n="form.saveExam">Save exam</button>
         </div>
       </form>
     </dialog>
 
     <dialog id="resource-dialog" class="form-dialog glass-card" aria-labelledby="resource-form-title">
       <form id="resource-form" class="form" novalidate>
-        <h2 id="resource-form-title" class="form__title">Link</h2>
+        <h2 id="resource-form-title" class="form__title" data-i18n="form.linkTitle">Link</h2>
         <p class="form__error" data-error="_form" hidden></p>
         <div class="field">
-          <label for="r-title">Title <span aria-hidden="true">*</span></label>
+          <label for="r-title"><span data-i18n="form.title">Title</span> <span aria-hidden="true">*</span></label>
           <input id="r-title" name="title" required maxlength="80" autocomplete="off" />
           <p class="field__error" data-error="title" hidden></p>
         </div>
         <div class="field">
-          <label for="r-url">Address <span aria-hidden="true">*</span></label>
+          <label for="r-url"><span data-i18n="form.url">Address</span> <span aria-hidden="true">*</span></label>
           <input id="r-url" name="url" type="url" required placeholder="https://" autocomplete="off" />
           <p class="field__error" data-error="url" hidden></p>
         </div>
         <div class="field-row">
           <div class="field">
-            <label for="r-category">Category <span aria-hidden="true">*</span></label>
+            <label for="r-category"><span data-i18n="form.category">Category</span> <span aria-hidden="true">*</span></label>
             <input id="r-category" name="category" list="category-options" required maxlength="40" autocomplete="off" />
             <datalist id="category-options"></datalist>
             <p class="field__error" data-error="category" hidden></p>
           </div>
           <div class="field">
-            <label for="r-module">Module</label>
+            <label for="r-module" data-i18n="form.module">Module</label>
             <select id="r-module" name="module"></select>
           </div>
         </div>
         <div class="form__actions">
-          <button type="button" class="btn btn--quiet" data-close>Cancel</button>
-          <button type="submit" class="btn btn--primary">Save link</button>
+          <button type="button" class="btn btn--quiet" data-close data-i18n="form.cancel">Cancel</button>
+          <button type="submit" class="btn btn--primary" data-i18n="form.saveLink">Save link</button>
         </div>
       </form>
     </dialog>

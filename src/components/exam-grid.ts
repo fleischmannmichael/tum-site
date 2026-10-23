@@ -1,6 +1,7 @@
 import type { Summary, UpcomingExam } from "../lib/countdown";
 import { el } from "../lib/dom";
 import { formatDateDE } from "../lib/format";
+import { t } from "../lib/i18n";
 import type { Exam } from "../lib/types";
 import { clockEl } from "./clock";
 
@@ -11,7 +12,7 @@ export const SOON_DAYS = 7;
 const MODULE_COLORS = 6;
 
 export function whenText(date: string | null, time?: string): string {
-  return date ? [formatDateDE(date), time].filter(Boolean).join(" · ") : "Date TBA";
+  return date ? [formatDateDE(date), time].filter(Boolean).join(" · ") : t("date.tba");
 }
 
 /** Stable fallback colour per exam, so dots don't change when the list reorders. */
@@ -41,13 +42,13 @@ function tile(exam: Exam, kind: TileKind, allIds: string[], opts: { days?: numbe
   // Square panel, top to bottom: dot + date (+ badge), module name, countdown.
   const top = el("span", "exam-tile__top");
   top.append(dot(exam, allIds), el("span", "exam-tile__when", whenText(exam.date, exam.time)));
-  if (kind === "done") top.append(el("span", "exam-tile__badge", "Done"));
+  if (kind === "done") top.append(el("span", "exam-tile__badge", t("tile.done")));
   btn.append(top, el("span", "exam-tile__module", exam.module));
   if (exam.label) btn.append(el("span", "exam-tile__label", exam.label));
   if (kind !== "done") {
     const clock = clockEl(exam.id);
     // "Next" sits on the day-count row, where there's free space; the date line stays whole.
-    if (opts.next) clock.querySelector(".clock__days")!.append(el("span", "exam-tile__badge", "Next"));
+    if (opts.next) clock.querySelector(".clock__days")!.append(el("span", "exam-tile__badge", t("tile.next")));
     btn.append(clock);
   }
   btn.setAttribute("aria-haspopup", "dialog");

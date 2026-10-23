@@ -1,4 +1,5 @@
 import { examClock, summarize, TIMEZONE, zonedParts, zonedToInstant } from "./countdown";
+import { t, tn } from "./i18n";
 import type { Exam } from "./types";
 
 /** Exams this many days away (or fewer) are "soon": warm badge. Same rule as the countdown. */
@@ -9,10 +10,10 @@ export type Badge = { text: string; kind: "none" | "today" | "soon" | "normal"; 
 /** Toolbar badge for the next exam: "113d", "1d", "!" on exam day, empty without dates. */
 export function badgeFor(exams: Exam[], now: number, tz = TIMEZONE): Badge {
   const { state } = summarize(exams, now, tz);
-  if (state.kind === "none") return { text: "", kind: "none", title: "Exam countdown — no exam dates yet" };
+  if (state.kind === "none") return { text: "", kind: "none", title: t("badge.none") };
   const { exam, days } = state.next;
   const name = [exam.module, exam.label].filter(Boolean).join(" · ");
-  if (state.kind === "today") return { text: "!", kind: "today", title: `${name} is today` };
+  if (state.kind === "today") return { text: "!", kind: "today", title: t("badge.today", { name }) };
   // Same count as the countdown squares (whole 24-hour periods), except that
   // tomorrow always reads "1d", like "Tomorrow" in the pop-up.
   const clock = examClock(exam, now, tz);
@@ -20,7 +21,7 @@ export function badgeFor(exams: Exam[], now: number, tz = TIMEZONE): Badge {
   return {
     text: `${n}d`,
     kind: days <= SOON_DAYS ? "soon" : "normal",
-    title: days === 1 ? `${name} is tomorrow` : `${name} in ${n} ${n === 1 ? "day" : "days"}`,
+    title: days === 1 ? t("badge.tomorrow", { name }) : tn("badge.in", n, { name }),
   };
 }
 

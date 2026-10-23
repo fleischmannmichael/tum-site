@@ -1,0 +1,73 @@
+/* Chips (radio choices) and the custom timer fields; used on the Focus tab and in Settings. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.25rem;
+  padding-inline: var(--space-3);
+  border: var(--hairline) solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--control-fill);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+
+.chip:hover {
+  border-color: var(--glass-border-strong);
+}
+
+.chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip:has(input:checked) {
+  border-color: var(--tower-gold);
+  background: var(--tower-gold-soft);
+}
+
+.timer-options {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.timer-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end; /* inputs line up even when a label wraps */
+  gap: var(--space-3);
+}
+
+.timer-fields[hidden] {
+  display: none;
+}
+
+.timer-fields__field {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.timer-fields__error {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.timer-fields__error:empty {
+  display: none;
+}
+
+.chip:has(input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}

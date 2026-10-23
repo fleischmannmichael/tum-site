@@ -1,4 +1,6 @@
-import type { Exam, FocusEntry, Resource, Settings, StoredData } from "./types";
+import { checkLength, MAX_DAY_MINUTES } from "./focus";
+import { t, type Key } from "./i18n";
+import type { ChecklistItem, Exam, FocusEntry, Resource, Settings, StoredData } from "./types";
 
 /** Raw form values: everything is a string (checkboxes "on"/""), as read from FormData. */
 export type FormInput = Record<string, string | undefined>;
@@ -16,6 +18,8 @@ export const LIMITS = {
   url: 500,
   durationMin: 600,
   headline: 80,
+  checkItem: 200,
+  checkItems: 300, // per module
 };
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -35,40 +39,40 @@ const clean = (v: string | undefined) => (v ?? "").trim();
 export function validateExam(input: FormInput, id: string): Result<Exam> {
   const errors: Record<string, string> = {};
   const get = (k: string) => clean(input[k]);
-  const tooLong = (k: string, max: number, label: string) => {
-    if (get(k).length > max) errors[k] = `${label} can be at most ${max} characters.`;
+  const tooLong = (k: string, max: number, label: Key) => {
+    if (get(k).length > max) errors[k] = t("err.tooLong", { label: t(label), max });
   };
   const date = (k: string) => {
-    if (get(k) && !isValidDate(get(k))) errors[k] = "Enter a real date.";
+    if (get(k) && !isValidDate(get(k))) errors[k] = t("err.realDate");
   };
   const time = (k: string) => {
-    if (get(k) && !TIME.test(get(k))) errors[k] = "Use 24-hour time, e.g. 09:00.";
+    if (get(k) && !TIME.test(get(k))) errors[k] = t("err.time24");
   };
 
-  if (!get("module")) errors.module = "Give the exam a module name.";
-  tooLong("module", LIMITS.module, "Module name");
-  tooLong("label", LIMITS.label, "Label");
+  if (!get("module")) errors.module = t("err.moduleName");
+  tooLong("module", LIMITS.module, "err.label.module");
+  tooLong("label", LIMITS.label, "err.label.label");
   date("date");
   time("time");
-  if (get("time") && !get("date")) errors.time = "Add a date first, or leave the time empty.";
-  tooLong("room", LIMITS.room, "Room");
-  if (get("color") && !COLOR.test(get("color"))) errors.color = "Pick a colour.";
+  if (get("time") && !get("date")) errors.time = t("err.timeNeedsDate");
+  tooLong("room", LIMITS.room, "err.label.room");
+  if (get("color") && !COLOR.test(get("color"))) errors.color = t("err.color");
   const duration = get("durationMin");
   if (duration && !(/^\d+$/.test(duration) && +duration >= 1 && +duration <= LIMITS.durationMin))
-    errors.durationMin = `Enter whole minutes between 1 and ${LIMITS.durationMin}.`;
+    errors.durationMin = t("err.duration", { max: LIMITS.durationMin });
   date("registrationDeadline");
   date("retakeDate");
   time("retakeTime");
-  tooLong("retakeRoom", LIMITS.room, "Retake room");
-  tooLong("description", LIMITS.text, "About");
-  tooLong("notes", LIMITS.text, "Notes");
+  tooLong("retakeRoom", LIMITS.room, "err.label.retakeRoom");
+  tooLong("description", LIMITS.text, "err.label.about");
+  tooLong("notes", LIMITS.text, "err.label.notes");
 
   const aids = get("allowedAids")
     .split("\n")
     .map((a) => a.trim())
     .filter(Boolean);
-  if (aids.length > LIMITS.aids) errors.allowedAids = `List at most ${LIMITS.aids} items.`;
-  else if (aids.some((a) => a.length > LIMITS.aid)) errors.allowedAids = `Each item can be at most ${LIMITS.aid} characters.`;
+  if (aids.length > LIMITS.aids) errors.allowedAids = t("err.aidsCount", { max: LIMITS.aids });
+  else if (aids.some((a) => a.length > LIMITS.aid)) errors.allowedAids = t("err.aidLength", { max: LIMITS.aid });
 
   if (Object.keys(errors).length) return { ok: false, errors };
 
@@ -101,8 +105,8 @@ export function validateResource(input: FormInput, id: string): Result<Resource>
   const category = clean(input.category);
   const module = clean(input.module);
 
-  if (!title) errors.title = "Give the link a title.";
-  else if (title.length > LIMITS.title) errors.title = `Title can be at most ${LIMITS.title} characters.`;
+  if (!title) errors.title = t("err.linkTitle");
+  else if (title.length > LIMITS.title) errors.title = t("err.tooLong", { label: t("err.label.title"), max: LIMITS.title });
 
   let parsed: URL | undefined;
   try {
@@ -110,12 +114,12 @@ export function validateResource(input: FormInput, id: string): Result<Resource>
   } catch {
     // handled below
   }
-  if (!url) errors.url = "Add the address.";
-  else if (!parsed || !/^https?:$/.test(parsed.protocol)) errors.url = "Use a full web address starting with https://";
-  else if (url.length > LIMITS.url) errors.url = `Address can be at most ${LIMITS.url} characters.`;
+  if (!url) errors.url = t("err.url");
+  else if (!parsed || !/^https?:$/.test(parsed.protocol)) errors.url = t("err.urlFull");
+  else if (url.length > LIMITS.url) errors.url = t("err.tooLong", { label: t("err.label.address"), max: LIMITS.url });
 
-  if (!category) errors.category = "Pick or type a category.";
-  else if (category.length > LIMITS.category) errors.category = `Category can be at most ${LIMITS.category} characters.`;
+  if (!category) errors.category = t("err.category");
+  else if (category.length > LIMITS.category) errors.category = t("err.tooLong", { label: t("err.label.category"), max: LIMITS.category });
 
   if (Object.keys(errors).length) return { ok: false, errors };
   const resource: Resource = { id, title, url: parsed!.href, category };
@@ -154,12 +158,12 @@ export function parseBackup(text: string): { ok: true; value: StoredData } | { o
   try {
     raw = JSON.parse(text);
   } catch {
-    return { ok: false, error: "This file isn't valid JSON." };
+    return { ok: false, error: t("backup.notJson") };
   }
-  if (!isObj(raw) || raw.format !== BACKUP_FORMAT) return { ok: false, error: "This isn't an Exam Tab backup file." };
+  if (!isObj(raw) || raw.format !== BACKUP_FORMAT) return { ok: false, error: t("backup.notBackup") };
   if (typeof raw.version !== "number" || raw.version > BACKUP_VERSION)
-    return { ok: false, error: "This backup comes from a newer version of Exam Tab." };
-  if (!Array.isArray(raw.exams) || !Array.isArray(raw.resources)) return { ok: false, error: "The backup is missing its exams or resources." };
+    return { ok: false, error: t("backup.newer") };
+  if (!Array.isArray(raw.exams) || !Array.isArray(raw.resources)) return { ok: false, error: t("backup.missing") };
 
   const exams: Exam[] = [];
   const ids = new Set<string>();
@@ -169,16 +173,16 @@ export function parseBackup(text: string): { ok: true; value: StoredData } | { o
     return id;
   };
   for (const [i, e] of raw.exams.entries()) {
-    if (!isObj(e)) return { ok: false, error: `Exam ${i + 1} isn't an object.` };
+    if (!isObj(e)) return { ok: false, error: t("backup.badExam", { n: i + 1 }) };
     const r = validateExam(examToInput(e), idFor(e.id));
-    if (!r.ok) return { ok: false, error: `Exam ${i + 1} (${String(e.module ?? "no name")}): ${firstError(r.errors)}` };
+    if (!r.ok) return { ok: false, error: t("backup.examError", { n: i + 1, name: String(e.module ?? "?"), error: firstError(r.errors) ?? "" }) };
     exams.push(r.value);
   }
   const resources: Resource[] = [];
   for (const [i, r] of raw.resources.entries()) {
-    if (!isObj(r)) return { ok: false, error: `Resource ${i + 1} isn't an object.` };
+    if (!isObj(r)) return { ok: false, error: t("backup.badLink", { n: i + 1 }) };
     const res = validateResource({ title: String(r.title ?? ""), url: String(r.url ?? ""), category: String(r.category ?? ""), module: String(r.module ?? "") }, idFor(r.id));
-    if (!res.ok) return { ok: false, error: `Resource ${i + 1} (${String(r.title ?? "no title")}): ${firstError(res.errors)}` };
+    if (!res.ok) return { ok: false, error: t("backup.linkError", { n: i + 1, name: String(r.title ?? "?"), error: firstError(res.errors) ?? "" }) };
     resources.push(res.value);
   }
   const s = isObj(raw.settings) ? raw.settings : {};
@@ -189,15 +193,28 @@ export function parseBackup(text: string): { ok: true; value: StoredData } | { o
     settings.headline = { mode: h.mode as NonNullable<Settings["headline"]>["mode"] };
     if (typeof h.custom === "string" && h.custom.trim()) settings.headline.custom = h.custom.trim().slice(0, LIMITS.headline);
   }
+  if (s.language === "en" || s.language === "de") settings.language = s.language;
   const f = isObj(s.focus) ? s.focus : undefined;
-  const mins = (v: unknown, max: number) => typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= max;
-  if (f && mins(f.focusMin, 180) && mins(f.shortMin, 60) && mins(f.longMin, 120) && mins(f.rounds, 12))
-    settings.focus = { focusMin: f.focusMin as number, shortMin: f.shortMin as number, longMin: f.longMin as number, rounds: f.rounds as number, sound: f.sound !== false };
+  if (f) {
+    const [focusMin, shortMin, longMin, rounds] = (["focusMin", "shortMin", "longMin", "rounds"] as const).map((k) => checkLength(k, f[k]));
+    if (focusMin && shortMin && longMin && rounds) settings.focus = { focusMin, shortMin, longMin, rounds, sound: f.sound !== false };
+  }
 
-  // The study log is optional (older backups don't have it); invalid entries are skipped.
+  // The study log and checklists are optional (older backups don't have them); invalid entries are skipped.
+  const mins = (v: unknown) => typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= MAX_DAY_MINUTES;
   const focusLog = (Array.isArray(raw.focusLog) ? raw.focusLog : []).filter(
     (e): e is FocusEntry =>
-      isObj(e) && typeof e.day === "string" && isValidDate(e.day) && (e.module === null || typeof e.module === "string") && mins(e.minutes, 180),
+      isObj(e) && typeof e.day === "string" && isValidDate(e.day) && (e.module === null || typeof e.module === "string") && mins(e.minutes),
   );
-  return { ok: true, value: { exams, resources, settings, focusLog } };
+  const checklists: Record<string, ChecklistItem[]> = {};
+  if (isObj(raw.checklists))
+    for (const [module, items] of Object.entries(raw.checklists)) {
+      if (!Array.isArray(items)) continue;
+      const valid = items
+        .filter((i): i is Record<string, unknown> => isObj(i) && typeof i.text === "string" && i.text.trim() !== "")
+        .slice(0, LIMITS.checkItems)
+        .map((i) => ({ id: idFor(i.id), text: (i.text as string).trim().slice(0, LIMITS.checkItem), done: i.done === true }));
+      if (valid.length) checklists[module.slice(0, LIMITS.module)] = valid;
+    }
+  return { ok: true, value: { exams, resources, settings, focusLog, checklists } };
 }

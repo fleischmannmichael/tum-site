@@ -93,9 +93,7 @@
   --tile-module: var(--text-lg);
   --tile-days: clamp(2rem, 1.6rem + 1.4vw, 2.75rem);
   --tile-days-sm: 1.625rem;
-  --detail-width: 20rem;
-  --detail-title: 1.5rem;
-  --detail-label-width: 6.5rem;
+  --detail-label-width: 9.5rem;
   --form-width: 40rem;
   --module-width: 48rem;
   --popup-width: 21rem;
@@ -123,9 +121,17 @@
   --tower-face-edge: #071712;
   --tower-gold: #e3bd6b;
   --tower-gold-soft: rgb(227 189 107 / 0.18);
-  --tower-stone: #2a2f3a;
-  --tower-window: #141925;
-  --tower-glow: #ffcf7a;
+  /* Study log heatmap: empty, then five steps of tower gold. */
+  --heat-cell: 0.75rem;
+  --heat-gap: 3px;
+  --heat-label: 0.875rem;
+  --heat-0: rgb(255 255 255 / 0.06);
+  --heat-1: rgb(227 189 107 / 0.22);
+  --heat-2: rgb(227 189 107 / 0.42);
+  --heat-3: rgb(227 189 107 / 0.62);
+  --heat-4: rgb(227 189 107 / 0.82);
+  --heat-5: #ffd88a;
+  --detail-width-lg: 38rem;
   --focus-time: clamp(2.75rem, 2rem + 3vw, 4rem);
   --focus-side-width: 22rem;
 

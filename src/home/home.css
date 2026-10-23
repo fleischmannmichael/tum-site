@@ -7,6 +7,7 @@
 @import "../components/exam-detail.css";
 @import "../components/clock.css";
 @import "../components/resource-grid.css";
+@import "../components/timer-options.css";
 @import "../components/focus.css";
 @import "../styles/motion.css";
 
@@ -173,8 +174,209 @@ body {
   outline: none;
 }
 
-.module-view .detail__fields {
+/* Exams of the module: chips that open the pop-out. */
+.module-exams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
   margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.module-exams__chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-2);
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-4);
+  border: var(--hairline) solid var(--glass-border);
+  border-radius: var(--radius-row);
+  text-align: start;
+  background: var(--control-fill);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.module-exams__chip:hover {
+  border-color: var(--glass-border-strong);
+  background: var(--glass-fill-hover);
+}
+
+.module-exams__chip:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.module-exams__label {
+  font-weight: var(--weight-semibold);
+}
+
+.module-exams__when {
+  color: var(--color-text-muted);
+}
+
+/* ---- Checklist of a module's contents ---- */
+.checklist {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.checklist__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.checklist__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.checklist__progress::before {
+  content: "";
+  width: 8rem;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--color-accent) calc(var(--share) * 100%), var(--clock-fill) 0);
+}
+
+.checklist__list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checklist__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-top: var(--hairline) solid var(--glass-border);
+}
+
+.checklist__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap-target);
+  padding-block: var(--space-1);
+  cursor: pointer;
+}
+
+.checklist__label input {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--color-accent);
+}
+
+.checklist__text {
+  overflow-wrap: anywhere;
+}
+
+.is-done .checklist__text {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-text-faint);
+}
+
+.checklist__delete {
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.checklist__item:hover .checklist__delete,
+.checklist__delete:focus-visible {
+  opacity: 1;
+}
+
+.checklist__delete:hover {
+  background: var(--glass-fill-hover);
+  color: var(--color-text);
+}
+
+.checklist__delete:focus-visible,
+.checklist__label:has(input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.checklist__empty {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.checklist__add {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.checklist__input {
+  flex: 1;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  border: var(--hairline) solid var(--glass-border);
+  border-radius: var(--control-radius);
+  background: var(--control-fill);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  resize: vertical;
+  field-sizing: content; /* grows with pasted lists where supported */
+  max-height: 12rem;
+}
+
+.checklist__input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.checklist__btn,
+.checklist__clear {
+  min-height: var(--tap-target);
+  padding-inline: var(--space-4);
+  border: var(--hairline) solid var(--color-accent-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.checklist__clear {
+  justify-self: start;
+  border-color: var(--glass-border);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.checklist__btn:hover,
+.checklist__clear:hover {
+  background: var(--glass-fill-hover);
+}
+
+.checklist__btn:focus-visible,
+.checklist__clear:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 /* ---- Modules overview ---- */
@@ -306,9 +508,6 @@ body {
   font-size: var(--text-lg);
 }
 
-.module-view .detail__edit {
-  justify-self: start;
-}
 
 /* Phones: less air above the headline so all exams fit on one screen. */
 @media (max-width: 479px) {

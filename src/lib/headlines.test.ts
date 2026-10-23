@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { summarize, zonedToInstant } from "./countdown";
 import { chooseHeadline, MOTIVATION, QUOTES } from "./headlines";
+import { setLang } from "./i18n";
 import { SEED } from "./seed";
 
 const now = zonedToInstant({ y: 2026, m: 10, d: 24, h: 12 });
@@ -24,13 +25,25 @@ describe("chooseHeadline", () => {
   });
 
   it("fills motivational templates with the next exam", () => {
-    const titles = Array.from({ length: MOTIVATION.length }, (_, i) => chooseHeadline(settings({ mode: "motivation" }), summary, i / MOTIVATION.length).title);
+    const n = MOTIVATION.en.length;
+    const titles = Array.from({ length: n }, (_, i) => chooseHeadline(settings({ mode: "motivation" }), summary, i / n).title);
     expect(titles.some((t) => /^Analysis 1 in 114 days\. Today counts\.$/.test(t))).toBe(true);
     expect(titles).toContain("6 exams. One at a time.");
     expect(titles.every((t) => t && !t.includes("undefined"))).toBe(true);
   });
 
-  it("every quote has an author and a source", () => {
-    expect(QUOTES.every((q) => q.text && q.author && q.source)).toBe(true);
+  it("every quote has an author, a source and a German version", () => {
+    expect(QUOTES.every((q) => q.text && q.author && q.source && q.de.text && q.de.source)).toBe(true);
+  });
+
+  it("speaks German when the interface does", () => {
+    setLang("de");
+    try {
+      expect(chooseHeadline(settings(), summary, 0).title).toBe("Noch 6 Prüfungen");
+      expect(chooseHeadline(settings({ mode: "quotes" }), summary, 2 / QUOTES.length).title).toBe("Was ich nicht erschaffen kann, verstehe ich nicht.");
+      expect(MOTIVATION.de).toHaveLength(MOTIVATION.en.length);
+    } finally {
+      setLang("en");
+    }
   });
 });

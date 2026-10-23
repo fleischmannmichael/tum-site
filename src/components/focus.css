@@ -239,42 +239,6 @@
   color: var(--color-text-muted);
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.chip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 2.25rem;
-  padding-inline: var(--space-3);
-  border: var(--hairline) solid var(--glass-border);
-  border-radius: var(--radius-pill);
-  background: var(--control-fill);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
-}
-
-.chip:hover {
-  border-color: var(--glass-border-strong);
-}
-
-.chip input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.chip:has(input:checked) {
-  border-color: var(--tower-gold);
-  background: var(--tower-gold-soft);
-}
-
 .focus .check {
   display: inline-flex;
   align-items: center;
@@ -290,84 +254,286 @@
   accent-color: var(--tower-gold);
 }
 
-/* ---- Today: the tower facade, one window per finished session ---- */
-.tower {
-  justify-self: center;
-  width: 7.5rem;
-}
-
-.tower__roof {
-  height: 1.75rem;
-  margin-inline: 1.25rem;
-  background: var(--tower-stone);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-}
-
-.tower__windows {
+/* ---- Study log heatmap ---- */
+.heat {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-2);
-  padding: var(--space-3);
-  border-radius: 4px 4px 0 0;
-  background: var(--tower-stone);
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--content-width-wide);
+  margin-top: var(--space-4);
+  padding: var(--space-5);
+  text-align: start;
 }
 
-.tower__window {
-  height: 1.25rem;
-  border-radius: 0.6rem 0.6rem 2px 2px; /* arched */
-  background: var(--tower-window);
-  transition: background var(--dur-slow) var(--ease), box-shadow var(--dur-slow) var(--ease);
+.heat__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
 }
 
-.tower__window.is-lit {
-  background: var(--tower-glow);
-  box-shadow: 0 0 12px rgb(255 207 122 / 0.55);
-}
-
-.focus__today {
+.heat__summary {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
-  text-align: center;
 }
 
-/* ---- This week ---- */
-.week {
+/* The grid keeps its size; on narrow screens it scrolls sideways inside the card. */
+.heat__scroll {
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+  scrollbar-width: thin;
+}
+
+.heat__map {
+  display: flex;
+  gap: var(--space-2);
+  width: max-content;
+  margin-inline: auto;
+}
+
+.heat__weekdays {
   display: grid;
-  gap: var(--space-3);
+  grid-template-rows: var(--heat-label) repeat(7, var(--heat-cell));
+  gap: var(--heat-gap);
+  font-size: var(--text-2xs);
+  color: var(--color-text-muted);
+}
+
+.heat__weekdays span:first-child {
+  grid-row: 1;
+}
+
+.heat__weekdays span {
+  line-height: var(--heat-cell);
+}
+
+.heat__body {
+  display: grid;
+  grid-template-rows: var(--heat-label) auto;
+  gap: var(--heat-gap);
+}
+
+.heat__months,
+.heat__grid {
+  display: grid;
+  grid-auto-columns: var(--heat-cell);
+  gap: var(--heat-gap);
+}
+
+.heat__months {
+  grid-auto-flow: column;
+  font-size: var(--text-2xs);
+  line-height: var(--heat-label);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.heat__grid {
+  grid-template-rows: repeat(7, var(--heat-cell));
+  grid-auto-flow: column;
+}
+
+.heat__cell {
+  display: block;
+  width: var(--heat-cell);
+  height: var(--heat-cell);
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: var(--heat-0);
+}
+
+button.heat__cell {
+  cursor: pointer;
+}
+
+button.heat__cell:hover {
+  outline: 1px solid var(--glass-border-strong);
+}
+
+button.heat__cell:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.heat__cell[aria-pressed="true"] {
+  outline: 2px solid var(--color-text);
+  outline-offset: 1px;
+}
+
+.heat__cell--future {
+  background: transparent;
+}
+
+.heat--1 { background: var(--heat-1); }
+.heat--2 { background: var(--heat-2); }
+.heat--3 { background: var(--heat-3); }
+.heat--4 { background: var(--heat-4); }
+.heat--5 { background: var(--heat-5); }
+
+.heat__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.heat__panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: var(--hairline) solid var(--glass-border);
+}
+
+@media (max-width: 52rem) {
+  .heat__panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.heat-day__title {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.heat-day__list {
+  display: grid;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.week__row {
+.heat-day__row {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: var(--space-1) var(--space-3);
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap-target);
+  border-top: var(--hairline) solid var(--glass-border);
   font-size: var(--text-sm);
 }
 
-.week__minutes {
+.heat-day__name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+.heat-day__time {
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.week__bar {
-  grid-column: 1 / -1;
-  height: 6px;
+.heat-day__remove {
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 0;
   border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, var(--bar) calc(var(--share) * 100%), var(--clock-fill) 0);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
 }
 
-.week__empty {
+.heat-day__remove:hover {
+  background: var(--glass-fill-hover);
+  color: var(--color-text);
+}
+
+.heat-day__remove:focus-visible {
+  outline: 2px solid var(--color-focus);
+}
+
+.heat-day__empty {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
+}
+
+.heat-form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.heat-form__fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (max-width: 30rem) {
+  .heat-form__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.heat-form__field {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.heat-form__field input,
+.heat-form__field select,
+.timer-fields input {
+  width: 100%;
+  min-height: var(--tap-target);
+  padding-inline: var(--space-3);
+  border: var(--hairline) solid var(--glass-border);
+  border-radius: var(--control-radius);
+  background: var(--control-fill);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  color-scheme: dark;
+}
+
+.heat-form__field input:focus-visible,
+.heat-form__field select:focus-visible,
+.timer-fields input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.heat-form__field input[aria-invalid],
+.timer-fields input[aria-invalid] {
+  border-color: var(--color-danger);
+}
+
+.heat-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.heat-form__upload {
+  display: inline-grid;
+  place-items: center;
+}
+
+.heat-form__upload:has(+ #heat-upload:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.heat-form__hint,
+.heat-form__message {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.heat-form__message:empty {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .is-running .dial__rim {
     animation: none;
-  }
-  .tower__window {
-    transition: none;
   }
 }

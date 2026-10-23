@@ -81,6 +81,7 @@ export const SEED: StoredData = {
   ],
   settings: { showSeconds: true },
   focusLog: [],
+  checklists: {},
 };
 
 /** Exam ids of the first, date-less seed (before the real dates were known). */

@@ -5,10 +5,11 @@ import { renderModulesOverview } from "../components/modules-overview";
 import { applyRoute, currentRoute, initModulesMenu, renderModulesMenu } from "../components/nav";
 import { generalGroups } from "../components/resource-grid";
 import { applyAccent } from "../lib/accent";
+import { applyI18n, cachedLang, setLang } from "../lib/i18n";
 import { HEROES } from "../lib/heroes.generated";
 import { VARIANT_MEDIA, heroFolder, pickHero } from "../lib/heroes";
 import { summarize } from "../lib/countdown";
-import { loadAll, onDataChanged } from "../lib/storage";
+import { describeSaveError, loadAll, onDataChanged, save } from "../lib/storage";
 import type { StoredData } from "../lib/types";
 import { renderExams, renderHeadline, updateClocks } from "./render";
 
@@ -18,10 +19,25 @@ let structureKey = "";
 /** One random number per visit: picks the motivational line or quote. */
 const headlinePick = Math.random();
 
-const detail = initExamDetail(document.getElementById("exam-detail") as HTMLDialogElement, () => data.exams);
+const detail = initExamDetail(
+  document.getElementById("exam-detail") as HTMLDialogElement,
+  () => data,
+  () => updateClocks(data.exams, Date.now(), data.settings.showSeconds),
+);
+
+/** Checklist edits on a module page: shown at once, saved in the background. */
+function saveChecklist(module: string, items: StoredData["checklists"][string]): void {
+  const checklists = { ...data.checklists, [module]: items };
+  if (!items.length) delete checklists[module];
+  data = { ...data, checklists };
+  tick();
+  save("checklists", checklists).catch((err) => alert(describeSaveError(err)));
+}
 
 /** Rebuilds what depends on data or route (not on the clock). */
 function renderStructure(now: number): void {
+  setLang(data.settings.language);
+  applyI18n();
   const summary = summarize(data.exams, now);
   renderHeadline(summary, data.settings, headlinePick);
   renderModulesOverview(document.getElementById("modules-overview")!, data, now);
@@ -30,7 +46,7 @@ function renderStructure(now: number): void {
   document.getElementById("general-groups")!.replaceChildren(...generalGroups(data.resources));
 
   let route = currentRoute();
-  if (route.view === "module" && !renderModuleView(document.getElementById("view-module")!, route.id, data, now)) {
+  if (route.view === "module" && !renderModuleView(document.getElementById("view-module")!, route.id, data, now, saveChecklist)) {
     history.replaceState(null, "", "#countdown"); // module was deleted
     route = { view: "countdown" };
   }
@@ -47,7 +63,7 @@ function tick(force = false): void {
 
   // Exams move between upcoming/done at midnight, so the summary is part of the key.
   const summary = summarize(data.exams, now);
-  const key = JSON.stringify([data.exams, data.resources, data.settings.headline, data.settings.focus, data.focusLog, location.hash, summary.upcoming.map((u) => u.days), summary.done.map((e) => e.id)]);
+  const key = JSON.stringify([data.exams, data.resources, data.settings.headline, data.settings.focus, data.settings.language, data.focusLog, data.checklists, location.hash, summary.upcoming.map((u) => u.days), summary.done.map((e) => e.id)]);
   if (force || key !== structureKey) {
     structureKey = key;
     renderStructure(now);
@@ -76,6 +92,9 @@ function applyHero(): void {
 // Rotating a phone or resizing the window can switch crops.
 for (const query of Object.values(VARIANT_MEDIA)) matchMedia(query).addEventListener("change", applyHero);
 
+// The language used last time, so the page doesn't flash English before settings load.
+setLang(cachedLang());
+applyI18n();
 applyHero();
 initModulesMenu();
 // The entrance (motion.css) plays once; after it, re-rendered parts appear without animating.

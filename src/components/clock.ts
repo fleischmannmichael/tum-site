@@ -1,12 +1,13 @@
 import type { ExamClock } from "../lib/countdown";
 import { el } from "../lib/dom";
+import { t, type Key } from "../lib/i18n";
 import type { Exam } from "../lib/types";
 
-const SMALL_UNITS = [
-  ["hours", "hrs"],
-  ["minutes", "min"],
-  ["seconds", "sec"],
-] as const;
+const SMALL_UNITS: [unit: string, label: Key][] = [
+  ["hours", "clock.hrs"],
+  ["minutes", "clock.min"],
+  ["seconds", "clock.sec"],
+];
 
 /** Big serif day count, then hours · minutes · seconds. Filled in by updateClock(). */
 export function clockEl(examId: string, size: "sm" | "lg" = "sm"): HTMLSpanElement {
@@ -18,7 +19,7 @@ export function clockEl(examId: string, size: "sm" | "lg" = "sm"): HTMLSpanEleme
   for (const [unit, label] of SMALL_UNITS) {
     const box = el("span", "clock__unit");
     box.dataset.unit = unit;
-    box.append(el("span", "clock__num", "–"), el("span", "clock__label", label));
+    box.append(el("span", "clock__num", "–"), el("span", "clock__label", t(label)));
     rest.append(box);
   }
   clock.append(days, rest);
@@ -42,9 +43,9 @@ export function updateClock(clock: HTMLElement, state: ExamClock, exam: Exam, sh
   if (state.kind === "counting") {
     const r = state.remaining;
     setText(daysNum, String(r.days));
-    // Small panels have no room for "ahead"; the module page does.
-    const ahead = clock.classList.contains("clock--lg") ? " ahead" : "";
-    setText(daysLabel, (r.days === 1 ? "day" : "days") + ahead);
+    // Small panels have no room for "ahead"; the big clock in the pop-out does.
+    const big = clock.classList.contains("clock--lg");
+    setText(daysLabel, t(r.days === 1 ? (big ? "clock.dayAhead" : "clock.day") : big ? "clock.daysAhead" : "clock.days"));
     setText(num("hours"), pad(r.hours));
     setText(num("minutes"), pad(r.minutes));
     setText(num("seconds"), pad(r.seconds));
@@ -52,9 +53,9 @@ export function updateClock(clock: HTMLElement, state: ExamClock, exam: Exam, sh
   }
   // The small units only make sense while counting; CSS hides them otherwise.
   const words = {
-    today: ["Today", [exam.time, exam.room].filter(Boolean).join(" · ") || "Good luck"],
-    tba: ["–", "days"],
-    done: ["Done", ""],
+    today: [t("clock.today"), [exam.time, exam.room].filter(Boolean).join(" · ") || t("clock.goodLuck")],
+    tba: ["–", t("clock.days")],
+    done: [t("clock.done"), ""],
   } as const;
   const [big, small] = words[state.kind];
   setText(daysNum, big);

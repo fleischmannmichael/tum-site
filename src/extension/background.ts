@@ -1,5 +1,6 @@
 // Extension service worker: keeps the toolbar badge (days to the next exam) current.
 import { badgeFor, nextMidnight } from "../lib/badge";
+import { setLang } from "../lib/i18n";
 import { loadAll } from "../lib/storage";
 
 // Match tokens.css (--color-accent-default, --color-warm, --color-bg); a worker can't read CSS.
@@ -9,6 +10,7 @@ const INK = "#0b0f1a";
 
 async function updateBadge(): Promise<void> {
   const data = await loadAll();
+  setLang(data.settings.language);
   const now = Date.now();
   const badge = badgeFor(data.exams, now);
   await chrome.action.setBadgeText({ text: badge.text });

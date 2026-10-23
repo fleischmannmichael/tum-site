@@ -1,6 +1,7 @@
+/* Laid out like a page: header, big clock, details, links, actions. */
 .detail {
-  width: min(var(--detail-width), 100% - 2 * var(--gutter));
-  max-height: min(85dvh, 48rem);
+  width: min(var(--detail-width-lg), 100% - 2 * var(--gutter));
+  max-height: min(90dvh, 52rem);
   padding: 0;
   color: var(--color-text);
   /* Over the page rather than the photo, so a denser glass. */
@@ -15,7 +16,12 @@
 
 .detail__inner {
   position: relative;
-  padding: var(--space-4);
+  padding: var(--space-5);
+}
+
+.detail__body {
+  display: grid;
+  gap: var(--space-4);
 }
 
 .detail__close {
@@ -58,22 +64,29 @@
   margin-top: var(--space-1);
   font-family: var(--font-display);
   font-weight: var(--weight-regular);
-  font-size: var(--detail-title);
+  font-size: var(--text-display-sm);
   line-height: var(--leading-snug);
   letter-spacing: var(--tracking-display);
 }
 
 .detail__fields {
   display: grid;
-  margin: var(--space-2) 0 0;
+  margin: 0;
   font-size: var(--text-sm);
 }
 
-/* The pop-up is small: one size of text throughout. */
-.detail .detail__fields,
-.detail .detail__label {
-  font-size: var(--text-xs);
+.detail__subtitle {
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-lg);
 }
+
+.detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 
 .detail__field {
   display: grid;
@@ -110,7 +123,6 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-target);
-  margin-top: var(--space-2);
   padding-inline: var(--space-3);
   border: var(--hairline) solid var(--color-accent-border);
   border-radius: var(--radius-pill);
@@ -124,6 +136,11 @@
   background: var(--glass-fill-hover);
 }
 
+.detail__edit--quiet {
+  border-color: var(--glass-border);
+  background: transparent;
+}
+
 @media (max-width: 480px) {
   .detail__field {
     grid-template-columns: 1fr;
@@ -131,8 +148,4 @@
   }
 }
 
-.detail__missing {
-  margin-top: var(--space-2);
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-}
+

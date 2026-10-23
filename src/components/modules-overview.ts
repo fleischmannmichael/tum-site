@@ -1,16 +1,16 @@
 import { examClock } from "../lib/countdown";
 import { el } from "../lib/dom";
-import { formatDays } from "../lib/format";
+import { t, tn } from "../lib/i18n";
 import type { StoredData } from "../lib/types";
 import { dot, whenText } from "./exam-grid";
 import { modulesInOrder } from "./nav";
 
 function when(state: ReturnType<typeof examClock>): string {
-  if (state.kind === "counting") return state.days === 1 ? "tomorrow" : `in ${formatDays(state.remaining.days)}`;
-  return { today: "today", done: "done", tba: "date TBA" }[state.kind];
+  if (state.kind === "counting") return state.days === 1 ? t("when.tomorrow") : tn("when.in", state.remaining.days);
+  return t(`when.${state.kind}`);
 }
 
-/** One card per module: its exams with dates and days left, and how many links it has. */
+/** One card per module: its exams with dates and days left, checklist progress and how many links it has. */
 export function renderModulesOverview(root: HTMLElement, data: StoredData, now: number): void {
   const ids = data.exams.map((e) => e.id);
   root.replaceChildren(
@@ -27,7 +27,7 @@ export function renderModulesOverview(root: HTMLElement, data: StoredData, now: 
         const a = el("a", `overview-card__exam overview-card__exam--${state.kind}`);
         a.href = `#module=${encodeURIComponent(exam.id)}`;
         a.append(
-          el("span", "overview-card__label", exam.label ?? "Exam"),
+          el("span", "overview-card__label", exam.label ?? t("overview.exam")),
           el("span", "overview-card__date", exam.date ? whenText(exam.date, exam.time) : "—"),
           el("span", "overview-card__days", when(state)),
         );
@@ -37,7 +37,10 @@ export function renderModulesOverview(root: HTMLElement, data: StoredData, now: 
       }
 
       const links = data.resources.filter((r) => r.module === first.module).length;
-      card.append(head, list, el("p", "overview-card__links", links ? `${links} ${links === 1 ? "link" : "links"}` : "No links yet"));
+      const topics = data.checklists[first.module] ?? [];
+      const meta = [links ? tn("overview.links", links) : t("overview.noLinks")];
+      if (topics.length) meta.unshift(t("overview.topics", { done: topics.filter((i) => i.done).length, total: topics.length }));
+      card.append(head, list, el("p", "overview-card__links", meta.join(" · ")));
       return card;
     }),
   );

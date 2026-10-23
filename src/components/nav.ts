@@ -1,4 +1,5 @@
 import { el } from "../lib/dom";
+import { t } from "../lib/i18n";
 import type { Exam } from "../lib/types";
 import { dot } from "./exam-grid";
 
@@ -30,7 +31,7 @@ export function modulesInOrder(exams: Exam[]): Exam[][] {
 /** Fills the hover list; called whenever exams change. */
 export function renderModulesMenu(exams: Exam[]): void {
   const ids = exams.map((e) => e.id);
-  const general = el("a", "modules-menu__item modules-menu__item--general", "General links");
+  const general = el("a", "modules-menu__item modules-menu__item--general", t("nav.general"));
   general.href = "#general";
   const generalLi = el("li", "modules-menu__general");
   generalLi.append(general);

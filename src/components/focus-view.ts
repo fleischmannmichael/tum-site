@@ -2,12 +2,9 @@ import { chime, unlockAudio } from "../lib/chime";
 import { summarize } from "../lib/countdown";
 import { el } from "../lib/dom";
 import {
-  FOCUS_DEFAULTS,
-  PRESETS,
-  WINDOWS_PER_DAY,
   advance,
+  FOCUS_DEFAULTS,
   formatClock,
-  formatMinutes,
   initialState,
   logSession,
   pause,
@@ -17,21 +14,21 @@ import {
   reset,
   start,
   tick,
-  today,
-  week,
   type FocusSettings,
-  type Phase,
   type TimerState,
 } from "../lib/focus";
+import { t, type Key } from "../lib/i18n";
 import { describeSaveError, save } from "../lib/storage";
 import type { StoredData } from "../lib/types";
 import { dotColor } from "./exam-grid";
+import { initHeatmap } from "./heatmap";
 import { modulesInOrder } from "./nav";
+import { renderTimerOptions } from "./timer-options";
 
 /*
- * The Focus tab: a Pomodoro timer drawn as the Thiersch tower clock. The gold
- * arc fills and the hand sweeps once per phase; every finished focus session
- * lights one window of the tower for the day.
+ * The Focus tab: a Pomodoro timer drawn as the Thiersch tower clock (the gold
+ * arc fills and the hand sweeps once per phase), and the study log heatmap,
+ * which every finished focus session adds to.
  *
  * The running timer lives in localStorage (not the synced data: it changes
  * every start/pause and only matters on this device), so it survives reloads
@@ -41,7 +38,8 @@ import { modulesInOrder } from "./nav";
 const TIMER_KEY = "exam-tab-focus-timer";
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 
-const PHASE_NAMES: Record<Phase, string> = { focus: "Focus", short: "Short break", long: "Long break" };
+/** The status line: a message key (so it follows a language switch) or an error sentence. */
+type Said = { key: Key; vars?: Record<string, string> } | { text: string } | null;
 
 function readTimer(): TimerState | null {
   try {
@@ -66,8 +64,8 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
   let state: TimerState = readTimer() ?? initialState(settings(), defaultModule());
   let finishTimer: number | undefined;
   let display: number | undefined;
-  let lastAnnounced = "";
-  const baseTitle = document.title;
+  // The last message, kept as a key so it follows a language switch.
+  let said: Said = null;
 
   function defaultModule(): string | null {
     const s = summarize(getData().exams, Date.now());
@@ -117,17 +115,30 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
     if (!finished) return schedule();
     set(next);
     if (finished === "focus") {
-      const focusLog = logSession(getData().focusLog, state.module, s.focusMin, Date.now());
-      update({ focusLog });
-      save("focusLog", focusLog).catch((err) => announce(describeSaveError(err)));
-      announce(`Focus session done — a window lights up. Time for a ${next.phase === "long" ? "long" : "short"} break.`);
-    } else announce("Break over. Ready for the next focus session?");
+      void setLog(logSession(getData().focusLog, state.module, s.focusMin, Date.now())).catch((m: string) => announceText(m));
+      announce(next.phase === "long" ? "focus.doneLong" : "focus.doneShort");
+    } else announce("focus.breakOver");
     if (s.sound) chime(finished === "focus" ? "focus-done" : "break-done");
   }
 
-  function announce(text: string): void {
-    lastAnnounced = text;
+  function announce(key: Key, vars?: Record<string, string>): void {
+    said = { key, vars };
+    $("focus-status").textContent = t(key, vars);
+  }
+  /** Errors come as finished sentences. */
+  function announceText(text: string): void {
+    said = { text };
     $("focus-status").textContent = text;
+  }
+
+  /** Applies and saves a new study log; rejects with a message. */
+  async function setLog(focusLog: StoredData["focusLog"]): Promise<void> {
+    update({ focusLog });
+    try {
+      await save("focusLog", focusLog);
+    } catch (err) {
+      throw describeSaveError(err);
+    }
   }
 
   // ---- Painting ----
@@ -144,7 +155,7 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
     arc.opacity = p > 0 ? "1" : "0"; // a zero-length arc would still draw its round cap
     $("dial-hand").setAttribute("transform", `rotate(${p * 360} 100 100)`);
     // The tab title shows the time left on every view, so it's readable from other tabs.
-    document.title = state.status === "running" ? `${clock} · ${PHASE_NAMES[state.phase]}` : baseTitle;
+    document.title = state.status === "running" ? `${clock} · ${t(`focus.phase.${state.phase}`)}` : t("page.title");
   }
 
   function paint(): void {
@@ -153,11 +164,19 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
     timer.classList.toggle("is-break", state.phase !== "focus");
     timer.classList.toggle("is-running", state.status === "running");
     $("focus-phase").textContent =
-      state.phase === "focus" ? `Focus · round ${Math.min(state.round, s.rounds)} of ${s.rounds}` : PHASE_NAMES[state.phase];
+      state.phase === "focus" ? t("focus.round", { round: Math.min(state.round, s.rounds), rounds: s.rounds }) : t(`focus.phase.${state.phase}`);
     const startBtn = $<HTMLButtonElement>("focus-start");
-    startBtn.textContent = state.status === "running" ? "Pause" : state.status === "paused" ? "Resume" : state.phase === "focus" ? "Start" : "Start break";
+    startBtn.textContent = t(
+      state.status === "running" ? "focus.pause" : state.status === "paused" ? "focus.resume" : state.phase === "focus" ? "focus.start" : "focus.startBreak",
+    );
     $<HTMLButtonElement>("focus-reset").disabled = state.status === "idle" && state.remainingMs === phaseMs(state.phase, s);
-    if (!lastAnnounced) $("focus-status").textContent = state.module ? `Counting toward ${state.module}` : "Not counting toward a module";
+    $("focus-status").textContent = said
+      ? "text" in said
+        ? said.text
+        : t(said.key, said.vars)
+      : state.module
+        ? t("focus.counting", { module: state.module })
+        : t("focus.notCounting");
     paintClock();
   }
 
@@ -174,7 +193,7 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
       input.value = name ?? "";
       input.checked = state.module === name;
       input.addEventListener("change", () => {
-        lastAnnounced = "";
+        said = null;
         set({ ...state, module: name });
       });
       label.append(input);
@@ -185,70 +204,52 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
         d.setAttribute("aria-hidden", "true");
         label.append(d);
       }
-      label.append(el("span", "", name ?? "No module"));
+      label.append(el("span", "", name ?? t("focus.noModule")));
       return label;
     });
     $("focus-modules").replaceChildren(...chips);
   }
 
-  function renderLog(): void {
-    const data = getData();
-    const now = Date.now();
-    const t = today(data.focusLog, now);
-    const lit = Math.min(t.sessions, WINDOWS_PER_DAY);
-    $("tower-windows").replaceChildren(
-      ...Array.from({ length: WINDOWS_PER_DAY }, (_, i) => el("span", i < lit ? "tower__window is-lit" : "tower__window")),
-    );
-    $("today-text").textContent =
-      t.sessions === 0
-        ? "No sessions yet today. Each one lights a window."
-        : `${t.sessions} ${t.sessions === 1 ? "session" : "sessions"} · ${formatMinutes(t.minutes)}` +
-          (t.sessions >= WINDOWS_PER_DAY ? " · the tower is lit" : "");
-
-    const rows = week(data.focusLog, now);
-    const max = Math.max(1, ...rows.map((r) => r.minutes));
-    const ids = data.exams.map((e) => e.id);
-    $("week-list").replaceChildren(
-      ...(rows.length
-        ? rows.map((r) => {
-            const li = el("li", "week__row");
-            const exam = data.exams.find((e) => e.module === r.module);
-            li.style.setProperty("--bar", exam ? dotColor(exam, ids) : "var(--color-text-faint)");
-            li.style.setProperty("--share", String(r.minutes / max));
-            li.append(el("span", "week__name", r.module ?? "No module"), el("span", "week__minutes", formatMinutes(r.minutes)), el("span", "week__bar"));
-            return li;
-          })
-        : [el("li", "week__empty", "Your study time per module shows up here.")]),
-    );
-  }
+  const heat = initHeatmap({
+    getLog: () => getData().focusLog,
+    getExams: () => getData().exams,
+    modules: () => modulesInOrder(getData().exams).map((list) => list[0]!.module),
+    setLog,
+  });
 
   function renderOptions(): void {
-    const s = settings();
-    const preset = s.focusMin === PRESETS.deep.focusMin ? "deep" : "classic";
-    for (const input of document.querySelectorAll<HTMLInputElement>('input[name="focus-preset"]')) input.checked = input.value === preset;
-    $<HTMLInputElement>("focus-sound").checked = s.sound;
+    renderTimerOptions($("focus-options"), settings(), async (patch) => {
+      await saveSettings(patch);
+      // A timer that hasn't started yet takes new lengths right away.
+      if (state.status === "idle" && ("focusMin" in patch || "shortMin" in patch || "longMin" in patch)) set(reset(state, settings()));
+      if (patch.sound) unlockAudio();
+    });
   }
 
   async function saveSettings(patch: Partial<FocusSettings>): Promise<void> {
     const next = { ...getData().settings, focus: { ...settings(), ...patch } };
     update({ settings: next });
-    await save("settings", next);
+    try {
+      await save("settings", next);
+    } catch (err) {
+      throw describeSaveError(err);
+    }
   }
 
   // ---- Controls ----
 
   function toggle(): void {
     unlockAudio();
-    lastAnnounced = "";
+    said = null;
     set(state.status === "running" ? pause(state, Date.now()) : start(state, Date.now()));
-    if (state.status === "running") announce(state.phase === "focus" ? "Focus started. The tower is watching." : "Break started.");
+    if (state.status === "running") announce(state.phase === "focus" ? "focus.started" : "focus.breakStarted");
   }
   const doReset = () => {
-    lastAnnounced = "";
+    said = null;
     set(reset(state, settings()));
   };
   const skip = () => {
-    lastAnnounced = "";
+    said = null;
     set(advance(state, settings())); // skipping never logs a session
   };
 
@@ -256,23 +257,10 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
   $("focus-reset").addEventListener("click", doReset);
   $("focus-skip").addEventListener("click", skip);
 
-  for (const input of document.querySelectorAll<HTMLInputElement>('input[name="focus-preset"]'))
-    input.addEventListener("change", async () => {
-      const done = saveSettings(PRESETS[input.value as keyof typeof PRESETS]);
-      // A timer that hasn't started yet takes the new length right away.
-      if (state.status === "idle") set(reset(state, settings()));
-      await done.catch((err) => announce(describeSaveError(err)));
-    });
-  $<HTMLInputElement>("focus-sound").addEventListener("change", (e) => {
-    const on = (e.target as HTMLInputElement).checked;
-    if (on) unlockAudio();
-    saveSettings({ sound: on }).catch((err) => announce(describeSaveError(err)));
-  });
-
   document.addEventListener("keydown", (e) => {
     if ($("view-focus").hidden || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
     const target = e.target as HTMLElement;
-    if (target.closest("input, textarea, select, button, a, dialog[open]")) return;
+    if (target.closest("input, textarea, select, button, a, dialog[open], .heat")) return;
     const key = e.key.toLowerCase();
     if (key === " ") toggle();
     else if (key === "r") doReset();
@@ -298,7 +286,7 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
   return {
     render() {
       renderModules();
-      renderLog();
+      heat.render();
       renderOptions();
       paint();
     },
