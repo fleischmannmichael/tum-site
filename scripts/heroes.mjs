@@ -16,8 +16,8 @@
 //
 // Videos (.mp4/.webm) become "live" backgrounds you can pick in Settings
 // (never chosen automatically): muted, looping, with a still for the load-in
-// and for reduced motion. ffmpeg strips the sound and shrinks them; without
-// ffmpeg they're skipped with a warning (on the deploy, CI=true, that's an error).
+// and for reduced motion. ffmpeg (from the ffmpeg-static package) strips the
+// sound and shrinks them; without ffmpeg they're skipped with a warning (on the deploy, CI=true, that's an error).
 //
 // For each picture this writes public/hero/<name>/ with:
 //   full.webp       the picture itself (max 2400 px wide)
@@ -103,14 +103,18 @@ for (const [name, group] of groups) {
   heroes.push({ name, label, season, ...(theme ? { theme } : {}), path: `hero/${name}/`, ...(variants.length ? { variants: variants.sort() } : {}) });
 }
 
-const hasFfmpeg = (() => {
+// The ffmpeg-static package's binary (installed by npm ci), else one on the PATH.
+const FFMPEG = await import("ffmpeg-static").then((m) => m.default).catch(() => null);
+const ffmpegBin = [FFMPEG, "ffmpeg"].find((bin) => {
+  if (!bin) return false;
   try {
-    execFileSync("ffmpeg", ["-version"], { stdio: "ignore" });
+    execFileSync(bin, ["-version"], { stdio: "ignore" });
     return true;
   } catch {
     return false;
   }
-})();
+});
+const hasFfmpeg = Boolean(ffmpegBin);
 for (const file of videos) {
   const name = slugOf(file);
   if (!hasFfmpeg) {
@@ -122,10 +126,10 @@ for (const file of videos) {
   const dir = `${OUT}${name}/`;
   await mkdir(dir, { recursive: true });
   // No sound, at most 1280 px wide, quick to start (moov atom first).
-  execFileSync("ffmpeg", ["-v", "error", "-y", "-i", `${SRC}${file}`, "-an", "-c:v", "libx264", "-preset", "slow", "-crf", "25",
+  execFileSync(ffmpegBin, ["-v", "error", "-y", "-i", `${SRC}${file}`, "-an", "-c:v", "libx264", "-preset", "slow", "-crf", "25",
     "-pix_fmt", "yuv420p", "-vf", "scale='min(1280,iw)':-2", "-movflags", "+faststart", `${dir}video.mp4`]);
   // The first frame: still for the load-in, reduced motion and the gallery.
-  const still = execFileSync("ffmpeg", ["-v", "error", "-i", `${SRC}${file}`, "-frames:v", "1", "-f", "image2pipe", "-vcodec", "png", "-"], {
+  const still = execFileSync(ffmpegBin, ["-v", "error", "-i", `${SRC}${file}`, "-frames:v", "1", "-f", "image2pipe", "-vcodec", "png", "-"], {
     maxBuffer: 64 * 1024 * 1024,
   });
   await prepare(sharp(still), dir, `${name} (video)`);
