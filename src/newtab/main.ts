@@ -3,6 +3,8 @@ import { renderModuleView } from "../components/module-view";
 import { applyRoute, currentRoute, initModulesMenu, renderModulesMenu } from "../components/nav";
 import { generalGroups } from "../components/resource-grid";
 import { applyAccent } from "../lib/accent";
+import { HEROES } from "../lib/heroes.generated";
+import { pickHero } from "../lib/heroes";
 import { summarize } from "../lib/countdown";
 import { loadAll, onDataChanged } from "../lib/storage";
 import type { StoredData } from "../lib/types";
@@ -50,6 +52,16 @@ function tick(force = false): void {
   timer = window.setTimeout(tick, step - (now % step) + 5);
 }
 
+/** Today's picture (by season), set before anything waits on storage so it paints first. */
+function applyHero(): void {
+  const hero = pickHero(HEROES, Date.now());
+  if (!hero) return;
+  const style = document.querySelector<HTMLElement>(".hero")!.style;
+  for (const [layer, file] of [["48", "48.png"], ["96", "96.png"], ["full", "full.webp"]])
+    style.setProperty(`--hero-${layer}`, `url("${hero.path}${file}")`);
+}
+
+applyHero();
 initModulesMenu();
 data = await loadAll();
 tick(true);

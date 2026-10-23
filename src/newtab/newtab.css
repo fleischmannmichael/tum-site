@@ -13,12 +13,10 @@ body {
   background: var(--color-page);
 }
 
-/* ---- Top bar: solid black row above the hero ---- */
+/* ---- Top bar: floats over the picture ---- */
 .topbar {
   position: relative;
   z-index: 2; /* the Modules panel opens over the content */
-  background: var(--color-page);
-  border-bottom: var(--hairline) solid var(--topbar-border);
 }
 
 .topbar__inner {
@@ -83,12 +81,12 @@ body {
   background-size: cover;
   background-position: var(--hero-position);
   background-repeat: no-repeat;
-  image-rendering: pixelated;
 }
 
-.hero__layer--48 { background-image: url("/hero/hero-48.png"); }
-.hero__layer--96 { background-image: url("/hero/hero-96.png"); }
-.hero__layer--384 { background-image: url("/hero/hero-384.png"); }
+/* The tiny load-in versions stay blocky; the full picture is already pixel art at full size. */
+.hero__layer--48 { background-image: var(--hero-48); image-rendering: pixelated; }
+.hero__layer--96 { background-image: var(--hero-96); image-rendering: pixelated; }
+.hero__layer--full { background-image: var(--hero-full); }
 
 .hero__overlay {
   background: var(--hero-overlay);
@@ -123,7 +121,7 @@ body {
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--color-text-on-photo);
 }
 
 .countdown__title {
@@ -147,7 +145,7 @@ body {
 .countdown__detail {
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
-  color: var(--color-text-muted);
+  color: var(--color-text-on-photo);
 }
 
 /* ---- Module page ---- */
@@ -187,7 +185,7 @@ body {
 }
 
 .general__intro {
-  color: var(--color-text-muted);
+  color: var(--color-text-on-photo);
   text-shadow: var(--text-shadow-hero);
 }
 

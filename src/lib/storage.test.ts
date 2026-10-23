@@ -53,4 +53,11 @@ describe("storage", () => {
     expect(data.exams[0]!.module).toBe("Old");
     expect(data.settings.showSeconds).toBe(true);
   });
+
+  it("drops the retired untouched 'Schaltungstheorie 2' seed, keeps an edited one", async () => {
+    store.exams = [{ id: "schaltungstheorie-2", module: "Schaltungstheorie 2", date: null }, { id: "a", module: "A", date: null }];
+    expect((await loadAll()).exams.map((e) => e.id)).toEqual(["a"]);
+    store.exams = [{ id: "schaltungstheorie-2", module: "Schaltungstheorie Midterm", date: "2026-12-01" }];
+    expect((await loadAll()).exams.map((e) => e.id)).toEqual(["schaltungstheorie-2"]);
+  });
 });

@@ -15,7 +15,7 @@
 
 .detail__inner {
   position: relative;
-  padding: var(--space-5) var(--space-4) var(--space-4);
+  padding: var(--space-4);
 }
 
 .detail__close {
@@ -65,15 +65,21 @@
 
 .detail__fields {
   display: grid;
-  margin: var(--space-3) 0 0;
+  margin: var(--space-2) 0 0;
   font-size: var(--text-sm);
+}
+
+/* The pop-up is small: one size of text throughout. */
+.detail .detail__fields,
+.detail .detail__label {
+  font-size: var(--text-xs);
 }
 
 .detail__field {
   display: grid;
   grid-template-columns: var(--detail-label-width) minmax(0, 1fr);
-  gap: var(--space-3);
-  padding-block: var(--space-2);
+  gap: var(--space-2);
+  padding-block: var(--space-1);
   border-top: var(--hairline) solid var(--glass-border);
 }
 
@@ -104,12 +110,12 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-target);
-  margin-top: var(--space-3);
-  padding-inline: var(--space-4);
+  margin-top: var(--space-2);
+  padding-inline: var(--space-3);
   border: var(--hairline) solid var(--color-accent-border);
   border-radius: var(--radius-pill);
   background: var(--color-accent-soft);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: var(--weight-medium);
   text-decoration: none;
 }
@@ -126,7 +132,7 @@
 }
 
 .detail__missing {
-  margin-top: var(--space-3);
+  margin-top: var(--space-2);
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }

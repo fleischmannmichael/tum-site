@@ -16,18 +16,20 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 /** Fills the Modules panel; called whenever exams change. */
 export function renderModulesMenu(exams: Exam[]): void {
   const ids = exams.map((e) => e.id);
-  const route = currentRoute();
   const sorted = [...exams].sort((a, b) => (a.date ?? "9999").localeCompare(b.date ?? "9999") || a.module.localeCompare(b.module));
   const general = el("a", "modules-menu__item modules-menu__item--general", "General links");
   general.href = "#general";
   const generalLi = el("li", "modules-menu__general");
   generalLi.append(general);
+  // One entry per module: midterms and finals saved as separate exams share a module name.
+  const byModule = new Map<string, Exam[]>();
+  for (const exam of sorted) byModule.set(exam.module, [...(byModule.get(exam.module) ?? []), exam]);
   $("modules-menu-list").replaceChildren(
-    ...sorted.map((exam) => {
+    ...[...byModule.values()].map(([exam, ...rest]) => {
       const a = el("a", "modules-menu__item");
-      a.href = `#module=${encodeURIComponent(exam.id)}`;
-      a.append(dot(exam, ids), document.createTextNode(exam.module));
-      if (route.view === "module" && route.id === exam.id) a.setAttribute("aria-current", "page");
+      a.href = `#module=${encodeURIComponent(exam!.id)}`;
+      a.dataset.examIds = [exam!, ...rest].map((e) => e.id).join(" ");
+      a.append(dot(exam!, ids), document.createTextNode(exam!.module));
       const li = el("li");
       li.append(a);
       return li;
@@ -47,7 +49,7 @@ export function applyRoute(route: Route): void {
   $("modules-toggle").classList.toggle("is-active", route.view !== "countdown");
   for (const a of Array.from(document.querySelectorAll<HTMLAnchorElement>(".modules-menu__item"))) {
     const match =
-      (route.view === "module" && a.hash === `#module=${encodeURIComponent(route.id)}`) ||
+      (route.view === "module" && (a.dataset.examIds ?? "").split(" ").includes(route.id)) ||
       (route.view === "general" && a.hash === "#general");
     if (match) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
