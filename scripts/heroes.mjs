@@ -15,7 +15,8 @@
 //   48.png, 96.png  tiny versions for the depixelate-in effect
 // (plus mobile/ and wide/ with the same three files for each crop there is)
 // and lists them all in src/lib/heroes.generated.ts.
-import { mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
@@ -40,11 +41,19 @@ function parse(file) {
 }
 
 await rm(OUT, { recursive: true, force: true }); // drop pictures that were removed
+const hashOf = async (file) => createHash("sha256").update(await readFile(`${SRC}${file}`)).digest("hex");
 const groups = new Map();
 for (const file of files) {
   const { name, variant } = parse(file);
   const group = groups.get(name) ?? {};
-  if (group[variant]) throw new Error(`${file} and ${group[variant]} are both the ${variant} picture of "${name}"`);
+  if (group[variant]) {
+    // The same picture uploaded under two names (e.g. _21x9 and _21-9): use one, say so.
+    if ((await hashOf(file)) === (await hashOf(group[variant]))) {
+      console.warn(`! ${file} is the same picture as ${group[variant]}; using ${group[variant]}`);
+      continue;
+    }
+    throw new Error(`${file} and ${group[variant]} are both the ${variant} picture of "${name}" — keep one`);
+  }
   groups.set(name, { ...group, [variant]: file });
 }
 

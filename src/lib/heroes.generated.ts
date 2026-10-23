@@ -5,6 +5,10 @@ export const HEROES: Hero[] = [
   {
     "name": "fall-hero",
     "season": "autumn",
-    "path": "hero/fall-hero/"
+    "path": "hero/fall-hero/",
+    "variants": [
+      "mobile",
+      "wide"
+    ]
   }
 ];
