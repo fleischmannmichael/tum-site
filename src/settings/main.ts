@@ -1,6 +1,7 @@
 import { dotColor } from "../components/exam-grid";
 import { formatDateDE } from "../lib/format";
 import { describeSaveError, loadAll, onDataChanged, save, saveAll } from "../lib/storage";
+import { storageArea } from "../lib/storage-area";
 import type { Exam, Resource, StoredData } from "../lib/types";
 import { parseBackup, toBackup, validateExam, validateResource, type FormInput } from "../lib/validate";
 import { applyAccent } from "../lib/accent";
@@ -107,6 +108,10 @@ async function persist<K extends keyof StoredData>(key: K, value: StoredData[K],
     await save(key, value);
     data = { ...data, [key]: value };
     renderAll();
+
+if (storageArea().kind === "sync")
+  $("storage-note").textContent =
+    "Saved in Chrome's sync storage, so it follows your Chrome profile. Export a file now and then, especially before reinstalling.";
     toast(message);
     return true;
   } catch (err) {

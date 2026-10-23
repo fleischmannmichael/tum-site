@@ -4,8 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
-    <title>New Tab</title>
-    <link rel="stylesheet" href="./newtab.css" />
+    <title>Exam countdown</title>
+    <meta name="description" content="Countdown to my TUM exams, with dates, rules and study links." />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./home/home.css" />
   </head>
   <body>
     <header class="topbar">
@@ -28,7 +30,7 @@
             <ul id="modules-menu-list" class="modules-menu__list"></ul>
           </div>
         </nav>
-        <a class="gear glass-card" href="../options/index.html" aria-label="Settings" title="Settings">
+        <a class="gear glass-card" href="settings/index.html" aria-label="Settings" title="Settings">
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
@@ -80,9 +82,9 @@
           <button class="detail__close" aria-label="Close">✕</button>
         </form>
         <div class="detail__body"></div>
-        <a class="detail__edit" id="detail-edit" href="../options/index.html">Edit in settings</a>
+        <a class="detail__edit" id="detail-edit" href="settings/index.html">Edit in settings</a>
       </div>
     </dialog>
-    <script type="module" src="./main.ts"></script>
+    <script type="module" src="./home/main.ts"></script>
   </body>
 </html>

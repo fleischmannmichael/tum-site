@@ -1,13 +1,16 @@
 {
-  "name": "exam-tab",
-  "version": "0.5.2",
+  "name": "tum-exam-countdown",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite build --watch --mode development",
+    "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "typecheck": "tsc --noEmit",
+    "preview": "vite preview",
+    "build:ext": "tsc --noEmit && vite build --mode extension",
+    "dev:ext": "vite build --watch --mode extension",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "assets": "node scripts/heroes.mjs"
   },
   "devDependencies": {

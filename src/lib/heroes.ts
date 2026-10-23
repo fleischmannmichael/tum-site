@@ -1,6 +1,7 @@
 import { TIMEZONE, zonedParts } from "./countdown";
 
 export type Season = "spring" | "summer" | "autumn" | "winter";
+/** `path` is relative to the site root, e.g. "hero/autumn/". */
 export type Hero = { name: string; season: Season | "any"; path: string };
 
 /** Meteorological seasons in Munich: spring Mar–May, summer Jun–Aug, autumn Sep–Nov, winter Dec–Feb. */

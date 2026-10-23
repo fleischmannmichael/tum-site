@@ -58,7 +58,8 @@ function applyHero(): void {
   if (!hero) return;
   const style = document.querySelector<HTMLElement>(".hero")!.style;
   for (const [layer, file] of [["48", "48.png"], ["96", "96.png"], ["full", "full.webp"]])
-    style.setProperty(`--hero-${layer}`, `url("${hero.path}${file}")`);
+    // Relative to the page, so it works at the site root, under /tum-site/ on GitHub Pages, and in the extension.
+    style.setProperty(`--hero-${layer}`, `url("${new URL(hero.path + file, document.baseURI).href}")`);
 }
 
 applyHero();

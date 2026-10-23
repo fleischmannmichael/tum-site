@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { SEED } from "./seed";
 import { loadAll, save } from "./storage";
+import { localArea, resetStorageArea } from "./storage-area";
 import type { Exam } from "./types";
 
 // Minimal in-memory chrome.storage.sync that enforces the 8 KB per-item quota.
 let store: Record<string, unknown>;
 beforeEach(() => {
+  resetStorageArea();
   store = {};
   const sync = {
     async get(keys: string | string[] | null) {
@@ -77,5 +79,54 @@ describe("storage", () => {
   it("keeps an edited retired entry", async () => {
     store.exams = [{ id: "schaltungstheorie-2", module: "Schaltungstheorie Midterm", date: "2026-12-01" }];
     expect((await loadAll()).exams.map((e) => e.id)).toEqual(["schaltungstheorie-2"]);
+  });
+});
+
+/** In-memory stand-in for window.localStorage. */
+class MemoryStorage implements Storage {
+  private map = new Map<string, string>();
+  get length() { return this.map.size; }
+  key(i: number) { return [...this.map.keys()][i] ?? null; }
+  getItem(k: string) { return this.map.get(k) ?? null; }
+  setItem(k: string, v: string) { this.map.set(k, String(v)); }
+  removeItem(k: string) { this.map.delete(k); }
+  clear() { this.map.clear(); }
+}
+
+describe("website storage (localStorage)", () => {
+  it("is used when there is no chrome.storage", async () => {
+    delete (globalThis as { chrome?: unknown }).chrome;
+    const ls = new MemoryStorage();
+    (globalThis as { localStorage?: Storage }).localStorage = ls;
+    resetStorageArea();
+    await save("settings", { showSeconds: false, accent: "#ff8800" });
+    expect(ls.getItem("exam-tab:settings")).toBe('{"chunks":1}');
+    expect((await loadAll()).settings).toEqual({ showSeconds: false, accent: "#ff8800" });
+    expect((await loadAll()).exams).toEqual(SEED.exams);
+  });
+
+  it("round-trips large values and only touches its own keys", async () => {
+    const ls = new MemoryStorage();
+    ls.setItem("other-app", "keep me");
+    const area = localArea(ls, new EventTarget());
+    await area.set({ a: { x: 1 }, "a#0": "text" });
+    expect(await area.get(null)).toEqual({ a: { x: 1 }, "a#0": "text" });
+    await area.remove(["a#0"]);
+    expect(await area.get(["a", "a#0"])).toEqual({ a: { x: 1 } });
+    expect(ls.getItem("other-app")).toBe("keep me");
+  });
+
+  it("reports changes made in other tabs (storage events) for its keys only", () => {
+    const events = new EventTarget();
+    const area = localArea(new MemoryStorage(), events);
+    let calls = 0;
+    const off = area.onChanged(() => calls++);
+    const fire = (key: string | null) => events.dispatchEvent(Object.assign(new Event("storage"), { key }));
+    fire("exam-tab:exams");
+    fire("someone-else");
+    fire(null); // localStorage.clear() in another tab
+    off();
+    fire("exam-tab:exams");
+    expect(calls).toBe(2);
   });
 });

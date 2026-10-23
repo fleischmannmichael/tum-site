@@ -32,7 +32,7 @@ export function linkCard(r: Resource): HTMLLIElement {
 export function addLinkHref(prefill: { module?: string; category?: string; title?: string } = {}): string {
   const params = new URLSearchParams({ "add-resource": "" });
   for (const [k, v] of Object.entries(prefill)) if (v) params.set(k, v);
-  return `../options/index.html#${params.toString()}`;
+  return `settings/index.html#${params.toString()}`;
 }
 
 /** Placeholder card for a link that isn't set yet (e.g. a module's lecture notes). */

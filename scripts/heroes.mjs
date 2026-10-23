@@ -42,7 +42,7 @@ for (const file of files) {
 
   const sizes = await Promise.all(["full.webp", ...STEPS.map((w) => `${w}.png`)].map(async (f) => `${f} ${((await stat(dir + f)).size / 1024).toFixed(1)} KB`));
   console.log(`${name} (${season}, ${width}×${height}): ${sizes.join(", ")}`);
-  heroes.push({ name, season, path: `/hero/${name}/` });
+  heroes.push({ name, season, path: `hero/${name}/` }); // relative to the site root
 }
 
 await writeFile(

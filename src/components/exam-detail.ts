@@ -37,7 +37,7 @@ function aidsList(aids: string[] | undefined): HTMLUListElement | undefined {
   return ul;
 }
 
-export const editHref = (exam: Exam) => `../options/index.html#exam=${encodeURIComponent(exam.id)}`;
+export const editHref = (exam: Exam) => `settings/index.html#exam=${encodeURIComponent(exam.id)}`;
 
 /** Eyebrow (dot + status) and title; shared by the dialog and the module page. */
 export function detailHeader(exam: Exam, exams: Exam[], now: number, level: "h1" | "h2", titleId: string): HTMLElement {

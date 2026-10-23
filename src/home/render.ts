@@ -12,7 +12,7 @@ export function renderHeadline(summary: Summary): void {
     ahead === 0 ? "All exams done" : `${ahead} ${ahead === 1 ? "exam" : "exams"} ahead`;
   const detail = $("detail");
   if (summary.upcoming.length === 0 && summary.tba.length > 0) {
-    const link = Object.assign(document.createElement("a"), { href: "../options/index.html", textContent: "Add the dates in settings" });
+    const link = Object.assign(document.createElement("a"), { href: "settings/index.html", textContent: "Add the dates in settings" });
     detail.replaceChildren(document.createTextNode("No dates yet · "), link);
   } else detail.replaceChildren();
 }

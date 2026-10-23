@@ -4,13 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
-    <title>Exam Tab · Settings</title>
-    <link rel="stylesheet" href="./options.css" />
+    <title>Settings · Exam countdown</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./settings.css" />
   </head>
   <body>
     <div class="page">
       <header class="topbar">
-        <a class="back" href="../newtab/index.html">← New tab</a>
+        <a class="back" href="../index.html">← Countdown</a>
         <h1 class="topbar__title">Settings</h1>
       </header>
 
@@ -46,7 +47,7 @@
 
         <section class="panel glass-card" aria-labelledby="backup-title">
           <h2 id="backup-title" class="panel__title">Backup</h2>
-          <p class="panel__text">Everything lives in Chrome's sync storage. Export a file now and then, especially before reinstalling.</p>
+          <p class="panel__text" id="storage-note">Your exams are saved in this browser. Export a file to back them up or to move them to another browser.</p>
           <div class="btn-row">
             <button type="button" class="btn" id="export">Export JSON</button>
             <label class="btn" for="import-file">Import JSON…</label>
