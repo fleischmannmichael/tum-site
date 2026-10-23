@@ -5,26 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
     <title>New Tab</title>
+    <link rel="preload" href="/hero/hero-48.png" as="image" />
+    <link rel="preload" href="/hero/hero-96.png" as="image" />
+    <link rel="preload" href="/hero/hero-192.png" as="image" />
     <link rel="stylesheet" href="./newtab.css" />
   </head>
   <body>
-    <main>
-      <section class="countdown" aria-labelledby="headline">
-        <h1 id="headline"></h1>
-        <p id="days" class="days"></p>
-        <p id="detail" class="detail"></p>
-      </section>
+    <!-- Decorative: pixel-art TUM campus at dusk. -->
+    <div class="hero" aria-hidden="true">
+      <div class="hero__layer hero__layer--48"></div>
+      <div class="hero__layer hero__layer--96"></div>
+      <div class="hero__layer hero__layer--192"></div>
+      <div class="hero__overlay"></div>
+    </div>
 
-      <section aria-labelledby="upcoming-title">
-        <h2 id="upcoming-title">Upcoming exams</h2>
-        <ul id="upcoming"></ul>
-      </section>
+    <div class="page">
+      <header class="topbar">
+        <nav aria-label="Sections">
+          <ul class="pill-nav glass-card">
+            <li><a class="pill-nav__item" href="#countdown" aria-current="page">Countdown</a></li>
+            <li><a class="pill-nav__item" href="#resources">Resources</a></li>
+            <li>
+              <a class="pill-nav__item" aria-disabled="true" title="Coming later">
+                Focus<span class="pill-nav__soon">Soon</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </header>
 
-      <details id="done-section" hidden>
-        <summary>Done (<span id="done-count">0</span>)</summary>
-        <ul id="done"></ul>
-      </details>
-    </main>
+      <main>
+        <div id="view-countdown" class="view">
+          <section class="countdown" aria-labelledby="headline">
+            <p id="eyebrow" class="countdown__eyebrow"></p>
+            <h1 id="headline" class="countdown__title">&nbsp;</h1>
+            <p id="days" class="countdown__days"></p>
+            <p id="detail" class="countdown__detail"></p>
+          </section>
+
+          <section class="exam-card glass-card" aria-labelledby="upcoming-title">
+            <h2 id="upcoming-title" class="exam-card__title">Upcoming</h2>
+            <ul id="upcoming" class="exam-list"></ul>
+            <details id="done-section" class="done-list" hidden>
+              <summary class="done-list__summary">Done (<span id="done-count">0</span>)</summary>
+              <ul id="done" class="exam-list"></ul>
+            </details>
+          </section>
+        </div>
+
+        <div id="view-resources" class="view" hidden>
+          <section class="exam-card glass-card placeholder" aria-labelledby="resources-title">
+            <h1 id="resources-title" class="exam-card__title">Resources</h1>
+            <p class="placeholder__text">Study links arrive in M5.</p>
+          </section>
+        </div>
+      </main>
+    </div>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

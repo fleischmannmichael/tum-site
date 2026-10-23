@@ -1,0 +1,8 @@
+.glass-card {
+  background: linear-gradient(var(--glass-fill), var(--glass-fill)), var(--glass-tint);
+  border: var(--hairline) solid var(--glass-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}

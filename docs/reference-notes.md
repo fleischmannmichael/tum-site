@@ -14,3 +14,10 @@ Planned method once the host is reachable:
 4. Reference video → frames (`ffmpeg -vf fps=30`) in a temp folder to
    check timings.
 5. Map findings onto `src/styles/tokens.css`.
+
+## Built without the study (M3)
+
+M3 used the spec's starting values. Everything that should be checked
+against the reference is marked `VERIFY` in `src/styles/tokens.css`:
+glass (fill, blur, border, shadow), radii, type families/scale/tracking,
+motion durations and easing.

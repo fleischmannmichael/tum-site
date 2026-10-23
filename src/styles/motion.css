@@ -1,0 +1,31 @@
+/* Depixelate-in: three stacked resolutions, opacity only.
+   48 is visible from first paint; 96 then 192 fade in over it.
+   M7 adds the headline/nav/card entrance. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hero__layer--96,
+.hero__layer--192 {
+  opacity: 0;
+  animation: fade-in var(--hero-step) var(--ease-out) forwards;
+}
+.hero__layer--192 {
+  animation-delay: var(--hero-step);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__layer--48,
+  .hero__layer--96 {
+    display: none;
+  }
+  .hero__layer--192 {
+    opacity: 1;
+    animation: none;
+  }
+}
