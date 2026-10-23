@@ -6,6 +6,7 @@ export type Result<T> = { ok: true; value: T } | { ok: false; errors: Record<str
 
 export const LIMITS = {
   module: 60,
+  label: 30,
   room: 80,
   text: 2000, // description, notes
   aid: 120,
@@ -45,6 +46,7 @@ export function validateExam(input: FormInput, id: string): Result<Exam> {
 
   if (!get("module")) errors.module = "Give the exam a module name.";
   tooLong("module", LIMITS.module, "Module name");
+  tooLong("label", LIMITS.label, "Label");
   date("date");
   time("time");
   if (get("time") && !get("date")) errors.time = "Add a date first, or leave the time empty.";
@@ -74,6 +76,7 @@ export function validateExam(input: FormInput, id: string): Result<Exam> {
     if (v !== "" && v !== undefined) exam[k] = v;
   };
   opt("time", get("time"));
+  opt("label", get("label"));
   opt("room", get("room"));
   opt("color", get("color").toLowerCase());
   if (input.done === "on") exam.done = true;
@@ -133,7 +136,7 @@ function examToInput(e: Record<string, unknown>): FormInput {
   const retake = (e.retake ?? {}) as Record<string, unknown>;
   const str = (v: unknown) => (v === undefined || v === null ? "" : String(v));
   return {
-    module: str(e.module), date: str(e.date), time: str(e.time), room: str(e.room), color: str(e.color),
+    module: str(e.module), label: str(e.label), date: str(e.date), time: str(e.time), room: str(e.room), color: str(e.color),
     done: e.done === true ? "on" : "", description: str(e.description), durationMin: str(e.durationMin),
     retakeDate: str(retake.date), retakeTime: str(retake.time), retakeRoom: str(retake.room),
     registrationDeadline: str(e.registrationDeadline),

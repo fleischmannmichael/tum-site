@@ -42,6 +42,9 @@ function actions(label: string, onEdit: () => void, onDelete: () => void): HTMLD
   return box;
 }
 
+/** "Schaltungstheorie · Midterm": the module plus its label, if any. */
+const examName = (e: Exam) => [e.module, e.label].filter(Boolean).join(" · ");
+
 const byDate = (a: Exam, b: Exam) =>
   (a.date ?? "9999") .localeCompare(b.date ?? "9999") || (a.time ?? "").localeCompare(b.time ?? "") || a.module.localeCompare(b.module);
 
@@ -59,8 +62,9 @@ function renderExams(): void {
       dot.style.setProperty("--dot", dotColor(exam, ids));
       const when = exam.date ? [formatDateDE(exam.date), exam.time, exam.room].filter(Boolean).join(" · ") : "Date TBA";
       const text = el("div", "item__text");
-      text.append(el("span", "item__title", exam.module + (exam.done ? " · done" : "")), el("span", "item__meta", when));
-      li.append(dot, text, actions(exam.module, () => openExam(exam), () => void deleteExam(exam)));
+      const title = [exam.module, exam.label, exam.done ? "done" : ""].filter(Boolean).join(" · ");
+      text.append(el("span", "item__title", title), el("span", "item__meta", when));
+      li.append(dot, text, actions(examName(exam), () => openExam(exam), () => void deleteExam(exam)));
       return li;
     }),
   );
@@ -112,8 +116,8 @@ async function persist<K extends keyof StoredData>(key: K, value: StoredData[K],
 }
 
 async function deleteExam(exam: Exam): Promise<void> {
-  if (!confirm(`Delete “${exam.module}”? This can't be undone (unless you have a backup).`)) return;
-  await persist("exams", data.exams.filter((e) => e.id !== exam.id), `Deleted ${exam.module}.`);
+  if (!confirm(`Delete “${examName(exam)}”? This can't be undone (unless you have a backup).`)) return;
+  await persist("exams", data.exams.filter((e) => e.id !== exam.id), `Deleted ${examName(exam)}.`);
 }
 
 async function deleteResource(r: Resource): Promise<void> {
@@ -128,7 +132,7 @@ let editingExam: string | null = null;
 
 function examToForm(e: Exam): FormInput {
   return {
-    module: e.module, date: e.date ?? "", time: e.time, room: e.room, durationMin: e.durationMin?.toString(),
+    module: e.module, label: e.label, date: e.date ?? "", time: e.time, room: e.room, durationMin: e.durationMin?.toString(),
     registrationDeadline: e.registrationDeadline, retakeDate: e.retake?.date ?? "", retakeTime: e.retake?.time,
     retakeRoom: e.retake?.room, allowedAids: e.allowedAids?.join("\n"), description: e.description, notes: e.notes,
     done: e.done ? "on" : "", customColor: e.color ? "on" : "", colorPick: e.color,
@@ -137,7 +141,7 @@ function examToForm(e: Exam): FormInput {
 
 function openExam(exam?: Exam): void {
   editingExam = exam?.id ?? null;
-  $("exam-form-title").textContent = exam ? `Edit ${exam.module}` : "Add exam";
+  $("exam-form-title").textContent = exam ? `Edit ${examName(exam)}` : "Add exam";
   fillForm(examForm, exam ? examToForm(exam) : {});
   examDialog.showModal();
 }

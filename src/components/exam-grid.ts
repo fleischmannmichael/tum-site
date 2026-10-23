@@ -1,6 +1,6 @@
 import type { Summary, UpcomingExam } from "../lib/countdown";
 import { el } from "../lib/dom";
-import { formatDateDE, formatDays } from "../lib/format";
+import { formatDateDE } from "../lib/format";
 import type { Exam } from "../lib/types";
 import { clockEl } from "./clock";
 
@@ -9,12 +9,6 @@ export { el };
 /** Exams this many days away (or fewer) get the warm accent. */
 export const SOON_DAYS = 7;
 const MODULE_COLORS = 6;
-
-export function relativeDays(days: number): string {
-  if (days === 0) return "Today";
-  if (days === 1) return "Tomorrow";
-  return formatDays(days);
-}
 
 export function whenText(date: string | null, time?: string): string {
   return date ? [formatDateDE(date), time].filter(Boolean).join(" · ") : "Date TBA";
@@ -49,6 +43,7 @@ function tile(exam: Exam, kind: TileKind, allIds: string[], opts: { days?: numbe
   top.append(dot(exam, allIds), el("span", "exam-tile__when", whenText(exam.date, exam.time)));
   if (kind === "done") top.append(el("span", "exam-tile__badge", "Done"));
   btn.append(top, el("span", "exam-tile__module", exam.module));
+  if (exam.label) btn.append(el("span", "exam-tile__label", exam.label));
   if (kind !== "done") {
     const clock = clockEl(exam.id);
     // "Next" sits on the day-count row, where there's free space; the date line stays whole.

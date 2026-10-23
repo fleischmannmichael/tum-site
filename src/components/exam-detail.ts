@@ -1,7 +1,7 @@
-import { daysUntil, examDayEnd } from "../lib/countdown";
-import { formatDateDE } from "../lib/format";
+import { examClock } from "../lib/countdown";
+import { formatDateDE, formatDays } from "../lib/format";
 import type { Exam } from "../lib/types";
-import { dot, el, relativeDays, whenText } from "./exam-grid";
+import { dot, el, whenText } from "./exam-grid";
 
 const NOT_SET = "Not set yet";
 
@@ -15,10 +15,13 @@ function field(label: string, value: string | Node | undefined): HTMLDivElement 
 }
 
 export function statusText(exam: Exam, now: number): string {
-  if (exam.done || (exam.date && now >= examDayEnd(exam.date))) return "Done";
-  if (!exam.date) return "Date TBA";
-  const days = daysUntil(exam.date, now);
-  return days <= 1 ? relativeDays(days) : `In ${relativeDays(days).toLowerCase()}`;
+  const clock = examClock(exam, now);
+  if (clock.kind === "done") return "Done";
+  if (clock.kind === "tba") return "Date TBA";
+  if (clock.kind === "today" || clock.days === 0) return "Today";
+  if (clock.days === 1) return "Tomorrow";
+  // Same count as the clock on the square, so the two never disagree.
+  return `In ${formatDays(clock.remaining.days)}`;
 }
 
 function retakeText(exam: Exam): string | undefined {
@@ -40,7 +43,8 @@ export const editHref = (exam: Exam) => `../options/index.html#exam=${encodeURIC
 export function detailHeader(exam: Exam, exams: Exam[], now: number, level: "h1" | "h2", titleId: string): HTMLElement {
   const header = el("header", "detail__header");
   const eyebrow = el("p", "detail__eyebrow");
-  eyebrow.append(dot(exam, exams.map((e) => e.id)), document.createTextNode(statusText(exam, now)));
+  const status = [exam.label, statusText(exam, now)].filter(Boolean).join(" · ");
+  eyebrow.append(dot(exam, exams.map((e) => e.id)), document.createTextNode(status));
   const title = el(level, "detail__title", exam.module);
   title.id = titleId;
   title.tabIndex = -1; // focus target when navigating to a module page

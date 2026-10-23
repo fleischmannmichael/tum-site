@@ -54,9 +54,27 @@ describe("storage", () => {
     expect(data.settings.showSeconds).toBe(true);
   });
 
-  it("drops the retired untouched 'Schaltungstheorie 2' seed, keeps an edited one", async () => {
-    store.exams = [{ id: "schaltungstheorie-2", module: "Schaltungstheorie 2", date: null }, { id: "a", module: "A", date: null }];
-    expect((await loadAll()).exams.map((e) => e.id)).toEqual(["a"]);
+  it("replaces a never-edited first seed with the current one", async () => {
+    store.exams = ["analysis-1", "linear-algebra", "schaltungstheorie", "digitaltechnik", "computertechnik", "schaltungstheorie-2"].map(
+      (id) => ({ id, module: id, date: null }),
+    );
+    expect((await loadAll()).exams).toEqual(SEED.exams);
+  });
+
+  it("keeps edits; fills in only untouched seed entries and drops the retired one", async () => {
+    store.exams = [
+      { id: "analysis-1", module: "Analysis 1", date: "2027-02-16", room: "MW 2001" }, // edited by the user
+      { id: "digitaltechnik", module: "Digitaltechnik", date: null }, // untouched
+      { id: "schaltungstheorie-2", module: "Schaltungstheorie 2", date: null }, // retired, untouched
+      { id: "mine", module: "Programmieren", date: null }, // the user's own
+    ];
+    const exams = (await loadAll()).exams;
+    expect(exams.map((e) => e.id)).toEqual(["analysis-1", "digitaltechnik", "mine"]);
+    expect(exams[0]).toEqual(store.exams && { id: "analysis-1", module: "Analysis 1", date: "2027-02-16", room: "MW 2001" });
+    expect(exams[1]!.date).toBe("2027-02-25");
+  });
+
+  it("keeps an edited retired entry", async () => {
     store.exams = [{ id: "schaltungstheorie-2", module: "Schaltungstheorie Midterm", date: "2026-12-01" }];
     expect((await loadAll()).exams.map((e) => e.id)).toEqual(["schaltungstheorie-2"]);
   });

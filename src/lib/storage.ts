@@ -1,4 +1,4 @@
-import { dropRetiredSeed, SEED } from "./seed";
+import { SEED, upgradeSeed } from "./seed";
 import type { StoredData } from "./types";
 
 type Key = keyof StoredData;
@@ -33,7 +33,7 @@ function decode(all: Record<string, unknown>, key: Key): unknown {
 export async function loadAll(): Promise<StoredData> {
   const all = await chrome.storage.sync.get(null);
   return {
-    exams: dropRetiredSeed((decode(all, "exams") as StoredData["exams"] | undefined) ?? SEED.exams),
+    exams: upgradeSeed((decode(all, "exams") as StoredData["exams"] | undefined) ?? SEED.exams),
     resources: (decode(all, "resources") as StoredData["resources"] | undefined) ?? SEED.resources,
     settings: { ...SEED.settings, ...(decode(all, "settings") as Partial<StoredData["settings"]> | undefined) },
   };

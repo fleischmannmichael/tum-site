@@ -2,6 +2,8 @@
 export type Exam = {
   id: string;
   module: string;
+  /** Tells several exams of one module apart, e.g. "Midterm" or "GOP". */
+  label?: string;
   date: string | null;
   /** "HH:MM", 24 h, Europe/Berlin. */
   time?: string;
