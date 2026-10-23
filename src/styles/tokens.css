@@ -84,10 +84,11 @@
   --space-8: 4rem;
   --gutter: clamp(1rem, 0.6rem + 1.8vw, 2rem);
   --content-width-wide: 72rem;
-  /* Square exam panels: as big as fits — 13rem max, three rows tall within
-     the screen height, two columns within the width. */
-  --tile-size: min(13rem, (100dvh - 23rem) / 3, (100vw - 2 * var(--gutter) - var(--space-3)) / 2);
-  --tile-padding: var(--space-3);
+  /* Exam rectangles: two columns of three, as tall as fits on screen. */
+  --tile-w: min(24rem, (100vw - 2 * var(--gutter) - var(--space-3)) / 2);
+  --tile-h: clamp(6.5rem, (100dvh - 23rem) / 3, 9rem);
+  --tile-h-phone: 4.5rem;
+  --tile-padding: var(--space-3) var(--space-4);
   --tile-module: var(--text-lg);
   --tile-days: clamp(2rem, 1.6rem + 1.4vw, 2.75rem);
   --tile-days-sm: 1.625rem;
@@ -96,6 +97,8 @@
   --detail-label-width: 6.5rem;
   --form-width: 40rem;
   --module-width: 48rem;
+  --overview-card-min: 17rem;
+  --headline-long-width: 46rem;
   --link-card-min: 13rem;
   --link-card-height: 4rem;
   --link-icon-size: 2.5rem;

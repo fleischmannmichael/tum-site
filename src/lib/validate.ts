@@ -15,6 +15,7 @@ export const LIMITS = {
   category: 40,
   url: 500,
   durationMin: 600,
+  headline: 80,
 };
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -183,5 +184,10 @@ export function parseBackup(text: string): { ok: true; value: StoredData } | { o
   const s = isObj(raw.settings) ? raw.settings : {};
   const settings: Settings = { showSeconds: s.showSeconds === true };
   if (typeof s.accent === "string" && COLOR.test(s.accent)) settings.accent = s.accent.toLowerCase();
+  const h = isObj(s.headline) ? s.headline : undefined;
+  if (h && ["count", "custom", "motivation", "quotes"].includes(h.mode as string)) {
+    settings.headline = { mode: h.mode as NonNullable<Settings["headline"]>["mode"] };
+    if (typeof h.custom === "string" && h.custom.trim()) settings.headline.custom = h.custom.trim().slice(0, LIMITS.headline);
+  }
   return { ok: true, value: { exams, resources, settings } };
 }

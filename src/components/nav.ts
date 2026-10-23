@@ -2,34 +2,44 @@ import { el } from "../lib/dom";
 import type { Exam } from "../lib/types";
 import { dot } from "./exam-grid";
 
-/** Views are driven by the URL hash: "" / #countdown, #module=<exam id>, or #general. */
-export type Route = { view: "countdown" } | { view: "module"; id: string } | { view: "general" };
+/** Views are driven by the URL hash: "" / #countdown, #modules, #module=<exam id>, or #general. */
+export type Route = { view: "countdown" } | { view: "modules" } | { view: "module"; id: string } | { view: "general" };
 
 export function currentRoute(): Route {
   if (location.hash === "#general") return { view: "general" };
+  if (location.hash === "#modules") return { view: "modules" };
   const id = new URLSearchParams(location.hash.slice(1)).get("module");
   return id ? { view: "module", id } : { view: "countdown" };
 }
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
-/** Fills the Modules panel; called whenever exams change. */
+/**
+ * Exams grouped by module, in the order of the exam list (so related modules
+ * like Analysis 1 and Linear Algebra stay together). Several exams of one
+ * module (GOP, midterm) share one entry.
+ */
+export function modulesInOrder(exams: Exam[]): Exam[][] {
+  const byModule = new Map<string, Exam[]>();
+  for (const exam of exams) byModule.set(exam.module, [...(byModule.get(exam.module) ?? []), exam]);
+  // Within a module, dated exams first (soonest first), then TBA.
+  return [...byModule.values()].map((list) => [...list].sort((a, b) => (a.date ?? "9999").localeCompare(b.date ?? "9999")));
+}
+
+/** Fills the hover list; called whenever exams change. */
 export function renderModulesMenu(exams: Exam[]): void {
   const ids = exams.map((e) => e.id);
-  const sorted = [...exams].sort((a, b) => (a.date ?? "9999").localeCompare(b.date ?? "9999") || a.module.localeCompare(b.module));
   const general = el("a", "modules-menu__item modules-menu__item--general", "General links");
   general.href = "#general";
   const generalLi = el("li", "modules-menu__general");
   generalLi.append(general);
-  // One entry per module: midterms and finals saved as separate exams share a module name.
-  const byModule = new Map<string, Exam[]>();
-  for (const exam of sorted) byModule.set(exam.module, [...(byModule.get(exam.module) ?? []), exam]);
   $("modules-menu-list").replaceChildren(
-    ...[...byModule.values()].map(([exam, ...rest]) => {
+    ...modulesInOrder(exams).map((list) => {
+      const first = list[0]!;
       const a = el("a", "modules-menu__item");
-      a.href = `#module=${encodeURIComponent(exam!.id)}`;
-      a.dataset.examIds = [exam!, ...rest].map((e) => e.id).join(" ");
-      a.append(dot(exam!, ids), document.createTextNode(exam!.module));
+      a.href = `#module=${encodeURIComponent(first.id)}`;
+      a.dataset.examIds = list.map((e) => e.id).join(" ");
+      a.append(dot(first, ids), document.createTextNode(first.module));
       const li = el("li");
       li.append(a);
       return li;
@@ -40,13 +50,14 @@ export function renderModulesMenu(exams: Exam[]): void {
 
 /** Shows the view for the current hash and marks the matching nav item. */
 export function applyRoute(route: Route): void {
-  $("view-countdown").hidden = route.view !== "countdown";
-  $("view-module").hidden = route.view !== "module";
-  $("view-general").hidden = route.view !== "general";
+  for (const view of ["countdown", "modules", "module", "general"] as const) $(`view-${view}`).hidden = route.view !== view;
   const countdownLink = document.querySelector('.pill-nav a[href="#countdown"]')!;
   if (route.view === "countdown") countdownLink.setAttribute("aria-current", "page");
   else countdownLink.removeAttribute("aria-current");
-  $("modules-toggle").classList.toggle("is-active", route.view !== "countdown");
+  const modulesLink = $("modules-link");
+  modulesLink.classList.toggle("is-active", route.view !== "countdown");
+  if (route.view === "modules") modulesLink.setAttribute("aria-current", "page");
+  else modulesLink.removeAttribute("aria-current");
   for (const a of Array.from(document.querySelectorAll<HTMLAnchorElement>(".modules-menu__item"))) {
     const match =
       (route.view === "module" && (a.dataset.examIds ?? "").split(" ").includes(route.id)) ||
@@ -56,27 +67,28 @@ export function applyRoute(route: Route): void {
   }
 }
 
-/** Disclosure for the Modules panel: toggle, Esc, click outside, close after picking. */
+/**
+ * The quick list opens on hover and on keyboard focus (CSS). This only adds
+ * ways to close it: Esc, or picking an entry, until the pointer/focus leaves.
+ */
 export function initModulesMenu(): void {
-  const toggle = $("modules-toggle");
-  const panel = $("modules-menu");
-  const setOpen = (open: boolean) => {
-    toggle.setAttribute("aria-expanded", String(open));
-    panel.hidden = !open;
-  };
-  toggle.addEventListener("click", () => {
-    const open = toggle.getAttribute("aria-expanded") !== "true";
-    setOpen(open);
-    if (open) panel.querySelector<HTMLElement>("a")?.focus();
+  const item = $("nav-modules");
+  const close = () => item.setAttribute("data-closed", "");
+  const reopen = () => item.removeAttribute("data-closed");
+  item.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    close();
+    $("modules-link").focus();
   });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !panel.hidden) {
-      setOpen(false);
-      toggle.focus();
-    }
+  item.addEventListener("click", (e) => {
+    if ((e.target as Element).closest("a")) close();
   });
-  document.addEventListener("click", (e) => {
-    if (!panel.hidden && !(e.target as Element).closest("#modules-menu, #modules-toggle")) setOpen(false);
+  item.addEventListener("mouseleave", reopen);
+  item.addEventListener("focusout", (e) => {
+    if (!item.contains(e.relatedTarget as Node | null)) reopen();
   });
-  window.addEventListener("hashchange", () => setOpen(false));
+  // Pointer re-entering after a pick should open it again.
+  item.addEventListener("mouseenter", () => {
+    if (!item.contains(document.activeElement)) reopen();
+  });
 }

@@ -16,7 +16,7 @@
   font-size: var(--clock-days);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-display);
-  color: var(--color-text);
+  color: var(--color-accent); /* exams ≤ 7 days away switch to the warm accent */
 }
 
 .clock__days-label {

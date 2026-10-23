@@ -59,26 +59,46 @@
   transition: transform var(--dur-fast) var(--ease);
 }
 
-[aria-expanded="true"] > .pill-nav__chevron {
-  transform: rotate(180deg);
-}
-
-/* ---- Modules panel: a horizontal row of modules under the nav ---- */
+/* ---- Modules: quick list on hover / keyboard focus ---- */
 .nav {
   position: relative;
 }
 
+/* The list is positioned against the whole nav (not the Modules item), so it
+   stays centred and on screen even where the nav isn't centred (phones). */
+/* Starts right under the nav item (the padding bridges the gap), so the pointer
+   can travel into the list without it closing. */
 .modules-menu {
   position: absolute;
-  top: calc(100% + var(--space-2));
+  top: 100%;
   left: 50%;
   z-index: 10;
-  width: max-content;
-  max-width: min(var(--content-width-wide), 100vw - 2 * var(--gutter));
-  padding: var(--space-2);
-  border-radius: var(--radius-tile);
+  padding-top: var(--space-3);
   transform: translateX(-50%);
-  background: linear-gradient(var(--glass-fill), var(--glass-fill)), var(--glass-tint-strong);
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity var(--dur-fast) var(--ease),
+    visibility 0s linear var(--dur-fast);
+}
+
+.nav-modules:not([data-closed]):hover .modules-menu,
+.nav-modules:not([data-closed]):focus-within .modules-menu {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+.nav-modules:not([data-closed]):hover .pill-nav__chevron,
+.nav-modules:not([data-closed]):focus-within .pill-nav__chevron {
+  transform: rotate(180deg);
+}
+
+/* Touch screens have no hover: a tap goes straight to the overview page. */
+@media (hover: none) {
+  .modules-menu {
+    display: none;
+  }
 }
 
 .modules-menu__list {
@@ -86,6 +106,11 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-1);
+  width: max-content;
+  max-width: min(var(--content-width-wide), 100vw - 2 * var(--gutter));
+  padding: var(--space-2);
+  border-radius: var(--radius-tile);
+  background: linear-gradient(var(--glass-fill), var(--glass-fill)), var(--glass-tint-strong);
 }
 
 .modules-menu__item {
@@ -107,12 +132,6 @@
   background: var(--glass-fill-hover);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .pill-nav__chevron {
-    transition: none;
-  }
-}
-
 /* "General links" sits apart from the modules: a hairline before it. */
 .modules-menu__general {
   padding-left: var(--space-2);
@@ -121,4 +140,11 @@
 
 .modules-menu__item--general {
   color: var(--color-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill-nav__chevron,
+  .modules-menu {
+    transition: none;
+  }
 }

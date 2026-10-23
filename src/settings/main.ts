@@ -91,6 +91,11 @@ function renderResources(): void {
 
 function renderDisplay(): void {
   ($("show-seconds") as HTMLInputElement).checked = data.settings.showSeconds;
+  const mode = data.settings.headline?.mode ?? "count";
+  for (const radio of Array.from(document.querySelectorAll<HTMLInputElement>('input[name="headline"]'))) radio.checked = radio.value === mode;
+  const custom = $("headline-custom") as HTMLInputElement;
+  if (document.activeElement !== custom) custom.value = data.settings.headline?.custom ?? "";
+  custom.disabled = mode !== "custom";
   const accent = $("accent") as HTMLInputElement;
   accent.value = data.settings.accent ?? getComputedStyle(document.documentElement).getPropertyValue("--color-accent-default").trim();
   applyAccent(data.settings.accent);
@@ -209,6 +214,26 @@ $("show-seconds").addEventListener("change", (e) => {
 $("accent").addEventListener("change", (e) => {
   void persist("settings", { ...data.settings, accent: (e.target as HTMLInputElement).value }, "Accent colour saved.");
 });
+type HeadlineMode = NonNullable<StoredData["settings"]["headline"]>["mode"];
+const HEADLINE_SAVED: Record<HeadlineMode, string> = {
+  count: "Headline: exams ahead.",
+  motivation: "Headline: motivational messages.",
+  quotes: "Headline: quotes.",
+  custom: "Headline: your message.",
+};
+function saveHeadline(mode: HeadlineMode): void {
+  const custom = ($("headline-custom") as HTMLInputElement).value.trim();
+  const headline = { mode, ...(custom ? { custom } : {}) };
+  void persist("settings", { ...data.settings, headline }, HEADLINE_SAVED[mode]);
+}
+for (const radio of Array.from(document.querySelectorAll<HTMLInputElement>('input[name="headline"]'))) {
+  radio.addEventListener("change", () => {
+    saveHeadline(radio.value as HeadlineMode);
+    if (radio.value === "custom") $("headline-custom").focus();
+  });
+}
+$("headline-custom").addEventListener("change", () => saveHeadline("custom"));
+
 $("accent-reset").addEventListener("click", () => {
   const { accent: _drop, ...rest } = data.settings;
   void persist("settings", rest, "Accent colour reset.");
@@ -243,6 +268,15 @@ $("import-file").addEventListener("change", async (e) => {
   } catch (err) {
     toast(describeSaveError(err));
   }
+});
+
+// ---- Esc goes back to the countdown (an open form closes first) ----
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || e.defaultPrevented || document.querySelector("dialog[open]")) return;
+  // In a text field, the first Esc just leaves the field (which saves it); the next one goes back.
+  const active = document.activeElement;
+  if (active instanceof HTMLInputElement && active.type === "text") return active.blur();
+  location.href = "../index.html";
 });
 
 // ---- Live updates & deep links ------------------------------------------------------------

@@ -1,5 +1,6 @@
 import { initExamDetail } from "../components/exam-detail";
 import { renderModuleView } from "../components/module-view";
+import { renderModulesOverview } from "../components/modules-overview";
 import { applyRoute, currentRoute, initModulesMenu, renderModulesMenu } from "../components/nav";
 import { generalGroups } from "../components/resource-grid";
 import { applyAccent } from "../lib/accent";
@@ -13,13 +14,16 @@ import { renderExams, renderHeadline, updateClocks } from "./render";
 let data: StoredData;
 let timer: number | undefined;
 let structureKey = "";
+/** One random number per visit: picks the motivational line or quote. */
+const headlinePick = Math.random();
 
 const detail = initExamDetail(document.getElementById("exam-detail") as HTMLDialogElement, () => data.exams);
 
 /** Rebuilds what depends on data or route (not on the clock). */
 function renderStructure(now: number): void {
   const summary = summarize(data.exams, now);
-  renderHeadline(summary);
+  renderHeadline(summary, data.settings, headlinePick);
+  renderModulesOverview(document.getElementById("modules-overview")!, data, now);
   renderExams(summary, data.exams);
   renderModulesMenu(data.exams);
   document.getElementById("general-groups")!.replaceChildren(...generalGroups(data.resources));
@@ -41,7 +45,7 @@ function tick(force = false): void {
 
   // Exams move between upcoming/done at midnight, so the summary is part of the key.
   const summary = summarize(data.exams, now);
-  const key = JSON.stringify([data.exams, data.resources, location.hash, summary.upcoming.map((u) => u.days), summary.done.map((e) => e.id)]);
+  const key = JSON.stringify([data.exams, data.resources, data.settings.headline, location.hash, summary.upcoming.map((u) => u.days), summary.done.map((e) => e.id)]);
   if (force || key !== structureKey) {
     structureKey = key;
     renderStructure(now);
@@ -70,7 +74,8 @@ tick(true);
 window.addEventListener("hashchange", () => {
   tick();
   const view = currentRoute().view;
-  if (view !== "countdown") document.getElementById(view === "module" ? "module-title" : "general-title")?.focus({ preventScroll: true });
+  const titles = { module: "module-title", modules: "modules-title", general: "general-title" } as const;
+  if (view !== "countdown") document.getElementById(titles[view])?.focus({ preventScroll: true });
 });
 
 onDataChanged((fresh) => {

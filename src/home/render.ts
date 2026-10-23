@@ -1,20 +1,29 @@
 import { updateClock } from "../components/clock";
 import { doneTiles, examTiles, SOON_DAYS } from "../components/exam-grid";
 import { examClock, type Summary } from "../lib/countdown";
-import type { Exam } from "../lib/types";
+import { chooseHeadline, countText } from "../lib/headlines";
+import type { Exam, Settings } from "../lib/types";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
-/** Headline: how many exams are left; a nudge to settings while no dates exist. */
-export function renderHeadline(summary: Summary): void {
+/**
+ * Headline: the exam count, your own message, a motivational line or a quote
+ * (Settings → Display). `pick` is one random number per page load.
+ */
+export function renderHeadline(summary: Summary, settings: Settings, pick: number): void {
+  const headline = chooseHeadline(settings, summary, pick);
+  const title = $("headline");
+  title.textContent = headline.title;
+  title.classList.toggle("countdown__title--long", headline.title.length > 32);
+  // When the headline isn't the count, the count moves into the small line above it.
   const ahead = summary.upcoming.length + summary.tba.length;
-  $("headline").textContent =
-    ahead === 0 ? "All exams done" : `${ahead} ${ahead === 1 ? "exam" : "exams"} ahead`;
+  $("eyebrow").textContent = headline.mode === "count" ? "Exam countdown" : `Exam countdown · ${countText(ahead)}`;
+
   const detail = $("detail");
   if (summary.upcoming.length === 0 && summary.tba.length > 0) {
     const link = Object.assign(document.createElement("a"), { href: "settings/index.html", textContent: "Add the dates in settings" });
     detail.replaceChildren(document.createTextNode("No dates yet · "), link);
-  } else detail.replaceChildren();
+  } else detail.replaceChildren(...(headline.byline ? [document.createTextNode(headline.byline)] : []));
 }
 
 /** Tiles; only re-rendered when their content changes, so focus isn't lost every tick. */

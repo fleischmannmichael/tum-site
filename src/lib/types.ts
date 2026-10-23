@@ -33,6 +33,8 @@ export type Resource = {
 export type Settings = {
   showSeconds: boolean;
   accent?: string;
+  /** What the big headline says: exam count (default), own text, motivation or quotes. */
+  headline?: { mode: "count" | "custom" | "motivation" | "quotes"; custom?: string };
 };
 
 export type StoredData = {

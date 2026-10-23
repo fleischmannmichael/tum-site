@@ -43,6 +43,18 @@
             <input type="color" id="accent" />
             <button type="button" class="btn btn--quiet" id="accent-reset">Use default</button>
           </div>
+          <fieldset class="fieldset headline-choice">
+            <legend>Headline on the countdown</legend>
+            <label class="check"><input type="radio" name="headline" value="count" /><span>Exams ahead (“6 exams ahead”)</span></label>
+            <label class="check"><input type="radio" name="headline" value="motivation" /><span>Motivational messages, a new one each visit</span></label>
+            <label class="check"><input type="radio" name="headline" value="quotes" /><span>Quotes from scientists and writers, a new one each visit</span></label>
+            <label class="check"><input type="radio" name="headline" value="custom" /><span>My own message</span></label>
+            <div class="field headline-custom">
+              <label for="headline-custom" class="visually-hidden">Your message</label>
+              <input id="headline-custom" type="text" maxlength="80" placeholder="e.g. Du schaffst das." autocomplete="off" />
+              <p class="field__hint">Up to 80 characters. Saved when you leave the field.</p>
+            </div>
+          </fieldset>
         </section>
 
         <section class="panel glass-card" aria-labelledby="backup-title">
