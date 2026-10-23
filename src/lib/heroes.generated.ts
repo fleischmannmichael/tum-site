@@ -3,11 +3,6 @@ import type { Hero } from "./heroes";
 
 export const HEROES: Hero[] = [
   {
-    "name": "autumn",
-    "season": "autumn",
-    "path": "hero/autumn/"
-  },
-  {
     "name": "fall-hero",
     "season": "autumn",
     "path": "hero/fall-hero/"
