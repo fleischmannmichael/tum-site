@@ -6,6 +6,7 @@ export const SEED: StoredData = {
     { id: "analysis-1", module: "Analysis 1", date: null },
     { id: "linear-algebra", module: "Linear Algebra", date: null },
     { id: "schaltungstheorie", module: "Schaltungstheorie", date: null },
+    { id: "schaltungstheorie-2", module: "Schaltungstheorie 2", date: null }, // second exam; rename once the official title is known
     { id: "digitaltechnik", module: "Digitaltechnik", date: null },
     { id: "computertechnik", module: "Computertechnik", date: null },
   ],

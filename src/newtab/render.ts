@@ -22,7 +22,11 @@ export function renderExams(summary: Summary, exams: Exam[]): void {
   const ids = exams.map((e) => e.id);
   const focusedId = (document.activeElement as HTMLElement | null)?.dataset?.examId;
 
-  $("exam-grid").replaceChildren(...examTiles(summary, ids));
+  const grid = $("exam-grid");
+  const tiles = examTiles(summary, ids);
+  grid.replaceChildren(...tiles);
+  // Two columns filled top to bottom: three rows for six exams, and so on.
+  grid.style.setProperty("--rows", String(Math.max(1, Math.ceil(tiles.length / 2))));
   $("done-section").hidden = summary.done.length === 0;
   $("done-count").textContent = String(summary.done.length);
   $("done-grid").replaceChildren(...doneTiles(summary, ids));

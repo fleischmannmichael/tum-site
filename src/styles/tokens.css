@@ -5,6 +5,7 @@
   color-scheme: dark;
 
   /* ---- Color ---- */
+  --color-page: #000; /* page, top bar and the space around the hero band */
   --color-bg: #0b0f1a;
   --color-bg-rgb: 11 15 26; /* for gradients that fade the bg in/out */
   --color-text: #f2f3f5;
@@ -25,6 +26,7 @@
   --module-3: #5cc8b0;
   --module-4: #e9879f;
   --module-5: #c9b46b;
+  --module-6: #e3a36f;
 
   /* ---- Glass ---- VERIFY */
   --glass-fill: rgb(255 255 255 / 0.06);
@@ -82,13 +84,16 @@
   --gutter: clamp(1rem, 0.6rem + 1.8vw, 2rem);
   --content-width-wide: 72rem;
   --tile-min-height: 8.5rem;
-  --detail-width: 34rem;
-  --detail-label-width: 10rem;
+  --detail-width: 26rem;
+  --detail-title: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+  --detail-label-width: 7.5rem;
   --form-width: 40rem;
   --module-width: 48rem;
-  --clock-compact-width: 10.5rem;
-  --clock-num-sm: clamp(1.125rem, 0.9rem + 0.5vw, 1.5rem);
-  --clock-num-lg: clamp(1.75rem, 1.2rem + 2.2vw, 3rem);
+  --clock-days: clamp(2.25rem, 1.6rem + 2.2vw, 3.5rem); /* the serif day count on each exam */
+  --clock-days-phone: 1.75rem;
+  --clock-days-lg: clamp(3.5rem, 2.2rem + 5vw, 6.5rem);
+  --clock-num-sm: var(--text-base);
+  --clock-num-lg: clamp(1.25rem, 1rem + 1vw, 1.75rem);
   --clock-fill: rgb(255 255 255 / 0.05);
   --radius-clock: 10px;
   --options-width: 48rem;
@@ -99,7 +104,7 @@
 
   /* ---- Hero ---- */
   /* ~30% keeps the clock tower in frame from 360px to wide screens. */
-  --hero-position: 30% 50%;
+  --hero-position: 30% 55%;
   /* Lighter in the middle so the tower and clock stay visible; the headline
      relies on the vignette + text shadow, the tiles on their own glass. */
   --hero-overlay:
@@ -110,6 +115,11 @@
       rgb(var(--color-bg-rgb) / 0.2) 45%,
       rgb(var(--color-bg-rgb) / 0.55) 100%
     );
+  --band-min-height: min(78dvh, 52rem);
+  --band-gap-below: var(--space-8);
+  /* Short fades so the band melts into the black above and below. */
+  --band-fade: linear-gradient(to bottom, var(--color-page) 0%, transparent 10%, transparent 82%, var(--color-page) 100%);
+  --topbar-border: rgb(255 255 255 / 0.08);
   --text-shadow-hero: 0 2px 24px rgb(0 0 0 / 0.45);
 
   /* ---- Motion ---- VERIFY: durations/easing */

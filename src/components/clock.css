@@ -1,68 +1,87 @@
 .clock {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: end;
+  gap: var(--space-2);
+}
+
+/* The day count in the display serif: the "fancy" number on each exam. */
+.clock__days {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.clock__days-num {
+  font-family: var(--font-display);
+  font-size: var(--clock-days);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-display);
+  color: var(--color-text);
+}
+
+.clock__days-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.clock__rest {
+  display: flex;
   gap: var(--space-1);
-  width: 100%;
 }
 
-.clock--no-seconds {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.clock--no-seconds [data-unit="seconds"] {
+.clock--no-seconds [data-unit="seconds"],
+.clock:not([data-state="counting"]) .clock__rest {
   display: none;
 }
 
 .clock__unit {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-block: var(--space-2);
+  align-items: baseline;
+  gap: 0.2em;
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-clock);
   background: var(--clock-fill);
 }
 
-/* Inter, not the serif: its tabular digits keep the clock from jittering every second. */
+/* Inter, not the serif: its tabular digits keep the small clock from jittering every second. */
 .clock__num {
   font-size: var(--clock-num-sm);
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
-  line-height: var(--leading-tight);
   color: var(--color-text);
 }
 
 .clock__label {
-  margin-top: var(--space-1);
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
   color: var(--color-text-muted);
 }
 
+.clock[data-state="tba"] .clock__days-num,
+.clock[data-state="done"] .clock__days-num {
+  color: var(--color-text-muted);
+}
+
+.clock[data-state="today"] .clock__days-num {
+  color: var(--color-warm);
+}
+
+/* Module page: same clock, bigger, left-aligned under the title. */
+.clock--lg {
+  justify-items: start;
+}
+
+.clock--lg .clock__days-num {
+  font-size: var(--clock-days-lg);
+}
+
+.clock--lg .clock__days-label {
+  font-size: var(--text-lg);
+}
+
 .clock--lg .clock__unit {
-  padding-block: var(--space-4);
+  padding: var(--space-2) var(--space-3);
 }
 
 .clock--lg .clock__num {
   font-size: var(--clock-num-lg);
-}
-
-.clock__status {
-  grid-column: 1 / -1;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--color-text-muted);
-}
-
-.clock__status:empty {
-  display: none;
-}
-
-/* Without a running countdown the numbers are placeholders; the status says why. */
-.clock:not([data-state="counting"]) .clock__num {
-  color: var(--color-text-muted);
-}
-
-.clock[data-state="today"] .clock__status {
-  color: var(--color-warm);
 }

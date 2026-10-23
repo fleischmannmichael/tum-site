@@ -2,34 +2,21 @@
   width: 100%;
 }
 
-/* Flex rather than grid so a short last row stays centred. */
+/* Wide screens: two columns filled top to bottom (date order reads down
+   each column), three rows each for six exams. JS sets --rows. */
 .exam-grid {
-  --cols: 2;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
   gap: var(--space-3);
 }
 
-.exam-grid > li {
-  flex: 0 0 calc((100% - (var(--cols) - 1) * var(--space-3)) / var(--cols));
-}
-
-@media (min-width: 640px) {
-  .exam-grid {
-    --cols: 3;
+@media (min-width: 900px) {
+  .exam-grid--columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(var(--rows, 3), auto);
+    grid-auto-flow: column;
   }
-}
-
-@media (min-width: 480px) and (max-width: 639px) {
-  .exam-grid {
-    --cols: 2;
-  }
-}
-
-@media (min-width: 1100px) {
-  .exam-grid {
-    --cols: 5;
+  .done-list .exam-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -41,15 +28,15 @@
   background: var(--dot, var(--module-1));
 }
 
+/* One row per exam: name and date on the left, the countdown on the right. */
 .exam-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-1);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-4);
   width: 100%;
   height: 100%;
-  min-height: var(--tile-min-height);
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-tile);
   text-align: start;
   cursor: pointer;
@@ -63,14 +50,15 @@
   border-color: var(--glass-border-strong);
 }
 
-.exam-tile__top {
+.exam-tile__name {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: 1.25rem;
+  min-width: 0;
 }
 
 .exam-tile__badge {
+  flex: none;
   padding: 0 var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--color-accent-soft);
@@ -82,10 +70,13 @@
 }
 
 .exam-tile__module {
+  min-width: 0;
   font-family: var(--font-display);
   font-size: var(--text-lg);
   line-height: var(--leading-snug);
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .exam-tile__when {
@@ -104,68 +95,46 @@
   min-width: 0;
 }
 
-.exam-tile .clock {
-  margin-top: auto;
-  padding-top: var(--space-3);
-}
-
 .exam-tile--next {
   border-color: var(--color-accent-border);
-}
-
-/* ≤ 7 days: warm numbers and a halo on the dot. */
-.is-soon .clock__num {
-  color: var(--color-warm);
 }
 
 .is-soon .dot {
   box-shadow: 0 0 0 3px var(--color-warm-soft);
 }
 
-/* Phones: each exam becomes one compact row (dot · name/date · clock) so all five fit on screen.
-   The "Next" badge is dropped there; the accent border still marks the next exam. */
+/* ≤ 7 days: warm numbers and a halo on the dot. */
+.is-soon .clock__days-num,
+.is-soon .clock__num {
+  color: var(--color-warm);
+}
+
+/* Phones: tighter padding; the "Next" badge is dropped (the accent border still marks it). */
 @media (max-width: 479px) {
-  .exam-grid {
-    --cols: 1;
-  }
   .exam-tile {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) var(--clock-compact-width);
-    align-items: center;
     column-gap: var(--space-3);
-    min-height: 0;
-    padding: var(--space-3);
+    padding: var(--space-3) var(--space-4);
   }
   .exam-tile__badge {
     display: none;
   }
   .exam-tile__module {
     font-size: var(--text-base);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .exam-tile__when {
     font-size: var(--text-xs);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
-  .exam-tile .clock {
-    margin: 0;
-    padding: 0;
-    gap: 2px;
+  .exam-tile .clock__days-num {
+    font-size: var(--clock-days-phone);
+  }
+  .exam-tile .clock__days-label {
+    font-size: var(--text-xs);
   }
   .exam-tile .clock__unit {
-    padding-block: var(--space-1);
+    padding: 2px var(--space-1);
   }
   .exam-tile .clock__num {
-    font-size: var(--text-base);
-  }
-  .exam-tile .clock__label {
-    margin-top: 0;
-    font-size: var(--text-2xs);
-    letter-spacing: var(--tracking-tight-caps);
+    font-size: var(--text-sm);
   }
 }
 
@@ -187,7 +156,8 @@
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   cursor: pointer;
-  background: linear-gradient(var(--glass-fill), var(--glass-fill)), var(--glass-tint);
+  /* Small pill over a busy picture: denser tint keeps the label readable. */
+  background: linear-gradient(var(--glass-fill), var(--glass-fill)), var(--glass-tint-strong);
   border: var(--hairline) solid var(--glass-border);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);

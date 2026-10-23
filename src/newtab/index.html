@@ -11,16 +11,8 @@
     <link rel="stylesheet" href="./newtab.css" />
   </head>
   <body>
-    <!-- Decorative: pixel-art TUM campus at dusk. -->
-    <div class="hero" aria-hidden="true">
-      <div class="hero__layer hero__layer--48"></div>
-      <div class="hero__layer hero__layer--96"></div>
-      <div class="hero__layer hero__layer--384"></div>
-      <div class="hero__overlay"></div>
-    </div>
-
-    <div class="page">
-      <header class="topbar">
+    <header class="topbar">
+      <div class="topbar__inner">
         <nav aria-label="Sections" class="nav">
           <ul class="pill-nav glass-card">
             <li><a class="pill-nav__item" href="#countdown" aria-current="page">Countdown</a></li>
@@ -45,9 +37,19 @@
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
         </a>
-      </header>
+      </div>
+    </header>
 
-      <main>
+    <!-- The hero is a band between the black top bar and the black page below. -->
+    <main class="band">
+      <!-- Decorative: pixel-art TUM campus at dusk. -->
+      <div class="hero" aria-hidden="true">
+        <div class="hero__layer hero__layer--48"></div>
+        <div class="hero__layer hero__layer--96"></div>
+        <div class="hero__layer hero__layer--384"></div>
+        <div class="hero__overlay"></div>
+      </div>
+      <div class="band__content">
         <div id="view-countdown" class="view">
           <section class="countdown" aria-labelledby="headline">
             <p class="countdown__eyebrow">Exam countdown</p>
@@ -57,7 +59,7 @@
 
           <section class="exams" aria-labelledby="exams-title">
             <h2 id="exams-title" class="visually-hidden">All exams</h2>
-            <ul id="exam-grid" class="exam-grid"></ul>
+            <ul id="exam-grid" class="exam-grid exam-grid--columns"></ul>
             <details id="done-section" class="done-list" hidden>
               <summary class="done-list__summary">Done (<span id="done-count">0</span>)</summary>
               <ul id="done-grid" class="exam-grid"></ul>
@@ -66,8 +68,8 @@
         </div>
 
         <div id="view-module" class="view" hidden></div>
-      </main>
-    </div>
+      </div>
+    </main>
     <dialog id="exam-detail" class="detail glass-card" aria-labelledby="detail-title">
       <div class="detail__inner">
         <form method="dialog">

@@ -1,26 +1,27 @@
 import type { ExamClock } from "../lib/countdown";
-import type { Exam } from "../lib/types";
 import { el } from "../lib/dom";
+import type { Exam } from "../lib/types";
 
-const UNITS = [
-  ["days", "days"],
+const SMALL_UNITS = [
   ["hours", "hrs"],
   ["minutes", "min"],
   ["seconds", "sec"],
 ] as const;
 
-/** Four labelled numbers: days · hours · minutes · seconds. Filled in by updateClock(). */
+/** Big serif day count, then hours · minutes · seconds. Filled in by updateClock(). */
 export function clockEl(examId: string, size: "sm" | "lg" = "sm"): HTMLSpanElement {
   const clock = el("span", `clock clock--${size}`);
   clock.dataset.clockFor = examId;
-  for (const [unit, label] of UNITS) {
+  const days = el("span", "clock__days");
+  days.append(el("span", "clock__days-num", "–"), el("span", "clock__days-label"));
+  const rest = el("span", "clock__rest");
+  for (const [unit, label] of SMALL_UNITS) {
     const box = el("span", "clock__unit");
     box.dataset.unit = unit;
-    const num = el("span", "clock__num", "–");
-    box.append(num, el("span", "clock__label", label));
-    clock.append(box);
+    box.append(el("span", "clock__num", "–"), el("span", "clock__label", label));
+    rest.append(box);
   }
-  clock.append(el("span", "clock__status"));
+  clock.append(days, rest);
   return clock;
 }
 
@@ -34,19 +35,26 @@ function setText(node: Element | null, text: string): void {
 export function updateClock(clock: HTMLElement, state: ExamClock, exam: Exam, showSeconds: boolean): void {
   clock.dataset.state = state.kind;
   clock.classList.toggle("clock--no-seconds", !showSeconds);
+  const daysNum = clock.querySelector(".clock__days-num");
+  const daysLabel = clock.querySelector(".clock__days-label");
   const num = (unit: string) => clock.querySelector(`[data-unit="${unit}"] .clock__num`);
-  const status = clock.querySelector(".clock__status");
 
   if (state.kind === "counting") {
     const r = state.remaining;
-    setText(num("days"), String(r.days));
+    setText(daysNum, String(r.days));
+    setText(daysLabel, r.days === 1 ? "day ahead" : "days ahead");
     setText(num("hours"), pad(r.hours));
     setText(num("minutes"), pad(r.minutes));
     setText(num("seconds"), pad(r.seconds));
-    setText(status, "");
     return;
   }
-  for (const [unit] of UNITS) setText(num(unit), "–");
-  // TBA/done are already said by the date line next to the clock; only exam day needs words here.
-  setText(status, state.kind === "today" ? ["Today", exam.time, exam.room].filter(Boolean).join(" · ") : "");
+  // The small units only make sense while counting; CSS hides them otherwise.
+  const words = {
+    today: ["Today", [exam.time, exam.room].filter(Boolean).join(" · ") || "Good luck"],
+    tba: ["–", "days ahead"],
+    done: ["Done", ""],
+  } as const;
+  const [big, small] = words[state.kind];
+  setText(daysNum, big);
+  setText(daysLabel, small);
 }

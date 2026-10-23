@@ -48,25 +48,40 @@ export function detailHeader(exam: Exam, exams: Exam[], now: number, level: "h1"
   return header;
 }
 
-/** Every detail field, "Not set yet" where empty, so it's clear what can be added. */
-export function detailFields(exam: Exam): HTMLDListElement {
+type Field = [label: string, value: string | Node | undefined];
+
+function fields(exam: Exam): Field[] {
+  return [
+    ["Date", exam.date ? whenText(exam.date, exam.time) : undefined],
+    ["Room", exam.room],
+    ["Duration", exam.durationMin ? `${exam.durationMin} min` : undefined],
+    ["Registration deadline", exam.registrationDeadline && formatDateDE(exam.registrationDeadline)],
+    ["Retake", retakeText(exam)],
+    ["What you can bring", aidsList(exam.allowedAids)],
+    ["About", exam.description],
+    ["Notes", exam.notes],
+  ];
+}
+
+/**
+ * Detail fields. Full: every field, "Not set yet" where empty (module page).
+ * Compact: only filled fields, then one line naming what's missing (pop-out).
+ */
+export function detailFields(exam: Exam, compact = false): DocumentFragment {
+  const all = fields(exam);
+  const shown = compact ? all.filter(([, v]) => v) : all;
   const dl = el("dl", "detail__fields");
-  dl.append(
-    field("Date", exam.date ? whenText(exam.date, exam.time) : undefined),
-    field("Room", exam.room),
-    field("Duration", exam.durationMin ? `${exam.durationMin} min` : undefined),
-    field("Registration deadline", exam.registrationDeadline && formatDateDE(exam.registrationDeadline)),
-    field("Retake", retakeText(exam)),
-    field("What you can bring", aidsList(exam.allowedAids)),
-    field("About", exam.description),
-    field("Notes", exam.notes),
-  );
-  return dl;
+  dl.append(...shown.map(([label, value]) => field(label, value)));
+  const out = document.createDocumentFragment();
+  if (shown.length) out.append(dl);
+  const missing = all.filter(([, v]) => !v).map(([label]) => label);
+  if (compact && missing.length) out.append(el("p", "detail__missing", `Not set yet: ${missing.join(", ")}`));
+  return out;
 }
 
 /** Fills the dialog for one exam. Safe to call again when data changes. */
 export function renderExamDetail(dialog: HTMLDialogElement, exam: Exam, exams: Exam[], now: number): void {
-  dialog.querySelector(".detail__body")!.replaceChildren(detailHeader(exam, exams, now, "h2", "detail-title"), detailFields(exam));
+  dialog.querySelector(".detail__body")!.replaceChildren(detailHeader(exam, exams, now, "h2", "detail-title"), detailFields(exam, true));
   dialog.querySelector<HTMLAnchorElement>("#detail-edit")!.href = editHref(exam);
 }
 

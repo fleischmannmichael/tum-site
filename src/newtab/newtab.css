@@ -8,12 +8,71 @@
 @import "../components/clock.css";
 @import "../styles/motion.css";
 
-/* ---- Hero ---- */
+body {
+  background: var(--color-page);
+}
+
+/* ---- Top bar: solid black row above the hero ---- */
+.topbar {
+  position: relative;
+  z-index: 2; /* the Modules panel opens over the band */
+  background: var(--color-page);
+  border-bottom: var(--hairline) solid var(--topbar-border);
+}
+
+.topbar__inner {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  max-width: var(--content-width-wide);
+  margin-inline: auto;
+  padding: var(--space-3) var(--gutter);
+}
+
+.gear {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--gutter);
+  display: grid;
+  place-items: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.gear:hover {
+  color: var(--color-text);
+}
+
+/* Narrow screens: no room to centre the nav with the gear floating beside it,
+   so both share one row. */
+@media (max-width: 520px) {
+  .topbar__inner {
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .gear {
+    position: static;
+    flex: none;
+  }
+}
+
+/* ---- Hero band: the picture sits in its own block, black above and below ---- */
+.band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: var(--band-min-height);
+  margin-bottom: var(--band-gap-below);
+}
+
 .hero {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--color-bg);
+  background: var(--color-page);
 }
 
 .hero__layer,
@@ -34,58 +93,13 @@
 .hero__layer--384 { background-image: url("/hero/hero-384.png"); }
 
 .hero__overlay {
-  background: var(--hero-overlay);
+  background: var(--band-fade), var(--hero-overlay);
 }
 
-/* ---- Layout ---- */
-.page {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--gutter);
-}
-
-.topbar {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.gear {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: grid;
-  place-items: center;
-  width: var(--tap-target);
-  height: var(--tap-target);
-  border-radius: var(--radius-pill);
-  color: var(--color-text-muted);
-  transition: color var(--dur-fast) var(--ease);
-}
-
-.gear:hover {
-  color: var(--color-text);
-}
-
-/* Narrow screens: no room to centre the nav with the gear floating beside it,
-   so both share one row. */
-@media (max-width: 520px) {
-  .topbar {
-    justify-content: space-between;
-    gap: var(--space-2);
-  }
-  .gear {
-    position: static;
-    flex: none;
-  }
-}
-
-main {
-  width: 100%;
+.band__content {
   max-width: var(--content-width-wide);
+  margin-inline: auto;
+  padding: var(--space-5) var(--gutter) var(--space-7);
 }
 
 .view:not([hidden]) {
@@ -101,7 +115,7 @@ main {
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
-  padding-block: clamp(var(--space-6), 9vh, 7rem) var(--space-2);
+  padding-block: clamp(var(--space-5), 6vh, 5rem) 0;
   text-align: center;
   text-shadow: var(--text-shadow-hero);
 }
@@ -144,13 +158,14 @@ main {
   gap: var(--space-4);
   width: 100%;
   max-width: var(--module-width);
-  margin-top: var(--space-7);
+  margin-top: var(--space-5);
   padding: var(--space-5);
   background: linear-gradient(var(--glass-fill), var(--glass-fill)), var(--glass-tint-strong);
 }
 
 .module-view .detail__title {
   font-size: var(--text-display);
+  margin-top: var(--space-2);
   outline: none;
 }
 
@@ -184,4 +199,17 @@ main {
 
 .module-view .detail__edit {
   justify-self: start;
+}
+
+/* Phones: less air above the headline so all exams fit on one screen. */
+@media (max-width: 479px) {
+  .band__content {
+    padding-top: var(--space-3);
+  }
+  .countdown {
+    padding-top: var(--space-2);
+  }
+  .view:not([hidden]) {
+    gap: var(--space-4);
+  }
 }

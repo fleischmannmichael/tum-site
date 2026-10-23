@@ -8,7 +8,7 @@ export { el };
 
 /** Exams this many days away (or fewer) get the warm accent. */
 export const SOON_DAYS = 7;
-const MODULE_COLORS = 5;
+const MODULE_COLORS = 6;
 
 export function relativeDays(days: number): string {
   if (days === 0) return "Today";
@@ -44,14 +44,15 @@ function tile(exam: Exam, kind: TileKind, allIds: string[], opts: { days?: numbe
   if (opts.days !== undefined && opts.days <= SOON_DAYS) btn.classList.add("exam-tile--soon");
   if (opts.next) btn.classList.add("exam-tile--next");
 
-  const top = el("span", "exam-tile__top");
-  top.append(dot(exam, allIds));
-  if (opts.next) top.append(el("span", "exam-tile__badge", "Next"));
-  if (kind === "done") top.append(el("span", "exam-tile__badge", "Done"));
+  // Dot, name and badge share one line so each tile stays compact.
+  const name = el("span", "exam-tile__name");
+  name.append(dot(exam, allIds), el("span", "exam-tile__module", exam.module));
+  if (opts.next) name.append(el("span", "exam-tile__badge", "Next"));
+  if (kind === "done") name.append(el("span", "exam-tile__badge", "Done"));
 
   const text = el("span", "exam-tile__text");
-  text.append(el("span", "exam-tile__module", exam.module), el("span", "exam-tile__when", whenText(exam.date, exam.time)));
-  btn.append(top, text);
+  text.append(name, el("span", "exam-tile__when", whenText(exam.date, exam.time)));
+  btn.append(text);
   if (kind !== "done") btn.append(clockEl(exam.id));
   btn.setAttribute("aria-haspopup", "dialog");
   li.append(btn);
