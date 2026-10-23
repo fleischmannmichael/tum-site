@@ -15,7 +15,7 @@ body {
 /* ---- Top bar: solid black row above the hero ---- */
 .topbar {
   position: relative;
-  z-index: 2; /* the Modules panel opens over the band */
+  z-index: 2; /* the Modules panel opens over the content */
   background: var(--color-page);
   border-bottom: var(--hairline) solid var(--topbar-border);
 }
@@ -59,17 +59,14 @@ body {
   }
 }
 
-/* ---- Hero band: the picture sits in its own block, black above and below ---- */
-.band {
+/* ---- Stage: the picture fills the screen behind the content, under the black top bar ---- */
+.stage {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  min-height: var(--band-min-height);
-  margin-bottom: var(--band-gap-below);
+  isolation: isolate; /* keeps the fixed picture (z-index -1) above the page's black background */
 }
 
 .hero {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   background: var(--color-page);
@@ -93,10 +90,10 @@ body {
 .hero__layer--384 { background-image: url("/hero/hero-384.png"); }
 
 .hero__overlay {
-  background: var(--band-fade), var(--hero-overlay);
+  background: var(--hero-overlay);
 }
 
-.band__content {
+.stage__content {
   max-width: var(--content-width-wide);
   margin-inline: auto;
   padding: var(--space-5) var(--gutter) var(--space-7);
@@ -203,7 +200,7 @@ body {
 
 /* Phones: less air above the headline so all exams fit on one screen. */
 @media (max-width: 479px) {
-  .band__content {
+  .stage__content {
     padding-top: var(--space-3);
   }
   .countdown {

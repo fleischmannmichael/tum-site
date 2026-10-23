@@ -44,16 +44,17 @@ function tile(exam: Exam, kind: TileKind, allIds: string[], opts: { days?: numbe
   if (opts.days !== undefined && opts.days <= SOON_DAYS) btn.classList.add("exam-tile--soon");
   if (opts.next) btn.classList.add("exam-tile--next");
 
-  // Dot, name and badge share one line so each tile stays compact.
-  const name = el("span", "exam-tile__name");
-  name.append(dot(exam, allIds), el("span", "exam-tile__module", exam.module));
-  if (opts.next) name.append(el("span", "exam-tile__badge", "Next"));
-  if (kind === "done") name.append(el("span", "exam-tile__badge", "Done"));
-
-  const text = el("span", "exam-tile__text");
-  text.append(name, el("span", "exam-tile__when", whenText(exam.date, exam.time)));
-  btn.append(text);
-  if (kind !== "done") btn.append(clockEl(exam.id));
+  // Square panel, top to bottom: dot + date (+ badge), module name, countdown.
+  const top = el("span", "exam-tile__top");
+  top.append(dot(exam, allIds), el("span", "exam-tile__when", whenText(exam.date, exam.time)));
+  if (kind === "done") top.append(el("span", "exam-tile__badge", "Done"));
+  btn.append(top, el("span", "exam-tile__module", exam.module));
+  if (kind !== "done") {
+    const clock = clockEl(exam.id);
+    // "Next" sits on the day-count row, where there's free space; the date line stays whole.
+    if (opts.next) clock.querySelector(".clock__days")!.append(el("span", "exam-tile__badge", "Next"));
+    btn.append(clock);
+  }
   btn.setAttribute("aria-haspopup", "dialog");
   li.append(btn);
   return li;

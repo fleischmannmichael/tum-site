@@ -2,22 +2,18 @@
   width: 100%;
 }
 
-/* Wide screens: two columns filled top to bottom (date order reads down
-   each column), three rows each for six exams. JS sets --rows. */
+/* Two columns of square panels, filled top to bottom (date order reads down
+   each column); JS sets --rows (three for six exams). */
 .exam-grid {
   display: grid;
+  grid-template-columns: repeat(2, var(--tile-size));
+  justify-content: center;
   gap: var(--space-3);
 }
 
-@media (min-width: 900px) {
-  .exam-grid--columns {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(var(--rows, 3), auto);
-    grid-auto-flow: column;
-  }
-  .done-list .exam-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.exam-grid--columns {
+  grid-template-rows: repeat(var(--rows, 3), var(--tile-size));
+  grid-auto-flow: column;
 }
 
 .dot {
@@ -28,15 +24,14 @@
   background: var(--dot, var(--module-1));
 }
 
-/* One row per exam: name and date on the left, the countdown on the right. */
 .exam-tile {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  column-gap: var(--space-4);
+  container-type: inline-size; /* lets the content shrink when the square is small */
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
-  padding: var(--space-4) var(--space-5);
+  aspect-ratio: 1;
+  padding: var(--tile-padding);
   border-radius: var(--radius-tile);
   text-align: start;
   cursor: pointer;
@@ -50,92 +45,122 @@
   border-color: var(--glass-border-strong);
 }
 
-.exam-tile__name {
+.exam-tile__top {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
 }
 
-.exam-tile__badge {
-  flex: none;
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--color-accent-soft);
-  color: var(--color-text);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-}
-
-.exam-tile__module {
-  min-width: 0;
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  line-height: var(--leading-snug);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .exam-tile__when {
-  font-size: var(--text-sm);
+  min-width: 0;
+  font-size: var(--text-xs);
   font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .exam-tile--tba .exam-tile__when {
   font-style: italic;
 }
 
-.exam-tile__text {
-  display: grid;
+.exam-tile__badge {
+  flex: none;
+  margin-left: auto;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+.exam-tile__module {
+  margin-top: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--tile-module);
+  line-height: var(--leading-snug);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The countdown sits at the bottom of the square. */
+.exam-tile .clock {
+  margin-top: auto;
+  justify-items: start;
   gap: var(--space-1);
-  min-width: 0;
+}
+
+.exam-tile .clock__days-num {
+  font-size: var(--tile-days);
+}
+
+.exam-tile .clock__days {
+  width: 100%;
+}
+
+.exam-tile .clock__days-label {
+  font-size: var(--text-xs);
+}
+
+.exam-tile .clock__rest {
+  width: 100%;
+}
+
+.exam-tile .clock__unit {
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: var(--space-1) 0;
+}
+
+.exam-tile .clock__num {
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.exam-tile .clock__label {
+  font-size: var(--text-2xs);
 }
 
 .exam-tile--next {
   border-color: var(--color-accent-border);
 }
 
+/* Small squares (phones): tighter type so everything still fits. */
+@container (max-width: 150px) {
+  .exam-tile__top {
+    gap: var(--space-1);
+  }
+  .exam-tile__module {
+    margin-top: var(--space-1);
+    font-size: var(--text-base);
+  }
+  .exam-tile .clock__days-num {
+    font-size: var(--tile-days-sm);
+  }
+  .exam-tile .clock__unit {
+    padding-block: 2px;
+  }
+  .exam-tile .clock__num {
+    font-size: var(--text-xs);
+  }
+}
+
+/* ≤ 7 days: warm numbers and a halo on the dot. */
 .is-soon .dot {
   box-shadow: 0 0 0 3px var(--color-warm-soft);
 }
 
-/* ≤ 7 days: warm numbers and a halo on the dot. */
 .is-soon .clock__days-num,
 .is-soon .clock__num {
   color: var(--color-warm);
-}
-
-/* Phones: tighter padding; the "Next" badge is dropped (the accent border still marks it). */
-@media (max-width: 479px) {
-  .exam-tile {
-    column-gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-  }
-  .exam-tile__badge {
-    display: none;
-  }
-  .exam-tile__module {
-    font-size: var(--text-base);
-  }
-  .exam-tile__when {
-    font-size: var(--text-xs);
-  }
-  .exam-tile .clock__days-num {
-    font-size: var(--clock-days-phone);
-  }
-  .exam-tile .clock__days-label {
-    font-size: var(--text-xs);
-  }
-  .exam-tile .clock__unit {
-    padding: 2px var(--space-1);
-  }
-  .exam-tile .clock__num {
-    font-size: var(--text-sm);
-  }
 }
 
 .exam-tile--done {

@@ -42,7 +42,9 @@ export function updateClock(clock: HTMLElement, state: ExamClock, exam: Exam, sh
   if (state.kind === "counting") {
     const r = state.remaining;
     setText(daysNum, String(r.days));
-    setText(daysLabel, r.days === 1 ? "day ahead" : "days ahead");
+    // Small panels have no room for "ahead"; the module page does.
+    const ahead = clock.classList.contains("clock--lg") ? " ahead" : "";
+    setText(daysLabel, (r.days === 1 ? "day" : "days") + ahead);
     setText(num("hours"), pad(r.hours));
     setText(num("minutes"), pad(r.minutes));
     setText(num("seconds"), pad(r.seconds));
@@ -51,7 +53,7 @@ export function updateClock(clock: HTMLElement, state: ExamClock, exam: Exam, sh
   // The small units only make sense while counting; CSS hides them otherwise.
   const words = {
     today: ["Today", [exam.time, exam.room].filter(Boolean).join(" · ") || "Good luck"],
-    tba: ["–", "days ahead"],
+    tba: ["–", "days"],
     done: ["Done", ""],
   } as const;
   const [big, small] = words[state.kind];
