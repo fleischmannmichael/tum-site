@@ -36,8 +36,16 @@ npm run build:ext  # → dist-ext/
 ```
 
 `chrome://extensions` → Developer mode → Load unpacked → select `dist-ext`.
+
+The extension adds what a website can't: it replaces the new tab page, shows
+the days to the next exam as a **toolbar badge** (`113d`, `1d`, `!` on exam
+day; warm when ≤ 7 days), and its **toolbar popup** lists the next 3 exams.
+The badge is kept current by `src/extension/background.ts` (on start, on data
+changes, every 30 min and right after midnight).
+
 The manifest lives in `extension/manifest.json`; its version comes from
-`package.json`.
+`package.json`, and the PNG icons are rendered from `public/favicon.svg` at
+build time.
 
 ## Hero pictures
 
