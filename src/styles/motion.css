@@ -83,3 +83,14 @@ html:not(.is-entered) .done-list {
     animation: none !important;
   }
 }
+
+/* A new personal message in the headline: fades and un-blurs in. */
+.countdown__title.is-new {
+  animation: headline-in var(--dur-enter) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .countdown__title.is-new {
+    animation: none;
+  }
+}

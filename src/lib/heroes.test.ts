@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { zonedToInstant } from "./countdown";
-import { pickHero, seasonOf, type Hero, heroFolder, VARIANT_MEDIA } from "./heroes";
+import { chooseHero, heroFolder, pickHero, seasonOf, themeOf, VARIANT_MEDIA, type Hero } from "./heroes";
 
 const at = (y: number, m: number, d: number, h = 12) => zonedToInstant({ y, m, d, h });
 const hero = (name: string, season: Hero["season"]): Hero => ({ name, season, path: `/hero/${name}/` });
@@ -48,5 +48,37 @@ describe("heroFolder", () => {
     expect(heroFolder({ ...hero, variants: [...hero.variants] }, () => false)).toBe("hero/fall-hero/");
     expect(heroFolder({ ...hero, variants: ["wide"] }, shape(VARIANT_MEDIA.mobile))).toBe("hero/fall-hero/");
     expect(heroFolder({ name: "x", season: "any", path: "hero/x/" }, () => true)).toBe("hero/x/");
+  });
+});
+
+describe("themes, live pictures and a picked picture", () => {
+  const all: Hero[] = [
+    hero("fall-hero", "autumn"),
+    { ...hero("halloween-hero", "autumn"), theme: "halloween" },
+    hero("winter-hero", "winter"),
+    { ...hero("christmas-hero", "winter"), theme: "christmas" },
+    hero("non-theme-hero", "any"),
+    { ...hero("hero-video", "any"), video: true },
+  ];
+
+  it("shows holiday pictures only in their window", () => {
+    expect(themeOf(at(2026, 10, 23))).toBeUndefined();
+    expect(pickHero(all, at(2026, 10, 23))?.name).toBe("fall-hero");
+    expect(pickHero(all, at(2026, 10, 24, 0))?.name).toBe("halloween-hero");
+    expect(pickHero(all, at(2026, 10, 31, 23))?.name).toBe("halloween-hero");
+    expect(pickHero(all, at(2026, 11, 1))?.name).toBe("fall-hero");
+    expect(pickHero(all, at(2026, 12, 24))?.name).toBe("christmas-hero");
+    expect(pickHero(all, at(2026, 12, 27))?.name).toBe("winter-hero");
+  });
+
+  it("never picks a live picture or an out-of-window theme by itself", () => {
+    expect(pickHero(all, at(2027, 7, 1))?.name).toBe("non-theme-hero");
+    expect(pickHero([all[1]!, all[5]!], at(2027, 7, 1))?.name).toBe("halloween-hero"); // nothing else left
+  });
+
+  it("uses the picked picture, or today's when the pick is gone", () => {
+    expect(chooseHero(all, "hero-video", at(2026, 10, 23))?.name).toBe("hero-video");
+    expect(chooseHero(all, "deleted-one", at(2026, 10, 23))?.name).toBe("fall-hero");
+    expect(chooseHero(all, undefined, at(2026, 12, 24))?.name).toBe("christmas-hero");
   });
 });

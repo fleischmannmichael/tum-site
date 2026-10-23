@@ -18,6 +18,7 @@ export const LIMITS = {
   url: 500,
   durationMin: 600,
   headline: 80,
+  name: 40,
   checkItem: 200,
   checkItems: 300, // per module
 };
@@ -189,11 +190,13 @@ export function parseBackup(text: string): { ok: true; value: StoredData } | { o
   const settings: Settings = { showSeconds: s.showSeconds === true };
   if (typeof s.accent === "string" && COLOR.test(s.accent)) settings.accent = s.accent.toLowerCase();
   const h = isObj(s.headline) ? s.headline : undefined;
-  if (h && ["count", "custom", "motivation", "quotes"].includes(h.mode as string)) {
+  if (h && ["count", "custom", "motivation", "quotes", "personal"].includes(h.mode as string)) {
     settings.headline = { mode: h.mode as NonNullable<Settings["headline"]>["mode"] };
     if (typeof h.custom === "string" && h.custom.trim()) settings.headline.custom = h.custom.trim().slice(0, LIMITS.headline);
   }
   if (s.language === "en" || s.language === "de") settings.language = s.language;
+  if (typeof s.hero === "string" && s.hero.trim()) settings.hero = s.hero.trim().slice(0, 80);
+  if (typeof s.name === "string" && s.name.trim()) settings.name = s.name.trim().slice(0, LIMITS.name);
   const f = isObj(s.focus) ? s.focus : undefined;
   if (f) {
     const [focusMin, shortMin, longMin, rounds] = (["focusMin", "shortMin", "longMin", "rounds"] as const).map((k) => checkLength(k, f[k]));

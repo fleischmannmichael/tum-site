@@ -2,7 +2,7 @@ import type { Summary } from "./countdown";
 import { getLang, t, tn } from "./i18n";
 import type { Settings } from "./types";
 
-export type HeadlineMode = "count" | "custom" | "motivation" | "quotes";
+export type HeadlineMode = "count" | "custom" | "motivation" | "quotes" | "personal";
 /** `de`: the German version, shown when the interface is German. */
 export type Quote = { text: string; author: string; source: string; de: { text: string; source: string } };
 
@@ -120,9 +120,11 @@ export function countText(ahead: number): string {
  * The headline for this visit. `pick` (0 ≤ pick < 1) chooses among messages or
  * quotes; pass one random number per page load so it doesn't change every tick.
  */
-export function chooseHeadline(settings: Settings, summary: Summary, pick: number): Headline {
+export function chooseHeadline(settings: Settings, summary: Summary, pick: number, personal?: { lines: string[]; index: number }): Headline {
   const ahead = summary.upcoming.length + summary.tba.length;
   const mode = settings.headline?.mode ?? "count";
+  // Personal: the page cycles through lines made for you (lib/personal.ts).
+  if (mode === "personal" && personal?.lines.length) return { mode, title: personal.lines[personal.index % personal.lines.length]! };
   if (mode === "custom" && settings.headline?.custom?.trim()) return { mode, title: settings.headline.custom.trim() };
   if (mode === "quotes") {
     const q = QUOTES[Math.floor(pick * QUOTES.length)]!;

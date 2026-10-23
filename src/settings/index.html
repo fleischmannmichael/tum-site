@@ -35,6 +35,11 @@
 
           <section class="panel glass-card" aria-labelledby="display-title">
             <h2 id="display-title" class="panel__title" data-i18n="settings.display">Countdown display</h2>
+            <div class="field name-field">
+              <label for="your-name" data-i18n="settings.name">Your name</label>
+              <input id="your-name" type="text" maxlength="40" autocomplete="given-name" data-i18n-placeholder="settings.namePlaceholder" />
+              <p class="field__hint" data-i18n="settings.nameHint"></p>
+            </div>
             <label class="check">
               <input type="checkbox" id="show-seconds" />
               <span data-i18n="settings.showSeconds">Show seconds in the countdown</span>
@@ -42,6 +47,7 @@
             <fieldset class="fieldset headline-choice">
               <legend data-i18n="settings.headline">Headline on the countdown</legend>
               <label class="check"><input type="radio" name="headline" value="count" /><span data-i18n="settings.headline.count">Exams ahead</span></label>
+              <label class="check"><input type="radio" name="headline" value="personal" /><span data-i18n="settings.headline.personal">Personal messages</span></label>
               <label class="check"><input type="radio" name="headline" value="motivation" /><span data-i18n="settings.headline.motivation">Motivational messages</span></label>
               <label class="check"><input type="radio" name="headline" value="quotes" /><span data-i18n="settings.headline.quotes">Quotes</span></label>
               <label class="check"><input type="radio" name="headline" value="custom" /><span data-i18n="settings.headline.custom">My own message</span></label>
@@ -96,6 +102,12 @@
               <label class="chip"><input type="radio" name="language" value="en" /><span lang="en">English</span></label>
               <label class="chip"><input type="radio" name="language" value="de" /><span lang="de">Deutsch</span></label>
             </div>
+          </section>
+
+          <section class="panel glass-card" aria-labelledby="background-title">
+            <h2 id="background-title" class="panel__title" data-i18n="settings.background">Background picture</h2>
+            <p class="panel__text" data-i18n="settings.backgroundText"></p>
+            <div id="gallery" class="gallery"></div>
           </section>
 
           <section class="panel glass-card" aria-labelledby="appearance-title">

@@ -3,12 +3,62 @@ import type { Hero } from "./heroes";
 
 export const HEROES: Hero[] = [
   {
+    "name": "christmas-hero",
+    "label": "Christmas",
+    "season": "winter",
+    "theme": "christmas",
+    "path": "hero/christmas-hero/",
+    "variants": [
+      "mobile",
+      "wide"
+    ]
+  },
+  {
+    "name": "halloween-hero",
+    "label": "Halloween",
+    "season": "autumn",
+    "theme": "halloween",
+    "path": "hero/halloween-hero/",
+    "variants": [
+      "mobile",
+      "wide"
+    ]
+  },
+  {
     "name": "fall-hero",
+    "label": "Fall",
     "season": "autumn",
     "path": "hero/fall-hero/",
     "variants": [
       "mobile",
       "wide"
     ]
+  },
+  {
+    "name": "non-theme-hero",
+    "label": "Non Theme",
+    "season": "any",
+    "path": "hero/non-theme-hero/",
+    "variants": [
+      "mobile",
+      "wide"
+    ]
+  },
+  {
+    "name": "winter-hero",
+    "label": "Winter",
+    "season": "winter",
+    "path": "hero/winter-hero/",
+    "variants": [
+      "mobile",
+      "wide"
+    ]
+  },
+  {
+    "name": "hero-video",
+    "label": "Live",
+    "season": "any",
+    "path": "hero/hero-video/",
+    "video": true
   }
 ];

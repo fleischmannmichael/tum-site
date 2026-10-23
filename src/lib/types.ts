@@ -36,9 +36,13 @@ export type Settings = {
   showSeconds: boolean;
   /** Interface language; exam data stays as entered. */
   language?: Language;
+  /** Background picture picked in Settings (a hero name); unset = automatic by season and holiday. */
+  hero?: string;
+  /** Your first name, for greetings and personal messages. */
+  name?: string;
   accent?: string;
   /** What the big headline says: exam count (default), own text, motivation or quotes. */
-  headline?: { mode: "count" | "custom" | "motivation" | "quotes"; custom?: string };
+  headline?: { mode: "count" | "custom" | "motivation" | "quotes" | "personal"; custom?: string };
   /** Pomodoro lengths in minutes, rounds before the long break, chime on/off. */
   focus?: { focusMin: number; shortMin: number; longMin: number; rounds: number; sound: boolean };
 };

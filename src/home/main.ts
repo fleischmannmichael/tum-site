@@ -5,12 +5,13 @@ import { renderModulesOverview } from "../components/modules-overview";
 import { applyRoute, currentRoute, initModulesMenu, renderModulesMenu } from "../components/nav";
 import { generalGroups } from "../components/resource-grid";
 import { applyAccent } from "../lib/accent";
-import { applyI18n, cachedLang, setLang } from "../lib/i18n";
-import { HEROES } from "../lib/heroes.generated";
-import { VARIANT_MEDIA, heroFolder, pickHero } from "../lib/heroes";
+import { applyI18n, cachedLang, getLang, setLang } from "../lib/i18n";
+import { personalLines } from "../lib/personal";
+import { cachedHeroChoice } from "../lib/heroes";
 import { summarize } from "../lib/countdown";
 import { describeSaveError, loadAll, onDataChanged, save } from "../lib/storage";
 import type { StoredData } from "../lib/types";
+import { applyHero } from "./hero";
 import { renderExams, renderHeadline, updateClocks } from "./render";
 
 let data: StoredData;
@@ -18,6 +19,16 @@ let timer: number | undefined;
 let structureKey = "";
 /** One random number per visit: picks the motivational line or quote. */
 const headlinePick = Math.random();
+/** Which personal line is showing; moves on every few seconds (see below). */
+let personalIndex = 0;
+const PERSONAL_EVERY = 12_000;
+
+function personal(now: number): { lines: string[]; index: number } | undefined {
+  if (data.settings.headline?.mode !== "personal") return undefined;
+  const summary = summarize(data.exams, now);
+  const lines = personalLines({ name: data.settings.name, lang: getLang(), now, summary, focusLog: data.focusLog, checklists: data.checklists });
+  return { lines, index: personalIndex };
+}
 
 const detail = initExamDetail(
   document.getElementById("exam-detail") as HTMLDialogElement,
@@ -36,10 +47,11 @@ function saveChecklist(module: string, items: StoredData["checklists"][string]):
 
 /** Rebuilds what depends on data or route (not on the clock). */
 function renderStructure(now: number): void {
+  applyHero(data.settings.hero);
   setLang(data.settings.language);
   applyI18n();
   const summary = summarize(data.exams, now);
-  renderHeadline(summary, data.settings, headlinePick);
+  renderHeadline(summary, data.settings, headlinePick, personal(now));
   renderModulesOverview(document.getElementById("modules-overview")!, data, now);
   renderExams(summary, data.exams);
   renderModulesMenu(data.exams);
@@ -63,7 +75,7 @@ function tick(force = false): void {
 
   // Exams move between upcoming/done at midnight, so the summary is part of the key.
   const summary = summarize(data.exams, now);
-  const key = JSON.stringify([data.exams, data.resources, data.settings.headline, data.settings.focus, data.settings.language, data.focusLog, data.checklists, location.hash, summary.upcoming.map((u) => u.days), summary.done.map((e) => e.id)]);
+  const key = JSON.stringify([data.exams, data.resources, data.settings.headline, data.settings.name, data.settings.focus, data.settings.language, data.settings.hero, data.focusLog, data.checklists, location.hash, summary.upcoming.map((u) => u.days), summary.done.map((e) => e.id), Math.floor(now / 3_600_000)]); // hourly: greetings change
   if (force || key !== structureKey) {
     structureKey = key;
     renderStructure(now);
@@ -75,27 +87,11 @@ function tick(force = false): void {
 }
 
 /** Today's picture (by season), set before anything waits on storage so it paints first. */
-/** Uses the phone or 21:9 crop when there is one and the window has that shape. */
-function applyHero(): void {
-  const hero = pickHero(HEROES, Date.now());
-  if (!hero) return;
-  const folder = heroFolder(hero, (query) => matchMedia(query).matches);
-  const style = document.querySelector<HTMLElement>(".hero")!.style;
-  for (const [layer, file] of [["48", "48.png"], ["96", "96.png"], ["full", "full.webp"]])
-    // Relative to the page, so it works at the site root, under /tum-site/ on GitHub Pages, and in the extension.
-    style.setProperty(`--hero-${layer}`, `url("${new URL(folder + file, document.baseURI).href}")`);
-  // The default focus point keeps the tower in frame on the main picture; a crop made for the screen is centred.
-  if (folder === hero.path) style.removeProperty("--hero-position");
-  else style.setProperty("--hero-position", "50% 50%");
-}
-
-// Rotating a phone or resizing the window can switch crops.
-for (const query of Object.values(VARIANT_MEDIA)) matchMedia(query).addEventListener("change", applyHero);
 
 // The language used last time, so the page doesn't flash English before settings load.
 setLang(cachedLang());
 applyI18n();
-applyHero();
+applyHero(cachedHeroChoice());
 initModulesMenu();
 // The entrance (motion.css) plays once; after it, re-rendered parts appear without animating.
 window.setTimeout(() => document.documentElement.classList.add("is-entered"), 1000);
@@ -121,6 +117,17 @@ onDataChanged((fresh) => {
   data = fresh;
   tick();
 });
+
+// Personal messages take turns while the countdown is on screen (not when the
+// tab is hidden, and not for reduced motion, where text shouldn't keep moving).
+window.setInterval(() => {
+  if (document.hidden || (location.hash.length > 1 && location.hash !== "#countdown") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const now = Date.now();
+  const p = personal(now);
+  if (!p || p.lines.length < 2) return;
+  personalIndex = (personalIndex + 1) % p.lines.length;
+  renderHeadline(summarize(data.exams, now), data.settings, headlinePick, { ...p, index: personalIndex });
+}, PERSONAL_EVERY);
 
 // Background tabs get their timers throttled; catch up when shown again.
 document.addEventListener("visibilitychange", () => {

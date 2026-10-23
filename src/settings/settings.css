@@ -437,3 +437,216 @@ input[type="color"] {
 .headline-custom input:disabled {
   opacity: 0.5;
 }
+
+/* ---- Background gallery ---- */
+.gallery {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.gallery__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 14rem);
+  align-items: start;
+  gap: var(--space-4);
+}
+
+@media (max-width: 40rem) {
+  .gallery__top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The preview frame takes the shape of the screen it previews. */
+.gallery__frame {
+  position: relative;
+  justify-self: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: var(--hairline) solid var(--glass-border-strong);
+  border-radius: var(--radius-row);
+  background: var(--color-page);
+  --hero-position: 30% 55%;
+}
+
+.gallery__frame[data-crop="mobile"] {
+  width: auto;
+  height: 22rem;
+  aspect-ratio: 9 / 19.5;
+}
+
+.gallery__frame[data-crop="wide"] {
+  aspect-ratio: 21 / 9;
+}
+
+.gallery__media,
+.gallery__overlay,
+.gallery__img {
+  position: absolute;
+  inset: 0;
+}
+
+.gallery__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--hero-position);
+}
+
+.gallery__overlay {
+  background: var(--hero-overlay);
+}
+
+/* A hint of the page on top: the nav pill and the headline. */
+.gallery__mock {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 8%;
+  padding-top: 3%;
+  pointer-events: none;
+}
+
+.gallery__mock-nav {
+  width: 26%;
+  min-width: 4rem;
+  height: 0.75rem;
+  border-radius: var(--radius-pill);
+  background: rgb(var(--color-bg-rgb) / 0.7);
+}
+
+.gallery__mock-title {
+  font-family: var(--font-display);
+  font-size: clamp(0.875rem, 3vw, 1.5rem);
+  text-shadow: var(--text-shadow-hero);
+}
+
+.gallery__side {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.gallery__caption {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+}
+
+.gallery__status,
+.gallery__note {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.gallery__note:empty {
+  display: none;
+}
+
+.gallery__use {
+  justify-self: start;
+}
+
+.gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(8.5rem, 40%), 1fr));
+  gap: var(--space-3);
+}
+
+.gallery__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  min-width: 0;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: var(--hairline) solid var(--glass-border);
+  border-radius: var(--radius-row);
+  background: var(--control-fill);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+.gallery__card:hover {
+  border-color: var(--glass-border-strong);
+  transform: translateY(var(--lift));
+}
+
+.gallery__card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gallery__card.is-previewing {
+  border-color: var(--color-accent-border);
+  background: var(--color-accent-soft);
+}
+
+.gallery__card:has(input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.gallery__thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: calc(var(--radius-row) - var(--space-2));
+  background: var(--color-page) center / cover no-repeat;
+}
+
+.gallery__badge {
+  position: absolute;
+  top: var(--space-1);
+  left: var(--space-1);
+  display: grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-pill);
+  background: rgb(var(--color-bg-rgb) / 0.8);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.gallery__text {
+  display: grid;
+  gap: 2px;
+}
+
+.gallery__name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.gallery__when {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.gallery__in-use {
+  justify-self: start;
+  margin-top: var(--space-1);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight-caps);
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery__card:hover {
+    transform: none;
+  }
+}
+
+.name-field {
+  max-width: 24rem;
+}

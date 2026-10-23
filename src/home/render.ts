@@ -3,22 +3,33 @@ import { doneTiles, examTiles, SOON_DAYS } from "../components/exam-grid";
 import { examClock, type Summary } from "../lib/countdown";
 import { chooseHeadline, countText } from "../lib/headlines";
 import { t } from "../lib/i18n";
+import { greeting } from "../lib/personal";
 import type { Exam, Settings } from "../lib/types";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 /**
- * Headline: the exam count, your own message, a motivational line or a quote
- * (Settings → Display). `pick` is one random number per page load.
+ * Headline: the exam count, your own message, a motivational line, a quote or
+ * personal messages (Settings → Countdown). `pick` is one random number per
+ * page load; `personal` the lines for you and which one is showing.
  */
-export function renderHeadline(summary: Summary, settings: Settings, pick: number): void {
-  const headline = chooseHeadline(settings, summary, pick);
+export function renderHeadline(summary: Summary, settings: Settings, pick: number, personal?: { lines: string[]; index: number }): void {
+  const headline = chooseHeadline(settings, summary, pick, personal);
   const title = $("headline");
-  title.textContent = headline.title;
+  if (title.textContent !== headline.title) {
+    title.textContent = headline.title;
+    // A new personal line fades in (motion.css); the first render has the page entrance instead.
+    title.classList.remove("is-new");
+    if (headline.mode === "personal" && document.documentElement.classList.contains("is-entered")) {
+      void title.offsetWidth; // restart the animation
+      title.classList.add("is-new");
+    }
+  }
   title.classList.toggle("countdown__title--long", headline.title.length > 32);
-  // When the headline isn't the count, the count moves into the small line above it.
+  // The small line above: a greeting when you've set your name, and the count when the headline isn't it.
   const ahead = summary.upcoming.length + summary.tba.length;
-  $("eyebrow").textContent = headline.mode === "count" ? t("cd.eyebrow") : `${t("cd.eyebrow")} · ${countText(ahead)}`;
+  const first = settings.name?.trim() ? greeting({ name: settings.name, lang: settings.language ?? "en", now: Date.now() }) : t("cd.eyebrow");
+  $("eyebrow").textContent = headline.mode === "count" ? first : `${first} · ${countText(ahead)}`;
 
   const detail = $("detail");
   if (summary.upcoming.length === 0 && summary.tba.length > 0) {

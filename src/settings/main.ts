@@ -3,12 +3,14 @@ import { renderTimerOptions } from "../components/timer-options";
 import { applyAccent } from "../lib/accent";
 import { FOCUS_DEFAULTS, formatMinutes, toCsv, type FocusSettings } from "../lib/focus";
 import { formatDateDE } from "../lib/format";
+import { cacheHeroChoice } from "../lib/heroes";
 import { applyI18n, cachedLang, setLang, t, type Key } from "../lib/i18n";
 import { describeSaveError, loadAll, onDataChanged, save, saveAll } from "../lib/storage";
 import { storageArea } from "../lib/storage-area";
 import type { Exam, Language, Resource, StoredData } from "../lib/types";
 import { parseBackup, toBackup, validateExam, validateResource, type FormInput } from "../lib/validate";
 import { fillForm, readForm, showErrors } from "./form";
+import { initGallery } from "./gallery";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const DEFAULT_CATEGORIES = ["Portals", "Lecture notes", "Exercises", "Past exams"];
@@ -176,7 +178,14 @@ function renderFocus(): void {
   ($("log-export") as HTMLButtonElement).disabled = ($("log-clear") as HTMLButtonElement).disabled = !data.focusLog.length;
 }
 
+const gallery = initGallery($("gallery"), (choice, label) => {
+  cacheHeroChoice(choice); // the countdown paints the right picture before its data loads
+  const { hero: _drop, ...rest } = data.settings;
+  void persist("settings", choice ? { ...rest, hero: choice } : rest, t("settings.bg.saved", { name: label }));
+});
+
 function renderGeneral(): void {
+  gallery.render(data.settings.hero);
   const lang = data.settings.language ?? "en";
   for (const radio of Array.from(document.querySelectorAll<HTMLInputElement>('input[name="language"]'))) radio.checked = radio.value === lang;
   const accent = $("accent") as HTMLInputElement;
@@ -191,6 +200,8 @@ function renderDisplay(): void {
   for (const radio of Array.from(document.querySelectorAll<HTMLInputElement>('input[name="headline"]'))) radio.checked = radio.value === mode;
   const custom = $("headline-custom") as HTMLInputElement;
   if (document.activeElement !== custom) custom.value = data.settings.headline?.custom ?? "";
+  const name = $("your-name") as HTMLInputElement;
+  if (document.activeElement !== name) name.value = data.settings.name ?? "";
   custom.disabled = mode !== "custom";
 }
 
@@ -320,6 +331,11 @@ for (const radio of Array.from(document.querySelectorAll<HTMLInputElement>('inpu
   });
 }
 $("headline-custom").addEventListener("change", () => saveHeadline("custom"));
+$("your-name").addEventListener("change", (e) => {
+  const name = (e.target as HTMLInputElement).value.trim().slice(0, 40);
+  const { name: _drop, ...rest } = data.settings;
+  void persist("settings", name ? { ...rest, name } : rest, name ? t("settings.nameSaved", { name }) : t("settings.nameCleared"));
+});
 
 // ---- Focus ------------------------------------------------------------------------------
 $("log-export").addEventListener("click", () => {

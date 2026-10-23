@@ -71,22 +71,36 @@ build time.
 
 ## Hero pictures
 
-Pictures live in `assets/heroes/`, named after their season:
-`spring.jpg`, `summer-lake.png`, `autumn.jpg` (or `fall-….jpg`),
-`winter-snow.webp`, or `any-….jpg` for all year. Then:
+Pictures live in `assets/heroes/`, named after their season or theme:
+`fall_hero.jpg`, `winter_hero_16x9.jpg`, `spring-lake.png`, `non-theme-hero-16x9.jpg`
+(all year). Two themes show by themselves: `Halloween_…` in the last week of
+October and `Christmas_…` from 1 to 26 December. Otherwise the site follows the
+meteorological seasons (Munich), rotating daily if there are several, then
+falls back to all-year pictures.
 
-```sh
-npm run assets   # → public/hero/<name>/ (full.webp + 48/96 px load-in versions)
-```
+Each picture can come in three shapes, same name plus a suffix: `_16x9` (main,
+suffix optional), `_mobile` for phones and portrait windows, `_21x9` for
+ultrawide screens. The site picks the one that fits the window (also on rotate
+or resize).
 
-The site shows a picture for the current season (Munich, meteorological
-seasons: Mar–May, Jun–Aug, Sep–Nov, Dec–Feb), rotating daily if there are
-several, and falls back to `any-…` pictures, then to whatever exists.
+A video (`.mp4`) becomes a **live** background: muted, looping, sound removed
+and shrunk by ffmpeg, with its first frame as the still. It's never picked
+automatically.
 
-Optional crops for other screens use the same name plus a suffix:
-`fall_hero_mobile.jpg` for phones / portrait windows and `fall_hero_21x9.jpg`
-for ultrawide (21:9) screens. The site switches to the crop that fits the
-window (also on rotate/resize) and otherwise shows the main picture.
+**Settings → General → Background picture** is a gallery of all of them:
+preview any picture in its desktop, phone or 21:9 shape, then "Use this
+picture" — or go back to Automatic.
 
-Uploading a picture to `assets/heroes/` on github.com is enough: the deploy
-runs `npm run assets` itself.
+Uploading to `assets/heroes/` on github.com is enough: the deploy runs
+`npm run assets` (`→ public/hero/<name>/`: full.webp, 48/96 px load-in
+versions, a gallery thumbnail, and the crops in mobile/ and wide/).
+
+## Personal messages
+
+Settings → Countdown: put in **your name** and the line above the headline
+greets you ("Good evening, Michael"). Pick **Personal messages** for the
+headline and it talks to you about what's going on — exam day, tomorrow's
+exam, how many days are left, what you studied today, your streak, how much of
+the next module's checklist is ticked off, the weekday, a late night — taking
+turns every few seconds with a soft fade. The Focus timer cheers you on by name
+too. English and German.

@@ -116,8 +116,8 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
     set(next);
     if (finished === "focus") {
       void setLog(logSession(getData().focusLog, state.module, s.focusMin, Date.now())).catch((m: string) => announceText(m));
-      announce(next.phase === "long" ? "focus.doneLong" : "focus.doneShort");
-    } else announce("focus.breakOver");
+      announce(next.phase === "long" ? "focus.doneLong" : "focus.doneShort", named());
+    } else announce("focus.breakOver", named());
     if (s.sound) chime(finished === "focus" ? "focus-done" : "break-done");
   }
 
@@ -125,6 +125,9 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
     said = { key, vars };
     $("focus-status").textContent = t(key, vars);
   }
+  /** ", Michael" for messages that address you, once your name is set. */
+  const named = () => ({ n: getData().settings.name?.trim() ? `, ${getData().settings.name!.trim()}` : "" });
+
   /** Errors come as finished sentences. */
   function announceText(text: string): void {
     said = { text };
@@ -242,7 +245,7 @@ export function initFocus(getData: () => StoredData, update: (patch: Partial<Sto
     unlockAudio();
     said = null;
     set(state.status === "running" ? pause(state, Date.now()) : start(state, Date.now()));
-    if (state.status === "running") announce(state.phase === "focus" ? "focus.started" : "focus.breakStarted");
+    if (state.status === "running") announce(state.phase === "focus" ? "focus.started" : "focus.breakStarted", named());
   }
   const doReset = () => {
     said = null;
