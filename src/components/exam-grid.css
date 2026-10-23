@@ -21,6 +21,12 @@
   }
 }
 
+@media (min-width: 480px) and (max-width: 639px) {
+  .exam-grid {
+    --cols: 2;
+  }
+}
+
 @media (min-width: 1100px) {
   .exam-grid {
     --cols: 5;
@@ -92,29 +98,75 @@
   font-style: italic;
 }
 
-.exam-tile__days {
-  margin-top: auto;
-  padding-top: var(--space-2);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  font-variant-numeric: tabular-nums;
-  color: var(--color-text-muted);
+.exam-tile__text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
 }
 
-.exam-tile--upcoming .exam-tile__days {
-  color: var(--color-text);
+.exam-tile .clock {
+  margin-top: auto;
+  padding-top: var(--space-3);
 }
 
 .exam-tile--next {
   border-color: var(--color-accent-border);
 }
 
-.exam-tile--soon .exam-tile__days {
+/* ≤ 7 days: warm numbers and a halo on the dot. */
+.is-soon .clock__num {
   color: var(--color-warm);
 }
 
-.exam-tile--soon .dot {
+.is-soon .dot {
   box-shadow: 0 0 0 3px var(--color-warm-soft);
+}
+
+/* Phones: each exam becomes one compact row (dot · name/date · clock) so all five fit on screen.
+   The "Next" badge is dropped there; the accent border still marks the next exam. */
+@media (max-width: 479px) {
+  .exam-grid {
+    --cols: 1;
+  }
+  .exam-tile {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) var(--clock-compact-width);
+    align-items: center;
+    column-gap: var(--space-3);
+    min-height: 0;
+    padding: var(--space-3);
+  }
+  .exam-tile__badge {
+    display: none;
+  }
+  .exam-tile__module {
+    font-size: var(--text-base);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .exam-tile__when {
+    font-size: var(--text-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .exam-tile .clock {
+    margin: 0;
+    padding: 0;
+    gap: 2px;
+  }
+  .exam-tile .clock__unit {
+    padding-block: var(--space-1);
+  }
+  .exam-tile .clock__num {
+    font-size: var(--text-base);
+  }
+  .exam-tile .clock__label {
+    margin-top: 0;
+    font-size: var(--text-2xs);
+    letter-spacing: var(--tracking-tight-caps);
+  }
 }
 
 .exam-tile--done {

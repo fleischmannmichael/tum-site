@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   daysUntil,
+  examClock,
   durationUntil,
   examDayEnd,
   examStart,
@@ -166,5 +167,30 @@ describe("summarize", () => {
 describe("format", () => {
   it("shows German dates", () => {
     expect(formatDateDE("2026-10-23")).toBe("23.10.2026");
+  });
+});
+
+describe("examClock", () => {
+  const e = (over: Partial<Exam>): Exam => ({ id: "a", module: "A", date: "2027-02-10", time: "09:00", ...over });
+
+  it("counts down to the start with days, hours, minutes, seconds", () => {
+    const c = examClock(e({}), berlin("2027-02-08 07:30:15"));
+    expect(c).toMatchObject({ kind: "counting", days: 2, remaining: { days: 2, hours: 1, minutes: 29, seconds: 45 } });
+  });
+
+  it("is 'today' from the start time until midnight, then done", () => {
+    expect(examClock(e({}), berlin("2027-02-10 08:59:59")).kind).toBe("counting");
+    expect(examClock(e({}), berlin("2027-02-10 09:00")).kind).toBe("today");
+    expect(examClock(e({}), berlin("2027-02-10 23:59:59")).kind).toBe("today");
+    expect(examClock(e({}), berlin("2027-02-11 00:00")).kind).toBe("done");
+  });
+
+  it("without a time, exam day itself is 'today'", () => {
+    expect(examClock(e({ time: undefined }), berlin("2027-02-10 00:00")).kind).toBe("today");
+  });
+
+  it("handles TBA and manually done exams", () => {
+    expect(examClock(e({ date: null }), berlin("2027-02-08 00:00")).kind).toBe("tba");
+    expect(examClock(e({ done: true }), berlin("2027-02-08 00:00")).kind).toBe("done");
   });
 });

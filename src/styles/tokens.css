@@ -52,6 +52,7 @@
   --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
   --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   /* Fluid scale: min at 360px viewport, max at 1440px. */
+  --text-2xs: 0.625rem; /* clock unit labels on phones only */
   --text-xs: clamp(0.75rem, 0.73rem + 0.09vw, 0.8125rem);
   --text-sm: clamp(0.8125rem, 0.79rem + 0.09vw, 0.875rem);
   --text-base: clamp(0.9375rem, 0.91rem + 0.12vw, 1rem);
@@ -64,6 +65,7 @@
   --leading-body: 1.5;
   --tracking-display: -0.02em;
   --tracking-caps: 0.12em;
+  --tracking-tight-caps: 0.06em;
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
@@ -78,12 +80,17 @@
   --space-7: 3rem;
   --space-8: 4rem;
   --gutter: clamp(1rem, 0.6rem + 1.8vw, 2rem);
-  --content-width: 36rem;
   --content-width-wide: 72rem;
   --tile-min-height: 8.5rem;
   --detail-width: 34rem;
   --detail-label-width: 10rem;
   --form-width: 40rem;
+  --module-width: 48rem;
+  --clock-compact-width: 10.5rem;
+  --clock-num-sm: clamp(1.125rem, 0.9rem + 0.5vw, 1.5rem);
+  --clock-num-lg: clamp(1.75rem, 1.2rem + 2.2vw, 3rem);
+  --clock-fill: rgb(255 255 255 / 0.05);
+  --radius-clock: 10px;
   --options-width: 48rem;
   --control-radius: 10px;
   --control-fill: rgb(255 255 255 / 0.05);

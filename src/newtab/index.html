@@ -21,16 +21,23 @@
 
     <div class="page">
       <header class="topbar">
-        <nav aria-label="Sections">
+        <nav aria-label="Sections" class="nav">
           <ul class="pill-nav glass-card">
             <li><a class="pill-nav__item" href="#countdown" aria-current="page">Countdown</a></li>
-            <li><a class="pill-nav__item" href="#resources">Resources</a></li>
             <li>
-              <a class="pill-nav__item" aria-disabled="true" title="Coming later">
+              <button type="button" class="pill-nav__item" id="modules-toggle" aria-expanded="false" aria-controls="modules-menu">
+                Modules<svg class="pill-nav__chevron" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </button>
+            </li>
+            <li>
+              <a class="pill-nav__item" aria-disabled="true" title="Pomodoro timer, coming later">
                 Focus<span class="pill-nav__soon">Soon</span>
               </a>
             </li>
           </ul>
+          <div id="modules-menu" class="modules-menu glass-card" hidden>
+            <ul id="modules-menu-list" class="modules-menu__list"></ul>
+          </div>
         </nav>
         <a class="gear glass-card" href="../options/index.html" aria-label="Settings" title="Settings">
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -43,9 +50,8 @@
       <main>
         <div id="view-countdown" class="view">
           <section class="countdown" aria-labelledby="headline">
-            <p id="eyebrow" class="countdown__eyebrow"></p>
+            <p class="countdown__eyebrow">Exam countdown</p>
             <h1 id="headline" class="countdown__title">&nbsp;</h1>
-            <p id="days" class="countdown__days"></p>
             <p id="detail" class="countdown__detail"></p>
           </section>
 
@@ -59,12 +65,7 @@
           </section>
         </div>
 
-        <div id="view-resources" class="view" hidden>
-          <section class="glass-card placeholder" aria-labelledby="resources-title">
-            <h1 id="resources-title" class="placeholder__title">Resources</h1>
-            <p class="placeholder__text">Study links arrive in M5.</p>
-          </section>
-        </div>
+        <div id="view-module" class="view" hidden></div>
       </main>
     </div>
     <dialog id="exam-detail" class="detail glass-card" aria-labelledby="detail-title">

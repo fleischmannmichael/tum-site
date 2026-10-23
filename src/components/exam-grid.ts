@@ -1,17 +1,14 @@
 import type { Summary, UpcomingExam } from "../lib/countdown";
+import { el } from "../lib/dom";
 import { formatDateDE, formatDays } from "../lib/format";
 import type { Exam } from "../lib/types";
+import { clockEl } from "./clock";
+
+export { el };
 
 /** Exams this many days away (or fewer) get the warm accent. */
 export const SOON_DAYS = 7;
 const MODULE_COLORS = 5;
-
-export function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text) node.textContent = text;
-  return node;
-}
 
 export function relativeDays(days: number): string {
   if (days === 0) return "Today";
@@ -52,13 +49,10 @@ function tile(exam: Exam, kind: TileKind, allIds: string[], opts: { days?: numbe
   if (opts.next) top.append(el("span", "exam-tile__badge", "Next"));
   if (kind === "done") top.append(el("span", "exam-tile__badge", "Done"));
 
-  const days = kind === "upcoming" ? relativeDays(opts.days!) : kind === "tba" ? "—" : "";
-  btn.append(
-    top,
-    el("span", "exam-tile__module", exam.module),
-    el("span", "exam-tile__when", whenText(exam.date, exam.time)),
-  );
-  if (days) btn.append(el("span", "exam-tile__days", days));
+  const text = el("span", "exam-tile__text");
+  text.append(el("span", "exam-tile__module", exam.module), el("span", "exam-tile__when", whenText(exam.date, exam.time)));
+  btn.append(top, text);
+  if (kind !== "done") btn.append(clockEl(exam.id));
   btn.setAttribute("aria-haspopup", "dialog");
   li.append(btn);
   return li;

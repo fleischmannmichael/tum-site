@@ -1,46 +1,20 @@
+import { updateClock } from "../components/clock";
 import { doneTiles, examTiles, SOON_DAYS } from "../components/exam-grid";
-import type { Summary } from "../lib/countdown";
-import { formatDateDE, formatDuration } from "../lib/format";
+import { examClock, type Summary } from "../lib/countdown";
 import type { Exam } from "../lib/types";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
-function setDays(days: number): void {
-  const num = document.createElement("span");
-  num.className = "countdown__number";
-  num.textContent = String(days);
-  $("days").replaceChildren(num, document.createTextNode(days === 1 ? " day" : " days"));
-}
-
-/** Headline; cheap enough to run every tick. */
-export function renderHeadline(summary: Summary, showSeconds: boolean): void {
-  const { state } = summary;
-  const eyebrow = $("eyebrow");
-  const headline = $("headline");
-  const days = $("days");
+/** Headline: how many exams are left; a nudge to settings while no dates exist. */
+export function renderHeadline(summary: Summary): void {
+  const ahead = summary.upcoming.length + summary.tba.length;
+  $("headline").textContent =
+    ahead === 0 ? "All exams done" : `${ahead} ${ahead === 1 ? "exam" : "exams"} ahead`;
   const detail = $("detail");
-
-  headline.closest(".countdown")!.classList.toggle("countdown--soon", state.kind !== "none" && state.next.days <= SOON_DAYS);
-
-  if (state.kind === "none") {
-    eyebrow.textContent = "Next exam";
-    headline.textContent = "No exam dates yet";
-    days.textContent = "";
-    const link = Object.assign(document.createElement("a"), { href: "../options/index.html", textContent: "Add them in settings" });
-    detail.replaceChildren(link);
-  } else if (state.kind === "today") {
-    const { exam } = state.next;
-    eyebrow.textContent = "Exam day";
-    headline.textContent = exam.module;
-    days.textContent = ["Today", exam.time, exam.room].filter(Boolean).join(" · ");
-    detail.textContent = "";
-  } else {
-    const { exam } = state.next;
-    eyebrow.textContent = `Next exam · ${formatDateDE(exam.date)}${exam.time ? ` · ${exam.time}` : ""}`;
-    headline.textContent = exam.module;
-    setDays(state.next.days);
-    detail.textContent = `Starts in ${formatDuration(state.remaining, showSeconds)}`;
-  }
+  if (summary.upcoming.length === 0 && summary.tba.length > 0) {
+    const link = Object.assign(document.createElement("a"), { href: "../options/index.html", textContent: "Add the dates in settings" });
+    detail.replaceChildren(document.createTextNode("No dates yet · "), link);
+  } else detail.replaceChildren();
 }
 
 /** Tiles; only re-rendered when their content changes, so focus isn't lost every tick. */
@@ -54,4 +28,16 @@ export function renderExams(summary: Summary, exams: Exam[]): void {
   $("done-grid").replaceChildren(...doneTiles(summary, ids));
 
   if (focusedId) document.querySelector<HTMLElement>(`[data-exam-id="${CSS.escape(focusedId)}"]`)?.focus();
+}
+
+/** Every clock on the page (tiles and module page), updated in place. */
+export function updateClocks(exams: Exam[], now: number, showSeconds: boolean): void {
+  const byId = new Map(exams.map((e) => [e.id, e]));
+  for (const clock of Array.from(document.querySelectorAll<HTMLElement>("[data-clock-for]"))) {
+    const exam = byId.get(clock.dataset.clockFor!);
+    if (!exam) continue;
+    const state = examClock(exam, now);
+    updateClock(clock, state, exam, showSeconds);
+    clock.closest(".exam-tile, .module-view")?.classList.toggle("is-soon", state.kind === "counting" && state.days <= SOON_DAYS);
+  }
 }

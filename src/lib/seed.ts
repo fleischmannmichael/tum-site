@@ -10,5 +10,5 @@ export const SEED: StoredData = {
     { id: "computertechnik", module: "Computertechnik", date: null },
   ],
   resources: [],
-  settings: { showSeconds: false },
+  settings: { showSeconds: true },
 };

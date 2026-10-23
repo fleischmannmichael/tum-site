@@ -177,3 +177,20 @@ export function summarize(exams: Exam[], now: number, tz = TIMEZONE): Summary {
 
   return { state, upcoming, tba, done };
 }
+
+/** What one exam's clock shows right now. */
+export type ExamClock =
+  | { kind: "tba" }
+  | { kind: "done" }
+  /** Exam day, start time has passed (or no time set and it's that day). */
+  | { kind: "today" }
+  | { kind: "counting"; remaining: Duration; days: number };
+
+export function examClock(exam: Exam, now: number, tz = TIMEZONE): ExamClock {
+  if (exam.done) return { kind: "done" };
+  if (!isDated(exam)) return { kind: "tba" };
+  if (now >= examDayEnd(exam.date, tz)) return { kind: "done" };
+  const start = examStart(exam, tz);
+  if (now >= start) return { kind: "today" };
+  return { kind: "counting", remaining: durationUntil(now, start, tz), days: daysUntil(exam.date, now, tz) };
+}

@@ -14,7 +14,7 @@ function field(label: string, value: string | Node | undefined): HTMLDivElement 
   return row;
 }
 
-function status(exam: Exam, now: number): string {
+export function statusText(exam: Exam, now: number): string {
   if (exam.done || (exam.date && now >= examDayEnd(exam.date))) return "Done";
   if (!exam.date) return "Date TBA";
   const days = daysUntil(exam.date, now);
@@ -34,18 +34,22 @@ function aidsList(aids: string[] | undefined): HTMLUListElement | undefined {
   return ul;
 }
 
-/** Fills the dialog for one exam. Safe to call again when data changes. */
-export function renderExamDetail(dialog: HTMLDialogElement, exam: Exam, exams: Exam[], now: number): void {
-  const ids = exams.map((e) => e.id);
-  const body = dialog.querySelector<HTMLElement>(".detail__body")!;
+export const editHref = (exam: Exam) => `../options/index.html#exam=${encodeURIComponent(exam.id)}`;
 
+/** Eyebrow (dot + status) and title; shared by the dialog and the module page. */
+export function detailHeader(exam: Exam, exams: Exam[], now: number, level: "h1" | "h2", titleId: string): HTMLElement {
   const header = el("header", "detail__header");
   const eyebrow = el("p", "detail__eyebrow");
-  eyebrow.append(dot(exam, ids), document.createTextNode(status(exam, now)));
-  const title = el("h2", "detail__title", exam.module);
-  title.id = "detail-title";
+  eyebrow.append(dot(exam, exams.map((e) => e.id)), document.createTextNode(statusText(exam, now)));
+  const title = el(level, "detail__title", exam.module);
+  title.id = titleId;
+  title.tabIndex = -1; // focus target when navigating to a module page
   header.append(eyebrow, title);
+  return header;
+}
 
+/** Every detail field, "Not set yet" where empty, so it's clear what can be added. */
+export function detailFields(exam: Exam): HTMLDListElement {
   const dl = el("dl", "detail__fields");
   dl.append(
     field("Date", exam.date ? whenText(exam.date, exam.time) : undefined),
@@ -57,9 +61,13 @@ export function renderExamDetail(dialog: HTMLDialogElement, exam: Exam, exams: E
     field("About", exam.description),
     field("Notes", exam.notes),
   );
+  return dl;
+}
 
-  body.replaceChildren(header, dl);
-  dialog.querySelector<HTMLAnchorElement>("#detail-edit")!.href = `../options/index.html#exam=${encodeURIComponent(exam.id)}`;
+/** Fills the dialog for one exam. Safe to call again when data changes. */
+export function renderExamDetail(dialog: HTMLDialogElement, exam: Exam, exams: Exam[], now: number): void {
+  dialog.querySelector(".detail__body")!.replaceChildren(detailHeader(exam, exams, now, "h2", "detail-title"), detailFields(exam));
+  dialog.querySelector<HTMLAnchorElement>("#detail-edit")!.href = editHref(exam);
 }
 
 /** Opens the detail dialog when a tile is clicked; closes on backdrop click. */
