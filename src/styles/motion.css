@@ -48,7 +48,8 @@
 html:not(.is-entered) .countdown,
 html:not(.is-entered) .module-view,
 html:not(.is-entered) .overview,
-html:not(.is-entered) .general {
+html:not(.is-entered) .general,
+html:not(.is-entered) .focus {
   animation: headline-in var(--dur-enter) var(--ease) var(--enter-headline) backwards;
 }
 

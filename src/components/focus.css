@@ -1,0 +1,373 @@
+/* ---- Focus: Pomodoro as the Thiersch tower clock ---- */
+.focus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding-top: clamp(var(--space-4), 4vh, var(--space-7));
+  text-align: center;
+}
+
+.focus > .countdown__eyebrow,
+.focus__title {
+  text-shadow: var(--text-shadow-hero);
+}
+
+.focus__title:focus {
+  outline: none;
+}
+
+.focus__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, var(--focus-side-width));
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--content-width-wide);
+  margin-top: var(--space-5);
+  text-align: start;
+}
+
+@media (max-width: 52rem) {
+  .focus__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- The timer card ---- */
+.focus__timer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+}
+
+.focus__phase {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--tower-gold);
+}
+
+.is-break .focus__phase {
+  color: var(--color-accent);
+}
+
+.dial {
+  width: var(--dial-size);
+  height: var(--dial-size);
+  filter: drop-shadow(0 18px 40px rgb(0 0 0 / 0.5));
+}
+
+.dial__rim {
+  fill: none;
+  stroke: var(--tower-gold);
+  stroke-width: 3;
+}
+
+.dial__face {
+  fill: var(--tower-face);
+  stroke: var(--tower-face-edge);
+  stroke-width: 4;
+}
+
+.dial__track {
+  fill: none;
+  stroke: var(--tower-gold-soft);
+  stroke-width: 6;
+}
+
+.dial__progress {
+  fill: none;
+  stroke: var(--tower-gold);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 0 100;
+  transition: stroke var(--dur-base) var(--ease);
+}
+
+.is-break .dial__progress {
+  stroke: var(--color-accent);
+}
+
+.dial__tick {
+  stroke: var(--tower-gold);
+  stroke-width: 0.8;
+  opacity: 0.55;
+}
+
+.dial__tick--major {
+  stroke-width: 2;
+  opacity: 1;
+}
+
+.dial__numeral {
+  fill: var(--tower-gold);
+  font-family: var(--font-display);
+  font-size: 15px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.dial__hand {
+  stroke: var(--tower-gold);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.is-break .dial__hand {
+  stroke: var(--color-accent);
+}
+
+.dial__cap {
+  fill: var(--tower-gold);
+}
+
+/* A slow breath on the gold while a phase runs. */
+.is-running .dial__rim {
+  animation: dial-glow 4s ease-in-out infinite;
+}
+
+@keyframes dial-glow {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.focus__time {
+  font-family: var(--font-display);
+  font-size: var(--focus-time);
+  line-height: var(--leading-tight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-display);
+}
+
+.focus__status {
+  min-height: calc(var(--text-sm) * var(--leading-body));
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.focus__controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.focus__btn {
+  min-width: 5.5rem;
+  min-height: var(--tap-target);
+  padding-inline: var(--space-4);
+  border: var(--hairline) solid var(--glass-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--control-fill);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+
+.focus__btn:hover:not(:disabled) {
+  background: var(--glass-fill-hover);
+  border-color: var(--glass-border-strong);
+}
+
+.focus__btn:disabled {
+  color: var(--color-text-faint);
+  cursor: default;
+}
+
+.focus__btn--primary {
+  border-color: var(--tower-gold);
+  background: var(--tower-gold);
+  color: var(--tower-face-edge);
+}
+
+.focus__btn--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--tower-gold) 85%, white);
+  border-color: var(--tower-gold);
+}
+
+.is-break .focus__btn--primary {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.focus__btn:focus-visible,
+.chip:has(input:focus-visible),
+.focus .check:has(input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.focus__keys {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+@media (hover: none) {
+  .focus__keys {
+    display: none;
+  }
+}
+
+/* ---- Side cards ---- */
+.focus__side {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.focus__card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+}
+
+.focus__card-title {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.25rem;
+  padding-inline: var(--space-3);
+  border: var(--hairline) solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--control-fill);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+
+.chip:hover {
+  border-color: var(--glass-border-strong);
+}
+
+.chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip:has(input:checked) {
+  border-color: var(--tower-gold);
+  background: var(--tower-gold-soft);
+}
+
+.focus .check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.focus .check input {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--tower-gold);
+}
+
+/* ---- Today: the tower facade, one window per finished session ---- */
+.tower {
+  justify-self: center;
+  width: 7.5rem;
+}
+
+.tower__roof {
+  height: 1.75rem;
+  margin-inline: 1.25rem;
+  background: var(--tower-stone);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.tower__windows {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: 4px 4px 0 0;
+  background: var(--tower-stone);
+}
+
+.tower__window {
+  height: 1.25rem;
+  border-radius: 0.6rem 0.6rem 2px 2px; /* arched */
+  background: var(--tower-window);
+  transition: background var(--dur-slow) var(--ease), box-shadow var(--dur-slow) var(--ease);
+}
+
+.tower__window.is-lit {
+  background: var(--tower-glow);
+  box-shadow: 0 0 12px rgb(255 207 122 / 0.55);
+}
+
+.focus__today {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* ---- This week ---- */
+.week {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.week__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.week__minutes {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.week__bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--bar) calc(var(--share) * 100%), var(--clock-fill) 0);
+}
+
+.week__empty {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-running .dial__rim {
+    animation: none;
+  }
+  .tower__window {
+    transition: none;
+  }
+}

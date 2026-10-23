@@ -2,12 +2,13 @@ import { el } from "../lib/dom";
 import type { Exam } from "../lib/types";
 import { dot } from "./exam-grid";
 
-/** Views are driven by the URL hash: "" / #countdown, #modules, #module=<exam id>, or #general. */
-export type Route = { view: "countdown" } | { view: "modules" } | { view: "module"; id: string } | { view: "general" };
+/** Views are driven by the URL hash: "" / #countdown, #modules, #module=<exam id>, #general or #focus. */
+export type Route = { view: "countdown" } | { view: "modules" } | { view: "module"; id: string } | { view: "general" } | { view: "focus" };
 
 export function currentRoute(): Route {
   if (location.hash === "#general") return { view: "general" };
   if (location.hash === "#modules") return { view: "modules" };
+  if (location.hash === "#focus") return { view: "focus" };
   const id = new URLSearchParams(location.hash.slice(1)).get("module");
   return id ? { view: "module", id } : { view: "countdown" };
 }
@@ -50,12 +51,15 @@ export function renderModulesMenu(exams: Exam[]): void {
 
 /** Shows the view for the current hash and marks the matching nav item. */
 export function applyRoute(route: Route): void {
-  for (const view of ["countdown", "modules", "module", "general"] as const) $(`view-${view}`).hidden = route.view !== view;
+  for (const view of ["countdown", "modules", "module", "general", "focus"] as const) $(`view-${view}`).hidden = route.view !== view;
+  const focusLink = $("focus-link");
+  if (route.view === "focus") focusLink.setAttribute("aria-current", "page");
+  else focusLink.removeAttribute("aria-current");
   const countdownLink = document.querySelector('.pill-nav a[href="#countdown"]')!;
   if (route.view === "countdown") countdownLink.setAttribute("aria-current", "page");
   else countdownLink.removeAttribute("aria-current");
   const modulesLink = $("modules-link");
-  modulesLink.classList.toggle("is-active", route.view !== "countdown");
+  modulesLink.classList.toggle("is-active", ["modules", "module", "general"].includes(route.view));
   if (route.view === "modules") modulesLink.setAttribute("aria-current", "page");
   else modulesLink.removeAttribute("aria-current");
   for (const a of Array.from(document.querySelectorAll<HTMLAnchorElement>(".modules-menu__item"))) {

@@ -81,6 +81,23 @@ describe("backup", () => {
     expect(parseBackup(bad)).toEqual({ ok: false, error: "Exam 1 (A): Enter a real date." });
   });
 
+  it("keeps the study log and focus settings, skipping broken log entries", () => {
+    const data = {
+      ...SEED,
+      settings: { showSeconds: true, focus: { focusMin: 50, shortMin: 10, longMin: 30, rounds: 4, sound: false } },
+      focusLog: [{ day: "2026-11-02", module: "Analysis 1", minutes: 50 }, { day: "2026-11-02", module: null, minutes: 25 }],
+    };
+    expect(parseBackup(toBackup(data))).toEqual({ ok: true, value: data });
+    const broken = JSON.parse(toBackup(data));
+    broken.focusLog.push({ day: "2026-02-30", module: null, minutes: 25 }, { day: "2026-11-02", module: 3, minutes: 25 }, "x");
+    expect(parseBackup(JSON.stringify(broken))).toMatchObject({ ok: true, value: { focusLog: data.focusLog } });
+  });
+
+  it("reads backups from before the study log existed", () => {
+    const old = JSON.stringify({ format: "exam-tab-backup", version: 1, exams: [], resources: [], settings: { showSeconds: true } });
+    expect(parseBackup(old)).toMatchObject({ ok: true, value: { focusLog: [] } });
+  });
+
   it("gives duplicate ids fresh ones", () => {
     const file = JSON.stringify({ format: "exam-tab-backup", version: 1, exams: [{ id: "x", module: "A" }, { id: "x", module: "B" }], resources: [] });
     const r = parseBackup(file);

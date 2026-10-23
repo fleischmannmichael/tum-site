@@ -34,24 +34,9 @@
   background: var(--glass-fill-hover);
 }
 
-.pill-nav__item[aria-disabled="true"] {
-  color: var(--color-text-faint);
-  cursor: not-allowed;
-}
-
-.pill-nav__soon {
-  margin-inline-start: var(--space-2);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-}
-
 @media (max-width: 400px) {
   .pill-nav__item {
     padding-inline: var(--space-3);
-  }
-  .pill-nav__soon {
-    display: none;
   }
 }
 

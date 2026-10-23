@@ -1,4 +1,4 @@
-import type { Exam, Resource, Settings, StoredData } from "./types";
+import type { Exam, FocusEntry, Resource, Settings, StoredData } from "./types";
 
 /** Raw form values: everything is a string (checkboxes "on"/""), as read from FormData. */
 export type FormInput = Record<string, string | undefined>;
@@ -189,5 +189,15 @@ export function parseBackup(text: string): { ok: true; value: StoredData } | { o
     settings.headline = { mode: h.mode as NonNullable<Settings["headline"]>["mode"] };
     if (typeof h.custom === "string" && h.custom.trim()) settings.headline.custom = h.custom.trim().slice(0, LIMITS.headline);
   }
-  return { ok: true, value: { exams, resources, settings } };
+  const f = isObj(s.focus) ? s.focus : undefined;
+  const mins = (v: unknown, max: number) => typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= max;
+  if (f && mins(f.focusMin, 180) && mins(f.shortMin, 60) && mins(f.longMin, 120) && mins(f.rounds, 12))
+    settings.focus = { focusMin: f.focusMin as number, shortMin: f.shortMin as number, longMin: f.longMin as number, rounds: f.rounds as number, sound: f.sound !== false };
+
+  // The study log is optional (older backups don't have it); invalid entries are skipped.
+  const focusLog = (Array.isArray(raw.focusLog) ? raw.focusLog : []).filter(
+    (e): e is FocusEntry =>
+      isObj(e) && typeof e.day === "string" && isValidDate(e.day) && (e.module === null || typeof e.module === "string") && mins(e.minutes, 180),
+  );
+  return { ok: true, value: { exams, resources, settings, focusLog } };
 }

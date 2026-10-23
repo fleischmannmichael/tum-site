@@ -35,10 +35,16 @@ export type Settings = {
   accent?: string;
   /** What the big headline says: exam count (default), own text, motivation or quotes. */
   headline?: { mode: "count" | "custom" | "motivation" | "quotes"; custom?: string };
+  /** Pomodoro lengths in minutes, rounds before the long break, chime on/off. */
+  focus?: { focusMin: number; shortMin: number; longMin: number; rounds: number; sound: boolean };
 };
+
+/** One finished focus session; `day` is the Munich date it ended on. */
+export type FocusEntry = { day: string; module: string | null; minutes: number };
 
 export type StoredData = {
   exams: Exam[];
   resources: Resource[];
   settings: Settings;
+  focusLog: FocusEntry[];
 };

@@ -7,6 +7,7 @@
 @import "../components/exam-detail.css";
 @import "../components/clock.css";
 @import "../components/resource-grid.css";
+@import "../components/focus.css";
 @import "../styles/motion.css";
 
 body {

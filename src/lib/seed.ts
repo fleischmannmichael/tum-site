@@ -80,6 +80,7 @@ export const SEED: StoredData = {
     { id: "tum-live", title: "TUM-Live", url: "https://live.rbg.tum.de/", category: "Portals" },
   ],
   settings: { showSeconds: true },
+  focusLog: [],
 };
 
 /** Exam ids of the first, date-less seed (before the real dates were known). */

@@ -24,11 +24,7 @@
                 <ul id="modules-menu-list" class="modules-menu__list glass-card" aria-label="Modules"></ul>
               </div>
             </li>
-            <li>
-              <a class="pill-nav__item" aria-disabled="true" title="Pomodoro timer, coming later">
-                Focus<span class="pill-nav__soon">Soon</span>
-              </a>
-            </li>
+            <li><a class="pill-nav__item" id="focus-link" href="#focus">Focus</a></li>
           </ul>
         </nav>
         <a class="gear glass-card" href="settings/index.html" aria-label="Settings" title="Settings">
@@ -72,6 +68,71 @@
           <section class="overview" aria-labelledby="modules-title">
             <h1 id="modules-title" class="countdown__title overview__title" tabindex="-1">Modules</h1>
             <ul id="modules-overview" class="overview__grid"></ul>
+          </section>
+        </div>
+
+        <div id="view-focus" class="view" hidden>
+          <section class="focus" aria-labelledby="focus-title">
+            <p class="countdown__eyebrow">Pomodoro · light up the tower</p>
+            <h1 id="focus-title" class="countdown__title focus__title" tabindex="-1">Focus</h1>
+
+            <div class="focus__grid">
+              <div class="focus__timer glass-card">
+                <p id="focus-phase" class="focus__phase">Focus · round 1 of 4</p>
+                <!-- The Thiersch tower clock: gold arc fills as the phase runs, the hand sweeps. -->
+                <svg class="dial" viewBox="0 0 200 200" aria-hidden="true">
+                  <circle class="dial__rim" cx="100" cy="100" r="97" />
+                  <circle class="dial__face" cx="100" cy="100" r="91" />
+                  <circle class="dial__track" cx="100" cy="100" r="78" />
+                  <circle class="dial__progress" id="dial-progress" cx="100" cy="100" r="78" pathLength="100" transform="rotate(-90 100 100)" />
+                  <g id="dial-ticks"></g>
+                  <text class="dial__numeral" x="100" y="38">XII</text>
+                  <text class="dial__numeral" x="164" y="104">III</text>
+                  <text class="dial__numeral" x="100" y="170">VI</text>
+                  <text class="dial__numeral" x="36" y="104">IX</text>
+                  <line class="dial__hand" id="dial-hand" x1="100" y1="108" x2="100" y2="40" />
+                  <circle class="dial__cap" cx="100" cy="100" r="5" />
+                </svg>
+                <p class="focus__time"><span id="focus-time">25:00</span></p>
+                <p id="focus-status" class="focus__status" role="status" aria-live="polite"></p>
+                <div class="focus__controls">
+                  <button type="button" class="focus__btn focus__btn--primary" id="focus-start">Start</button>
+                  <button type="button" class="focus__btn" id="focus-reset">Reset</button>
+                  <button type="button" class="focus__btn" id="focus-skip">Skip</button>
+                </div>
+                <p class="focus__keys">Space start/pause · R reset · S skip</p>
+              </div>
+
+              <div class="focus__side">
+                <section class="glass-card focus__card" aria-labelledby="studying-title">
+                  <h2 id="studying-title" class="focus__card-title">Studying</h2>
+                  <div id="focus-modules" class="chips" role="radiogroup" aria-labelledby="studying-title"></div>
+                </section>
+
+                <section class="glass-card focus__card" aria-labelledby="today-title">
+                  <h2 id="today-title" class="focus__card-title">Today</h2>
+                  <div class="tower" aria-hidden="true">
+                    <div class="tower__roof"></div>
+                    <div id="tower-windows" class="tower__windows"></div>
+                  </div>
+                  <p id="today-text" class="focus__today"></p>
+                </section>
+
+                <section class="glass-card focus__card" aria-labelledby="week-title">
+                  <h2 id="week-title" class="focus__card-title">This week</h2>
+                  <ul id="week-list" class="week"></ul>
+                </section>
+
+                <section class="glass-card focus__card focus__options" aria-labelledby="timer-title">
+                  <h2 id="timer-title" class="focus__card-title">Timer</h2>
+                  <div class="chips" role="radiogroup" aria-labelledby="timer-title">
+                    <label class="chip"><input type="radio" name="focus-preset" value="classic" /><span>Classic 25 · 5</span></label>
+                    <label class="chip"><input type="radio" name="focus-preset" value="deep" /><span>Deep work 50 · 10</span></label>
+                  </div>
+                  <label class="check"><input type="checkbox" id="focus-sound" /><span>Tower bell when a phase ends</span></label>
+                </section>
+              </div>
+            </div>
           </section>
         </div>
 

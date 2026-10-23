@@ -3,7 +3,7 @@ import { storageArea } from "./storage-area";
 import type { StoredData } from "./types";
 
 type Key = keyof StoredData;
-const KEYS: Key[] = ["exams", "resources", "settings"];
+const KEYS: Key[] = ["exams", "resources", "settings", "focusLog"];
 
 /*
  * chrome.storage.sync (extension) allows only 8 KB per item, which a few exams
@@ -38,6 +38,7 @@ export async function loadAll(): Promise<StoredData> {
     exams: upgradeSeed((decode(all, "exams") as StoredData["exams"] | undefined) ?? SEED.exams),
     resources: (decode(all, "resources") as StoredData["resources"] | undefined) ?? SEED.resources,
     settings: { ...SEED.settings, ...(decode(all, "settings") as Partial<StoredData["settings"]> | undefined) },
+    focusLog: (decode(all, "focusLog") as StoredData["focusLog"] | undefined) ?? [],
   };
 }
 

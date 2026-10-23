@@ -1,4 +1,5 @@
 import { initExamDetail } from "../components/exam-detail";
+import { initFocus } from "../components/focus-view";
 import { renderModuleView } from "../components/module-view";
 import { renderModulesOverview } from "../components/modules-overview";
 import { applyRoute, currentRoute, initModulesMenu, renderModulesMenu } from "../components/nav";
@@ -35,6 +36,7 @@ function renderStructure(now: number): void {
   }
   applyRoute(route);
   detail.refresh();
+  focus.render();
 }
 
 /** Every second (or minute): update the clocks; rebuild only when something structural changed. */
@@ -45,7 +47,7 @@ function tick(force = false): void {
 
   // Exams move between upcoming/done at midnight, so the summary is part of the key.
   const summary = summarize(data.exams, now);
-  const key = JSON.stringify([data.exams, data.resources, data.settings.headline, location.hash, summary.upcoming.map((u) => u.days), summary.done.map((e) => e.id)]);
+  const key = JSON.stringify([data.exams, data.resources, data.settings.headline, data.settings.focus, data.focusLog, location.hash, summary.upcoming.map((u) => u.days), summary.done.map((e) => e.id)]);
   if (force || key !== structureKey) {
     structureKey = key;
     renderStructure(now);
@@ -71,13 +73,20 @@ initModulesMenu();
 // The entrance (motion.css) plays once; after it, re-rendered parts appear without animating.
 window.setTimeout(() => document.documentElement.classList.add("is-entered"), 1000);
 data = await loadAll();
+const focus = initFocus(
+  () => data,
+  (patch) => {
+    data = { ...data, ...patch };
+    tick();
+  },
+);
 tick(true);
 performance.mark("countdown-rendered"); // first full render, for load-time checks
 
 window.addEventListener("hashchange", () => {
   tick();
   const view = currentRoute().view;
-  const titles = { module: "module-title", modules: "modules-title", general: "general-title" } as const;
+  const titles = { module: "module-title", modules: "modules-title", general: "general-title", focus: "focus-title" } as const;
   if (view !== "countdown") document.getElementById(titles[view])?.focus({ preventScroll: true });
 });
 

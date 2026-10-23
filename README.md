@@ -29,6 +29,16 @@ saved **in your browser** (localStorage on the website, Chrome sync storage in
 the extension) — use Settings → Backup to export/import them or move them to
 another browser.
 
+## Focus
+
+`#focus` is a Pomodoro timer drawn as the Thiersch tower clock: the gold arc
+fills and the hand sweeps once per phase (25 · 5 or 50 · 10, a long break
+after four rounds). Pick the module you're studying; every finished focus
+session lights one window of the tower for the day, and "This week" sums your
+minutes per module. Keys: Space start/pause, R reset, S skip. The running timer
+survives reloads and stays in step across open tabs; a soft synthesised bell
+marks the end of a phase (can be turned off).
+
 ## Extension (optional)
 
 ```sh

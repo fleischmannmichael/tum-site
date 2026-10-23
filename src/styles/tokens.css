@@ -117,6 +117,18 @@
   --tap-target: 44px;
   --dot-size: 0.625rem;
 
+  /* ---- Focus: the Thiersch tower clock ---- */
+  --dial-size: min(20rem, 72vw);
+  --tower-face: #0f2a24; /* the clock face's dark green */
+  --tower-face-edge: #071712;
+  --tower-gold: #e3bd6b;
+  --tower-gold-soft: rgb(227 189 107 / 0.18);
+  --tower-stone: #2a2f3a;
+  --tower-window: #141925;
+  --tower-glow: #ffcf7a;
+  --focus-time: clamp(2.75rem, 2rem + 3vw, 4rem);
+  --focus-side-width: 22rem;
+
   /* ---- Hero ---- */
   /* ~30% keeps the clock tower in frame from 360px to wide screens. */
   --hero-position: 30% 55%;
