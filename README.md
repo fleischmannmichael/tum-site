@@ -18,7 +18,9 @@ npm run preview    # serve dist/ locally
 ```
 
 Every push to `main` runs the tests, builds the site and deploys it to GitHub
-Pages (`.github/workflows/pages.yml`).
+Pages (`.github/workflows/pages.yml`). This needs **Settings → Pages → Source:
+GitHub Actions**; with "Deploy from a branch", GitHub serves this README instead
+of the site.
 
 ## Data
 
