@@ -1,8 +1,8 @@
 // Prepares the hero backgrounds. Usage: npm run assets
 //
 // To add a picture: put it in assets/heroes/ named after its season —
-//   spring.jpg, summer-lake.png, autumn.jpg, winter-snow.webp, any-night.jpg
-// ("any" = usable all year). Then run `npm run assets` and rebuild.
+//   spring.jpg, summer-lake.png, autumn.jpg (or fall-….jpg), winter-snow.webp,
+//   any-night.jpg ("any" = usable all year). Then run `npm run assets` and rebuild.
 // Several pictures per season are fine; the new tab rotates through them by day.
 //
 // For each picture this writes public/hero/<name>/ with:
@@ -29,7 +29,8 @@ const heroes = [];
 for (const file of files) {
   const name = file.replace(/\.[^.]+$/, "").toLowerCase().replace(/[^a-z0-9-]+/g, "-");
   const prefix = name.split("-")[0];
-  const season = SEASONS.includes(prefix) ? prefix : "any";
+  const alias = { fall: "autumn" }[prefix] ?? prefix;
+  const season = SEASONS.includes(alias) ? alias : "any";
   if (season !== prefix) console.warn(`! ${file}: name doesn't start with a season, using it all year`);
 
   const dir = `${OUT}${name}/`;
