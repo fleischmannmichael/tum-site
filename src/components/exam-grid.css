@@ -55,10 +55,14 @@
   cursor: pointer;
   transition:
     background-color var(--dur-fast) var(--ease),
-    border-color var(--dur-fast) var(--ease);
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease);
 }
 
 .exam-tile:hover {
+  transform: translateY(var(--lift));
+  box-shadow: var(--glass-shadow-hover), var(--glass-highlight);
   background: linear-gradient(var(--glass-fill-hover), var(--glass-fill-hover)), var(--glass-tint);
   border-color: var(--glass-border-strong);
 }
@@ -213,4 +217,10 @@
 
 .done-list .exam-grid {
   margin-top: var(--space-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exam-tile:hover {
+    transform: none;
+  }
 }

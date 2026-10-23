@@ -68,8 +68,11 @@ function applyHero(): void {
 
 applyHero();
 initModulesMenu();
+// The entrance (motion.css) plays once; after it, re-rendered parts appear without animating.
+window.setTimeout(() => document.documentElement.classList.add("is-entered"), 1000);
 data = await loadAll();
 tick(true);
+performance.mark("countdown-rendered"); // first full render, for load-time checks
 
 window.addEventListener("hashchange", () => {
   tick();

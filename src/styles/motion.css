@@ -1,6 +1,13 @@
-/* Depixelate-in: three stacked resolutions, opacity only.
-   48 is visible from first paint; 96 then the full picture fade in over it.
-   M7 adds the headline/nav/card entrance. */
+/*
+ * Entrance, once per page load (≤ 900 ms in total), transform/opacity/filter only:
+ *     0–360 ms  picture depixelates: 48 px → 96 px → full
+ *   200–650 ms  headline fades in, un-blurs and rises slightly
+ *   300–700 ms  nav rises in
+ *   380–890 ms  exam boxes rise in, 50 ms apart
+ * JS adds .is-entered to <html> once it's over, so boxes re-rendered later
+ * (new data, a new day) don't animate again. Everything is CSS: the page
+ * looks the same without it, and reduced motion turns it all off.
+ */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -10,6 +17,22 @@
   }
 }
 
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--enter-rise));
+  }
+}
+
+@keyframes headline-in {
+  from {
+    opacity: 0;
+    filter: blur(var(--enter-blur));
+    transform: translateY(var(--enter-rise-small));
+  }
+}
+
+/* ---- Picture: depixelate-in ---- */
 .hero__layer--96,
 .hero__layer--full {
   opacity: 0;
@@ -19,6 +42,33 @@
   animation-delay: var(--hero-step);
 }
 
+/* ---- Content ---- */
+/* `backwards` holds the start state during the delay but lets go afterwards,
+   so hover lifts (also transforms) still work once a box has arrived. */
+html:not(.is-entered) .countdown,
+html:not(.is-entered) .module-view,
+html:not(.is-entered) .overview,
+html:not(.is-entered) .general {
+  animation: headline-in var(--dur-enter) var(--ease) var(--enter-headline) backwards;
+}
+
+html:not(.is-entered) .pill-nav,
+html:not(.is-entered) .gear {
+  animation: rise-in var(--dur-enter-short) var(--ease) var(--enter-nav) backwards;
+}
+
+html:not(.is-entered) #exam-grid > li,
+html:not(.is-entered) .done-list {
+  animation: rise-in var(--dur-enter-item) var(--ease) calc(var(--enter-items) + var(--i, 0) * var(--stagger)) backwards;
+}
+
+#exam-grid > li:nth-child(2) { --i: 1; }
+#exam-grid > li:nth-child(3) { --i: 2; }
+#exam-grid > li:nth-child(4) { --i: 3; }
+#exam-grid > li:nth-child(5) { --i: 4; }
+#exam-grid > li:nth-child(n + 6),
+.done-list { --i: 5; }
+
 @media (prefers-reduced-motion: reduce) {
   .hero__layer--48,
   .hero__layer--96 {
@@ -27,5 +77,8 @@
   .hero__layer--full {
     opacity: 1;
     animation: none;
+  }
+  html:not(.is-entered) * {
+    animation: none !important;
   }
 }

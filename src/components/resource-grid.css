@@ -14,10 +14,13 @@
   text-decoration: none;
   transition:
     background-color var(--dur-fast) var(--ease),
-    border-color var(--dur-fast) var(--ease);
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease);
 }
 
 .link-card:hover {
+  transform: translateY(var(--lift));
   background: linear-gradient(var(--glass-fill-hover), var(--glass-fill-hover)), var(--glass-tint);
   border-color: var(--glass-border-strong);
 }
@@ -92,4 +95,10 @@
   text-transform: uppercase;
   color: var(--color-text-on-photo);
   text-shadow: var(--text-shadow-hero);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link-card:hover {
+    transform: none;
+  }
 }

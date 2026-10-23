@@ -40,6 +40,7 @@
   --glass-border-strong: rgb(255 255 255 / 0.22);
   --glass-blur: blur(20px) saturate(140%);
   --glass-shadow: 0 24px 64px -16px rgb(0 0 0 / 0.55), 0 2px 8px rgb(0 0 0 / 0.25);
+  --glass-shadow-hover: 0 30px 72px -16px rgb(0 0 0 / 0.65), 0 4px 12px rgb(0 0 0 / 0.3);
   --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.08);
   --hairline: 1px;
   --backdrop: rgb(var(--color-bg-rgb) / 0.55);
@@ -136,6 +137,18 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out: ease-out;
   --hero-step: 180ms; /* each depixelate stage */
+  /* Entrance (motion.css): delays and durations add up to ≤ 900 ms. */
+  --enter-headline: 200ms;
+  --enter-nav: 300ms;
+  --enter-items: 380ms;
+  --stagger: 50ms;
+  --dur-enter: 450ms;
+  --dur-enter-short: 400ms;
+  --dur-enter-item: 260ms;
+  --enter-rise: 12px;
+  --enter-rise-small: 8px;
+  --enter-blur: 8px;
+  --lift: -3px; /* hover lift on boxes and cards */
 }
 
 /* Portrait screens crop to the bright middle of the picture: a longer scrim. */
