@@ -46,73 +46,45 @@
 }
 
 .topbar {
+  position: relative;
   display: flex;
   justify-content: center;
   width: 100%;
 }
 
-main {
-  width: 100%;
-  max-width: var(--content-width-wide);
-}
-
-.view:not([hidden]) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-6);
-}
-
-/* ---- Countdown headline ---- */
-.countdown {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  padding-block: clamp(var(--space-6), 9vh, 7rem) var(--space-2);
-  text-align: center;
-  text-shadow: var(--text-shadow-hero);
-}
-
-.countdown__eyebrow {
-  min-height: 1lh;
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
+.gear {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border-radius: var(--radius-pill);
   color: var(--color-text-muted);
+  transition: color var(--dur-fast) var(--ease);
 }
 
-.countdown__title {
-  font-family: var(--font-display);
-  font-weight: var(--weight-regular);
-  font-size: var(--text-display);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-display);
-  text-wrap: balance;
-}
-
-.countdown__days {
-  font-family: var(--font-display);
-  font-size: var(--text-display-sm);
-  line-height: var(--leading-snug);
+.gear:hover {
   color: var(--color-text);
 }
 
-.countdown__days:empty,
-.countdown__detail:empty {
-  display: none;
+/* Narrow screens: no room to centre the nav with the gear floating beside it,
+   so both share one row. */
+@media (max-width: 520px) {
+  .topbar {
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .gear {
+    position: static;
+    flex: none;
+  }
 }
 
-.countdown__number {
-  font-size: var(--text-display-xl);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-display);
-  font-variant-numeric: lining-nums;
-}
-
-.countdown--soon .countdown__days {
-  color: var(--color-warm);
+.countdown__detail a {
+  color: var(--color-text);
+  text-underline-offset: 3px;
 }
 
 .countdown__detail {

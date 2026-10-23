@@ -10,12 +10,14 @@
   --color-text: #f2f3f5;
   --color-text-muted: rgb(242 243 245 / 0.7);
   --color-text-faint: rgb(242 243 245 / 0.5); /* disabled/decorative only */
-  --color-accent: #6aa8ec; /* TUM blue #3070b3, lightened for dark backgrounds */
-  --color-accent-soft: rgb(106 168 236 / 0.18);
+  --color-accent-default: #6aa8ec; /* TUM blue #3070b3, lightened for dark backgrounds */
+  --color-accent: var(--color-accent-default); /* the Display setting overrides this */
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 18%, transparent);
   --color-warm: #f2b366; /* "exam soon" (≤ 7 days) */
   --color-warm-soft: rgb(242 179 102 / 0.16);
-  --color-accent-border: rgb(106 168 236 / 0.55);
+  --color-accent-border: color-mix(in srgb, var(--color-accent) 55%, transparent);
   --color-focus: #9cc8ff;
+  --color-danger: #ff9a9a;
 
   /* Fallback dot colours for exams without their own `color`. */
   --module-1: #6aa8ec;
@@ -42,6 +44,7 @@
 
   /* ---- Radius ---- VERIFY */
   --radius-card: 24px;
+  --radius-row: 14px;
   --radius-tile: 20px;
   --radius-pill: 999px;
 
@@ -80,6 +83,10 @@
   --tile-min-height: 8.5rem;
   --detail-width: 34rem;
   --detail-label-width: 10rem;
+  --form-width: 40rem;
+  --options-width: 48rem;
+  --control-radius: 10px;
+  --control-fill: rgb(255 255 255 / 0.05);
   --tap-target: 44px;
   --dot-size: 0.625rem;
 

@@ -59,6 +59,7 @@ export function renderExamDetail(dialog: HTMLDialogElement, exam: Exam, exams: E
   );
 
   body.replaceChildren(header, dl);
+  dialog.querySelector<HTMLAnchorElement>("#detail-edit")!.href = `../options/index.html#exam=${encodeURIComponent(exam.id)}`;
 }
 
 /** Opens the detail dialog when a tile is clicked; closes on backdrop click. */

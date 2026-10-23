@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Exam Tab · Settings</title>
+    <link rel="stylesheet" href="./options.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="topbar">
+        <a class="back" href="../newtab/index.html">← New tab</a>
+        <h1 class="topbar__title">Settings</h1>
+      </header>
+
+      <main class="sections">
+        <section class="panel glass-card" aria-labelledby="exams-title">
+          <div class="panel__head">
+            <h2 id="exams-title" class="panel__title">Exams</h2>
+            <button type="button" class="btn btn--primary" id="add-exam">Add exam</button>
+          </div>
+          <ul id="exam-list" class="item-list"></ul>
+        </section>
+
+        <section class="panel glass-card" aria-labelledby="resources-title">
+          <div class="panel__head">
+            <h2 id="resources-title" class="panel__title">Resources</h2>
+            <button type="button" class="btn btn--primary" id="add-resource">Add link</button>
+          </div>
+          <ul id="resource-list" class="item-list"></ul>
+        </section>
+
+        <section class="panel glass-card" aria-labelledby="display-title">
+          <h2 id="display-title" class="panel__title">Display</h2>
+          <label class="check">
+            <input type="checkbox" id="show-seconds" />
+            <span>Show seconds in the countdown</span>
+          </label>
+          <div class="accent-row">
+            <label for="accent">Accent colour</label>
+            <input type="color" id="accent" />
+            <button type="button" class="btn btn--quiet" id="accent-reset">Use default</button>
+          </div>
+        </section>
+
+        <section class="panel glass-card" aria-labelledby="backup-title">
+          <h2 id="backup-title" class="panel__title">Backup</h2>
+          <p class="panel__text">Everything lives in Chrome's sync storage. Export a file now and then, especially before reinstalling.</p>
+          <div class="btn-row">
+            <button type="button" class="btn" id="export">Export JSON</button>
+            <label class="btn" for="import-file">Import JSON…</label>
+            <input type="file" id="import-file" accept="application/json,.json" class="visually-hidden" />
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <p id="toast" class="toast" role="status" aria-live="polite"></p>
+
+    <dialog id="exam-dialog" class="form-dialog glass-card" aria-labelledby="exam-form-title">
+      <form id="exam-form" class="form" novalidate>
+        <h2 id="exam-form-title" class="form__title">Exam</h2>
+        <p class="form__error" data-error="_form" hidden></p>
+
+        <div class="field">
+          <label for="f-module">Module <span aria-hidden="true">*</span></label>
+          <input id="f-module" name="module" required maxlength="60" autocomplete="off" />
+          <p class="field__error" data-error="module" hidden></p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-date">Date</label>
+            <input id="f-date" name="date" type="date" />
+            <p class="field__hint">Leave empty while it's TBA.</p>
+            <p class="field__error" data-error="date" hidden></p>
+          </div>
+          <div class="field">
+            <label for="f-time">Start time</label>
+            <input id="f-time" name="time" type="time" />
+            <p class="field__error" data-error="time" hidden></p>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-room">Room</label>
+            <input id="f-room" name="room" maxlength="80" />
+            <p class="field__error" data-error="room" hidden></p>
+          </div>
+          <div class="field">
+            <label for="f-duration">Duration (minutes)</label>
+            <input id="f-duration" name="durationMin" type="number" min="1" max="600" step="1" inputmode="numeric" />
+            <p class="field__error" data-error="durationMin" hidden></p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-deadline">Registration deadline</label>
+          <input id="f-deadline" name="registrationDeadline" type="date" />
+          <p class="field__error" data-error="registrationDeadline" hidden></p>
+        </div>
+        <fieldset class="fieldset">
+          <legend>Retake</legend>
+          <div class="field-row field-row--3">
+            <div class="field">
+              <label for="f-retake-date">Date</label>
+              <input id="f-retake-date" name="retakeDate" type="date" />
+              <p class="field__error" data-error="retakeDate" hidden></p>
+            </div>
+            <div class="field">
+              <label for="f-retake-time">Time</label>
+              <input id="f-retake-time" name="retakeTime" type="time" />
+              <p class="field__error" data-error="retakeTime" hidden></p>
+            </div>
+            <div class="field">
+              <label for="f-retake-room">Room</label>
+              <input id="f-retake-room" name="retakeRoom" maxlength="80" />
+              <p class="field__error" data-error="retakeRoom" hidden></p>
+            </div>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="f-aids">What you can bring</label>
+          <textarea id="f-aids" name="allowedAids" rows="3"></textarea>
+          <p class="field__hint">One item per line.</p>
+          <p class="field__error" data-error="allowedAids" hidden></p>
+        </div>
+        <div class="field">
+          <label for="f-description">About</label>
+          <textarea id="f-description" name="description" rows="3" maxlength="2000"></textarea>
+          <p class="field__error" data-error="description" hidden></p>
+        </div>
+        <div class="field">
+          <label for="f-notes">Notes</label>
+          <textarea id="f-notes" name="notes" rows="2" maxlength="2000"></textarea>
+          <p class="field__error" data-error="notes" hidden></p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="check">
+              <input type="checkbox" name="customColor" id="f-custom-color" />
+              <span>Own dot colour</span>
+            </label>
+            <input type="color" name="colorPick" id="f-color" aria-label="Dot colour" />
+            <p class="field__error" data-error="color" hidden></p>
+          </div>
+          <div class="field">
+            <label class="check">
+              <input type="checkbox" name="done" />
+              <span>Mark as done</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form__actions">
+          <button type="button" class="btn btn--quiet" data-close>Cancel</button>
+          <button type="submit" class="btn btn--primary">Save exam</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="resource-dialog" class="form-dialog glass-card" aria-labelledby="resource-form-title">
+      <form id="resource-form" class="form" novalidate>
+        <h2 id="resource-form-title" class="form__title">Link</h2>
+        <p class="form__error" data-error="_form" hidden></p>
+        <div class="field">
+          <label for="r-title">Title <span aria-hidden="true">*</span></label>
+          <input id="r-title" name="title" required maxlength="80" autocomplete="off" />
+          <p class="field__error" data-error="title" hidden></p>
+        </div>
+        <div class="field">
+          <label for="r-url">Address <span aria-hidden="true">*</span></label>
+          <input id="r-url" name="url" type="url" required placeholder="https://" autocomplete="off" />
+          <p class="field__error" data-error="url" hidden></p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="r-category">Category <span aria-hidden="true">*</span></label>
+            <input id="r-category" name="category" list="category-options" required maxlength="40" autocomplete="off" />
+            <datalist id="category-options"></datalist>
+            <p class="field__error" data-error="category" hidden></p>
+          </div>
+          <div class="field">
+            <label for="r-module">Module</label>
+            <select id="r-module" name="module"></select>
+          </div>
+        </div>
+        <div class="form__actions">
+          <button type="button" class="btn btn--quiet" data-close>Cancel</button>
+          <button type="submit" class="btn btn--primary">Save link</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

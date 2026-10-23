@@ -99,10 +99,22 @@
   list-style: disc;
 }
 
-.detail__hint {
-  margin-top: var(--space-4);
+.detail__edit {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target);
+  margin-top: var(--space-3);
+  padding-inline: var(--space-4);
+  border: var(--hairline) solid var(--color-accent-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
   font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.detail__edit:hover {
+  background: var(--glass-fill-hover);
 }
 
 @media (max-width: 480px) {

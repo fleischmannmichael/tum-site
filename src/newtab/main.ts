@@ -1,5 +1,6 @@
 import { initExamDetail } from "../components/exam-detail";
 import { initPillNav } from "../components/pill-nav";
+import { applyAccent } from "../lib/accent";
 import { summarize } from "../lib/countdown";
 import { loadAll, onDataChanged } from "../lib/storage";
 import type { StoredData } from "../lib/types";
@@ -15,6 +16,7 @@ const detail = initExamDetail(document.getElementById("exam-detail") as HTMLDial
 function tick(): void {
   window.clearTimeout(timer);
   const now = Date.now();
+  applyAccent(data.settings.accent);
   const summary = summarize(data.exams, now);
   renderHeadline(summary, data.settings.showSeconds);
 

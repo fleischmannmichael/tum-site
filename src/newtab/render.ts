@@ -26,7 +26,8 @@ export function renderHeadline(summary: Summary, showSeconds: boolean): void {
     eyebrow.textContent = "Next exam";
     headline.textContent = "No exam dates yet";
     days.textContent = "";
-    detail.textContent = "Add them in settings";
+    const link = Object.assign(document.createElement("a"), { href: "../options/index.html", textContent: "Add them in settings" });
+    detail.replaceChildren(link);
   } else if (state.kind === "today") {
     const { exam } = state.next;
     eyebrow.textContent = "Exam day";
