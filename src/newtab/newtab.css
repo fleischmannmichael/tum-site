@@ -6,6 +6,7 @@
 @import "../components/exam-grid.css";
 @import "../components/exam-detail.css";
 @import "../components/clock.css";
+@import "../components/resource-grid.css";
 @import "../styles/motion.css";
 
 body {
@@ -170,28 +171,36 @@ body {
   margin: 0;
 }
 
+/* ---- General links page ---- */
+.general {
+  display: grid;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: var(--module-width);
+  padding-top: clamp(var(--space-5), 6vh, 5rem);
+  text-align: center;
+}
+
+.general__title {
+  outline: none;
+  text-shadow: var(--text-shadow-hero);
+}
+
+.general__intro {
+  color: var(--color-text-muted);
+  text-shadow: var(--text-shadow-hero);
+}
+
+.general__groups {
+  display: grid;
+  gap: var(--space-5);
+  text-align: start;
+}
+
 .module-view__subtitle {
   font-family: var(--font-display);
   font-weight: var(--weight-regular);
   font-size: var(--text-lg);
-}
-
-.module-view__links {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.module-view__links li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
-}
-
-.module-view__host,
-.module-view__empty {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
 }
 
 .module-view .detail__edit {

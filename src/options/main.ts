@@ -159,7 +159,7 @@ const resourceDialog = $("resource-dialog") as HTMLDialogElement;
 const resourceForm = $("resource-form") as HTMLFormElement;
 let editingResource: string | null = null;
 
-function openResource(r?: Resource): void {
+function openResource(r?: Resource, prefill: FormInput = {}): void {
   editingResource = r?.id ?? null;
   $("resource-form-title").textContent = r ? `Edit ${r.title}` : "Add link";
   // Choices come from current data, so refresh them on every open.
@@ -170,7 +170,7 @@ function openResource(r?: Resource): void {
     Object.assign(document.createElement("option"), { value: "", textContent: "None" }),
     ...modules.map((m) => Object.assign(document.createElement("option"), { value: m, textContent: m })),
   );
-  fillForm(resourceForm, r ? { title: r.title, url: r.url, category: r.category, module: r.module ?? "" } : {});
+  fillForm(resourceForm, r ? { title: r.title, url: r.url, category: r.category, module: r.module ?? "" } : prefill);
   resourceDialog.showModal();
 }
 
@@ -244,8 +244,11 @@ onDataChanged((fresh) => {
 
 renderAll();
 
-// The new tab links here as #exam=<id> to edit one exam, or #add-exam.
+// The new tab links here as #exam=<id> to edit one exam, #add-exam, or
+// #add-resource[&module=…&category=…&title=…] to add a prefilled link.
 const hash = new URLSearchParams(location.hash.slice(1));
 const target = data.exams.find((e) => e.id === hash.get("exam"));
 if (target) openExam(target);
 else if (location.hash === "#add-exam") openExam();
+else if (hash.has("add-resource"))
+  openResource(undefined, { module: hash.get("module") ?? "", category: hash.get("category") ?? "", title: hash.get("title") ?? "" });

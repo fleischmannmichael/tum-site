@@ -112,3 +112,13 @@
     transition: none;
   }
 }
+
+/* "General links" sits apart from the modules: a hairline before it. */
+.modules-menu__general {
+  padding-left: var(--space-2);
+  border-left: var(--hairline) solid var(--glass-border);
+}
+
+.modules-menu__item--general {
+  color: var(--color-text-muted);
+}

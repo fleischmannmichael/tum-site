@@ -85,3 +85,8 @@
 .clock--lg .clock__num {
   font-size: var(--clock-num-lg);
 }
+
+/* No date yet: the module page's eyebrow already says "Date TBA". */
+.clock--lg[data-state="tba"] {
+  display: none;
+}

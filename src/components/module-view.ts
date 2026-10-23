@@ -1,26 +1,8 @@
 import { el } from "../lib/dom";
-import type { Resource, StoredData } from "../lib/types";
+import type { StoredData } from "../lib/types";
 import { clockEl } from "./clock";
 import { detailFields, detailHeader, editHref } from "./exam-detail";
-
-function linkList(resources: Resource[]): HTMLElement {
-  if (!resources.length) {
-    const p = el("p", "module-view__empty", "No links for this module yet. ");
-    const a = el("a", "", "Add one in settings");
-    a.href = "../options/index.html";
-    p.append(a);
-    return p;
-  }
-  const ul = el("ul", "module-view__links");
-  for (const r of [...resources].sort((a, b) => a.title.localeCompare(b.title))) {
-    const a = el("a", "", r.title);
-    a.href = r.url;
-    const li = el("li");
-    li.append(a, el("span", "module-view__host", new URL(r.url).host));
-    ul.append(li);
-  }
-  return ul;
-}
+import { moduleLinks } from "./resource-grid";
 
 /** The page for one module: live clock, every detail, and its links. Returns false if the exam is gone. */
 export function renderModuleView(root: HTMLElement, examId: string, data: StoredData, now: number): boolean {
@@ -37,7 +19,7 @@ export function renderModuleView(root: HTMLElement, examId: string, data: Stored
     clockEl(exam.id, "lg"),
     detailFields(exam),
     linksTitle,
-    linkList(data.resources.filter((r) => r.module === exam.module)),
+    moduleLinks(exam.module, data.resources),
     edit,
   );
   root.replaceChildren(card);

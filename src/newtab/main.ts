@@ -1,6 +1,7 @@
 import { initExamDetail } from "../components/exam-detail";
 import { renderModuleView } from "../components/module-view";
 import { applyRoute, currentRoute, initModulesMenu, renderModulesMenu } from "../components/nav";
+import { generalGroups } from "../components/resource-grid";
 import { applyAccent } from "../lib/accent";
 import { summarize } from "../lib/countdown";
 import { loadAll, onDataChanged } from "../lib/storage";
@@ -19,6 +20,7 @@ function renderStructure(now: number): void {
   renderHeadline(summary);
   renderExams(summary, data.exams);
   renderModulesMenu(data.exams);
+  document.getElementById("general-groups")!.replaceChildren(...generalGroups(data.resources));
 
   let route = currentRoute();
   if (route.view === "module" && !renderModuleView(document.getElementById("view-module")!, route.id, data, now)) {
@@ -54,7 +56,8 @@ tick(true);
 
 window.addEventListener("hashchange", () => {
   tick();
-  if (currentRoute().view === "module") document.getElementById("module-title")?.focus({ preventScroll: true });
+  const view = currentRoute().view;
+  if (view !== "countdown") document.getElementById(view === "module" ? "module-title" : "general-title")?.focus({ preventScroll: true });
 });
 
 onDataChanged((fresh) => {

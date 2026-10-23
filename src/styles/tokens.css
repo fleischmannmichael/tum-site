@@ -95,6 +95,10 @@
   --detail-label-width: 7.5rem;
   --form-width: 40rem;
   --module-width: 48rem;
+  --link-card-min: 13rem;
+  --link-card-height: 4rem;
+  --link-icon-size: 2.5rem;
+  --link-empty-fill: rgb(var(--color-bg-rgb) / 0.45);
   --clock-days: clamp(2.25rem, 1.6rem + 2.2vw, 3.5rem); /* the serif day count on each exam */
   --clock-days-lg: clamp(3.5rem, 2.2rem + 5vw, 6.5rem);
   --clock-num-sm: var(--text-base);
