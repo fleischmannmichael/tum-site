@@ -118,6 +118,13 @@ onDataChanged((fresh) => {
   tick();
 });
 
+// Esc on a module page goes back to all modules (an open pop-out closes first).
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || e.defaultPrevented || currentRoute().view !== "module" || document.querySelector("dialog[open]")) return;
+  if ((e.target as Element).closest("input, textarea, select")) return; // Esc in the topic field just leaves it
+  location.hash = "#modules";
+});
+
 // Personal messages take turns while the countdown is on screen (not when the
 // tab is hidden, and not for reduced motion, where text shouldn't keep moving).
 window.setInterval(() => {

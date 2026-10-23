@@ -77,6 +77,7 @@ const EN = {
 
   // ---- Module page (checklist)
   "module.eyebrow": "Module",
+  "module.back": "← All modules",
   "module.exams": "Exams",
   "module.contents": "Contents",
   "module.progress": "{done} of {total} done",
@@ -130,7 +131,6 @@ const EN = {
   "focus.timer": "Timer",
   "focus.classic": "Classic 25 · 5",
   "focus.deep": "Deep work 50 · 10",
-  "focus.custom": "Custom",
   "focus.focusMin": "Focus (min)",
   "focus.shortMin": "Short break (min)",
   "focus.longMin": "Long break (min)",
@@ -151,6 +151,7 @@ const EN = {
   "heat.dayEmpty": "Nothing logged on this day.",
   "heat.remove": "Remove {module} on {date}",
   "heat.log": "Log studying",
+  "heat.moreSummary": "Log time, upload or download",
   "heat.date": "Date",
   "heat.minutes": "Time",
   "heat.minutesHint": "Minutes, or h:mm",
@@ -422,6 +423,7 @@ const DE: Record<Key, string> = {
   "detail.links": "Links",
 
   "module.eyebrow": "Modul",
+  "module.back": "← Alle Module",
   "module.exams": "Prüfungen",
   "module.contents": "Inhalte",
   "module.progress": "{done} von {total} erledigt",
@@ -473,7 +475,6 @@ const DE: Record<Key, string> = {
   "focus.timer": "Timer",
   "focus.classic": "Klassisch 25 · 5",
   "focus.deep": "Deep Work 50 · 10",
-  "focus.custom": "Eigene",
   "focus.focusMin": "Fokus (Min.)",
   "focus.shortMin": "Kurze Pause (Min.)",
   "focus.longMin": "Lange Pause (Min.)",
@@ -494,6 +495,7 @@ const DE: Record<Key, string> = {
   "heat.dayEmpty": "An diesem Tag ist nichts eingetragen.",
   "heat.remove": "{module} am {date} entfernen",
   "heat.log": "Lernzeit eintragen",
+  "heat.moreSummary": "Zeit eintragen, hochladen oder herunterladen",
   "heat.date": "Datum",
   "heat.minutes": "Zeit",
   "heat.minutesHint": "Minuten oder h:mm",

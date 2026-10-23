@@ -144,8 +144,12 @@
                   <ul id="heat-day-list" class="heat-day__list"></ul>
                 </section>
 
+              </div>
+
+              <!-- Logging by hand, upload and download: folded away until needed. -->
+              <details class="heat-more" id="heat-more">
+                <summary class="heat-more__summary" data-i18n="heat.moreSummary">Log time, upload or download</summary>
                 <form id="heat-form" class="heat-form" novalidate>
-                  <h3 class="heat-day__title" data-i18n="heat.log">Log studying</h3>
                   <div class="heat-form__fields">
                     <label class="heat-form__field"><span data-i18n="heat.date">Date</span><input id="heat-date" type="date" required /></label>
                     <label class="heat-form__field"><span data-i18n="heat.minutes">Time</span><input id="heat-time" inputmode="numeric" autocomplete="off" placeholder="45 / 1:30" data-i18n-title="heat.minutesHint" /></label>
@@ -158,9 +162,9 @@
                     <button type="button" class="focus__btn" id="heat-export" data-i18n="heat.export">Download CSV</button>
                   </div>
                   <p class="heat-form__hint" data-i18n="heat.uploadHint"></p>
-                  <p id="heat-message" class="heat-form__message" role="status" aria-live="polite"></p>
                 </form>
-              </div>
+              </details>
+              <p id="heat-message" class="heat-form__message" role="status" aria-live="polite"></p>
             </section>
           </section>
         </div>

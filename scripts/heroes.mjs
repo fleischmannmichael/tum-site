@@ -17,7 +17,7 @@
 // Videos (.mp4/.webm) become "live" backgrounds you can pick in Settings
 // (never chosen automatically): muted, looping, with a still for the load-in
 // and for reduced motion. ffmpeg strips the sound and shrinks them; without
-// ffmpeg they're skipped with a warning.
+// ffmpeg they're skipped with a warning (on the deploy, CI=true, that's an error).
 //
 // For each picture this writes public/hero/<name>/ with:
 //   full.webp       the picture itself (max 2400 px wide)
@@ -114,6 +114,8 @@ const hasFfmpeg = (() => {
 for (const file of videos) {
   const name = slugOf(file);
   if (!hasFfmpeg) {
+    // On the deploy, a missing video would go unnoticed: fail instead.
+    if (process.env.CI) throw new Error(`${file}: ffmpeg isn't installed (needed for videos)`);
     console.warn(`! ${file}: ffmpeg isn't installed, skipping the video`);
     continue;
   }

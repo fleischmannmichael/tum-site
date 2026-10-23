@@ -188,6 +188,29 @@ body {
   outline: none;
 }
 
+.module-view__back {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target);
+  margin: calc(-1 * var(--space-2)) 0 calc(-1 * var(--space-2)) calc(-1 * var(--space-2));
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.module-view__back:hover {
+  color: var(--color-text);
+  background: var(--glass-fill-hover);
+}
+
+.module-view__back:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 /* Exams of the module: chips that open the pop-out. */
 .module-exams {
   display: flex;

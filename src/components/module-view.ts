@@ -55,6 +55,10 @@ export function renderModuleView(root: HTMLElement, examId: string, data: Stored
   const card = el("article", "module-view glass-card");
   card.setAttribute("aria-labelledby", "module-title");
 
+  // The way back to all modules (Esc works too, see home/main.ts).
+  const back = el("a", "module-view__back", t("module.back"));
+  back.href = "#modules";
+
   const header = el("header", "detail__header");
   const eyebrow = el("p", "detail__eyebrow");
   eyebrow.append(dot(exam, ids), document.createTextNode(t("module.eyebrow")));
@@ -159,7 +163,7 @@ export function renderModuleView(root: HTMLElement, examId: string, data: Stored
     section.append(clear);
   }
 
-  card.append(header, chips, section, el("h2", "module-view__subtitle", t("detail.links")), moduleLinks(module, data.resources));
+  card.append(back, header, chips, section, el("h2", "module-view__subtitle", t("detail.links")), moduleLinks(module, data.resources));
   root.replaceChildren(card);
   if (focusKey) root.querySelector<HTMLElement>(`[data-focus-key="${CSS.escape(focusKey)}"]`)?.focus();
   return true;

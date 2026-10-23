@@ -32,6 +32,9 @@ jobs:
           enablement: true
 
       - run: npm ci
+      # For live (video) backgrounds: npm run assets strips their sound and shrinks them.
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
       # Pictures added to assets/heroes/ (e.g. uploaded on github.com) are prepared here, so no local step is needed.
       - run: npm run assets
       - run: npm test
