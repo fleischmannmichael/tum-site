@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
     <title data-i18n-doc-title="page.title">Exam countdown</title>
-    <meta name="description" content="Countdown to my TUM exams, with dates, rules and study links." />
+    <meta name="description" content="Countdown to your exams, with a checklist per module, study links, a Pomodoro timer and a study log." />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./home/home.css" />
   </head>
@@ -37,7 +37,7 @@
     </header>
 
     <main class="stage">
-      <!-- Decorative: pixel-art TUM campus; the picture is picked per season in main.ts. -->
+      <!-- Decorative: pixel-art TUM campus; the picture is picked by season (or in Settings) in home/hero.ts. -->
       <div class="hero" aria-hidden="true">
         <div class="hero__layer hero__layer--48"></div>
         <div class="hero__layer hero__layer--96"></div>
@@ -178,6 +178,39 @@
         </div>
       </div>
     </main>
+    <!-- First visit: language, name, and blank or the example (home/welcome.ts). -->
+    <dialog id="welcome" class="welcome glass-card" aria-labelledby="welcome-title">
+      <div class="welcome__inner">
+        <h2 id="welcome-title" class="welcome__title" data-i18n="welcome.title">Welcome</h2>
+        <p class="welcome__text" data-i18n="welcome.text"></p>
+        <div class="welcome__row">
+          <div class="chips" role="radiogroup" aria-labelledby="welcome-lang-label">
+            <span id="welcome-lang-label" class="visually-hidden" data-i18n="welcome.language">Language</span>
+            <label class="chip"><input type="radio" name="welcome-lang" value="en" /><span lang="en">English</span></label>
+            <label class="chip"><input type="radio" name="welcome-lang" value="de" /><span lang="de">Deutsch</span></label>
+          </div>
+          <label class="welcome__name">
+            <span data-i18n="welcome.name">Your name (optional)</span>
+            <input id="welcome-name" type="text" maxlength="40" autocomplete="given-name" />
+          </label>
+        </div>
+        <h3 class="welcome__how" data-i18n="welcome.how">How do you want to start?</h3>
+        <div class="welcome__choices">
+          <button type="button" class="welcome__choice" data-start="blank">
+            <span class="welcome__choice-icon" aria-hidden="true">＋</span>
+            <span class="welcome__choice-title" data-i18n="welcome.blank">Start blank</span>
+            <span class="welcome__choice-text" data-i18n="welcome.blankText"></span>
+          </button>
+          <button type="button" class="welcome__choice" data-start="example">
+            <span class="welcome__choice-icon" aria-hidden="true">🎓</span>
+            <span class="welcome__choice-title" data-i18n="welcome.example">Use the example</span>
+            <span class="welcome__choice-text" data-i18n="welcome.exampleText"></span>
+          </button>
+        </div>
+        <p class="welcome__later" data-i18n="welcome.later"></p>
+      </div>
+    </dialog>
+
     <dialog id="exam-detail" class="detail glass-card" aria-labelledby="detail-title">
       <div class="detail__inner">
         <form method="dialog">

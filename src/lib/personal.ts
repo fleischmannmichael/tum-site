@@ -29,6 +29,8 @@ type Ctx = {
   weekday: number;
   exam?: { module: string; days: number; today: boolean };
   ahead: number;
+  /** Some exams are already behind you (vs. a blank page). */
+  anyDone: boolean;
   todayMin: number;
   streak: number;
   topics?: { module: string; done: number; total: number };
@@ -41,6 +43,7 @@ const time = (min: number) => formatMinutes(min);
 /** Lines per language, in order of relevance. */
 const LINES: Record<Language, Line[]> = {
   en: [
+    (c) => (c.ahead === 0 && !c.anyDone ? `A blank page${c.n}. Add your first exam in Settings — the date can wait.` : null),
     (c) => (c.exam?.today ? `Today's the day${c.n}. You've got ${c.exam.module}.` : null),
     (c) => (c.exam && !c.exam.today && c.exam.days === 1 ? `${c.exam.module} is tomorrow${c.n}. Pack your things, sleep early.` : null),
     (c) => (c.hour >= 23 || c.hour < 5 ? `It's late${c.n}. Sleep is part of studying too.` : null),
@@ -61,11 +64,12 @@ const LINES: Record<Language, Line[]> = {
     (c) => (c.weekday === 4 ? `Friday${c.n}. Close one topic, then enjoy the weekend.` : null),
     (c) => (c.weekday >= 5 ? `Weekend${c.n}. One focused hour makes Monday lighter.` : null),
     (c) => (c.hour >= 5 && c.hour < 9 ? `Early start${c.n}. Fresh head, hard topic first.` : null),
-    (c) => (c.ahead === 0 ? `All exams done${c.n}. Enjoy it — you earned it.` : null),
+    (c) => (c.ahead === 0 && c.anyDone ? `All exams done${c.n}. Enjoy it — you earned it.` : null),
     (c) => (c.ahead > 1 ? `${c.ahead} exams ahead${c.n}. One at a time.` : null),
     (c) => `You've got this${c.n}.`,
   ],
   de: [
+    (c) => (c.ahead === 0 && !c.anyDone ? `Eine leere Seite${c.n}. Trag in den Einstellungen deine erste Prüfung ein – das Datum kann warten.` : null),
     (c) => (c.exam?.today ? `Heute ist der Tag${c.n}. ${c.exam.module} – du packst das.` : null),
     (c) => (c.exam && !c.exam.today && c.exam.days === 1 ? `Morgen ist ${c.exam.module}${c.n}. Sachen packen, früh schlafen.` : null),
     (c) => (c.hour >= 23 || c.hour < 5 ? `Es ist spät${c.n}. Schlaf gehört auch zum Lernen.` : null),
@@ -86,7 +90,7 @@ const LINES: Record<Language, Line[]> = {
     (c) => (c.weekday === 4 ? `Freitag${c.n}. Ein Thema abschließen, dann ab ins Wochenende.` : null),
     (c) => (c.weekday >= 5 ? `Wochenende${c.n}. Eine konzentrierte Stunde macht den Montag leichter.` : null),
     (c) => (c.hour >= 5 && c.hour < 9 ? `Früh dran${c.n}. Frischer Kopf, schweres Thema zuerst.` : null),
-    (c) => (c.ahead === 0 ? `Alle Prüfungen geschafft${c.n}. Genieß es – du hast es dir verdient.` : null),
+    (c) => (c.ahead === 0 && c.anyDone ? `Alle Prüfungen geschafft${c.n}. Genieß es – du hast es dir verdient.` : null),
     (c) => (c.ahead > 1 ? `Noch ${c.ahead} Prüfungen${c.n}. Eine nach der anderen.` : null),
     (c) => `Du schaffst das${c.n}.`,
   ],
@@ -116,6 +120,7 @@ function context(input: PersonalInput): Ctx {
       ? { module: next.exam.module, days: state.kind === "countdown" && next.days > 1 ? Math.max(2, state.remaining.days) : next.days, today: state.kind === "today" }
       : undefined,
     ahead: upcoming.length + tba.length,
+    anyDone: input.summary.done.length > 0,
     todayMin: minutesSince(input.focusLog, input.now, 1, tz),
     streak: streak(input.focusLog, input.now, tz),
     topics: next && items?.length ? { module: next.exam.module, done: items.filter((i) => i.done).length, total: items.length } : undefined,

@@ -44,6 +44,12 @@ export async function loadAll(): Promise<StoredData> {
   };
 }
 
+/** True before anything was ever saved here: the first visit (shows the welcome). */
+export async function isFirstVisit(): Promise<boolean> {
+  const all = await storageArea().get(null);
+  return !KEYS.some((key) => key in all);
+}
+
 export async function save<K extends Key>(key: K, value: StoredData[K]): Promise<void> {
   const json = JSON.stringify(value);
   const items: Record<string, unknown> = {};

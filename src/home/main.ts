@@ -9,9 +9,10 @@ import { applyI18n, cachedLang, getLang, setLang } from "../lib/i18n";
 import { personalLines } from "../lib/personal";
 import { cachedHeroChoice } from "../lib/heroes";
 import { summarize } from "../lib/countdown";
-import { describeSaveError, loadAll, onDataChanged, save } from "../lib/storage";
+import { describeSaveError, isFirstVisit, loadAll, onDataChanged, save } from "../lib/storage";
 import type { StoredData } from "../lib/types";
 import { applyHero } from "./hero";
+import { showWelcome } from "./welcome";
 import { renderExams, renderHeadline, updateClocks } from "./render";
 
 let data: StoredData;
@@ -105,6 +106,13 @@ const focus = initFocus(
 );
 tick(true);
 performance.mark("countdown-rendered"); // first full render, for load-time checks
+
+// First visit: ask how to start (blank or the example) before anything is saved.
+if (await isFirstVisit())
+  showWelcome(document.getElementById("welcome") as HTMLDialogElement, data, (fresh) => {
+    data = fresh;
+    tick(true);
+  });
 
 window.addEventListener("hashchange", () => {
   tick();

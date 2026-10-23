@@ -62,3 +62,12 @@ describe("personalLines", () => {
     expect(lines.every((l) => !l.includes("undefined") && !l.includes(", ."))).toBe(true);
   });
 });
+
+describe("a blank page", () => {
+  it("doesn't say all exams are done when there are none", () => {
+    const now = at(2026, 10, 23, 12);
+    const lines = personalLines({ name: "Alex", lang: "en", now, summary: summarize([], now), focusLog: [], checklists: {} });
+    expect(lines[0]).toBe("A blank page, Alex. Add your first exam in Settings — the date can wait.");
+    expect(lines.some((l) => l.startsWith("All exams done"))).toBe(false);
+  });
+});

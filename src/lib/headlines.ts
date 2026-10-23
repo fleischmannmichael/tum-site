@@ -112,8 +112,10 @@ export const MOTIVATION: Record<"en" | "de", Message[]> = {
 
 export type Headline = { title: string; byline?: string; mode: HeadlineMode };
 
-export function countText(ahead: number): string {
-  return ahead === 0 ? t("count.allDone") : tn("count", ahead);
+/** "6 exams ahead"; with none ahead, "All exams done" — or "No exams yet" on a blank page. */
+export function countText(ahead: number, done = 1): string {
+  if (ahead === 0) return done === 0 ? t("empty.title") : t("count.allDone");
+  return tn("count", ahead);
 }
 
 /**
@@ -137,5 +139,5 @@ export function chooseHeadline(settings: Settings, summary: Summary, pick: numbe
     const options = MOTIVATION[getLang()].map((m) => m(ctx)).filter((m): m is string => m !== null);
     return { mode, title: options[Math.floor(pick * options.length)]! };
   }
-  return { mode: "count", title: countText(ahead) };
+  return { mode: "count", title: countText(ahead, summary.done.length) };
 }

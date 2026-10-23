@@ -46,4 +46,8 @@ describe("chooseHeadline", () => {
       setLang("en");
     }
   });
+
+  it("says there are no exams yet on a blank page", () => {
+    expect(chooseHeadline(settings(), summarize([], now), 0).title).toBe("No exams yet");
+  });
 });

@@ -24,10 +24,16 @@ of the site.
 
 ## Data
 
-Exam dates and rules start from `src/lib/seed.ts`. Edits made in Settings are
-saved **in your browser** (localStorage on the website, Chrome sync storage in
-the extension) — use Settings → Backup to export/import them or move them to
-another browser.
+On the **first visit** a welcome screen asks for the language, optionally your
+name, and how to start: **blank** (add your own exams, modules and links) or
+**the example** — TUM Electrical Engineering, 1st semester, WS 2026/27, from
+`src/lib/seed.ts`. Nothing is saved until you choose. Settings → General →
+**Start over** switches between the two later (exams, links and checklists
+are replaced; settings, name, picture and study log stay).
+
+Everything is saved **in your browser** (localStorage on the website, Chrome
+sync storage in the extension) — use Settings → General → Backup to export or
+import it, or to move it to another browser.
 
 ## Using it
 

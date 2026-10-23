@@ -8,6 +8,7 @@ import { applyI18n, cachedLang, setLang, t, type Key } from "../lib/i18n";
 import { describeSaveError, loadAll, onDataChanged, save, saveAll } from "../lib/storage";
 import { storageArea } from "../lib/storage-area";
 import type { Exam, Language, Resource, StoredData } from "../lib/types";
+import { startData, type StartKind } from "../lib/start";
 import { parseBackup, toBackup, validateExam, validateResource, type FormInput } from "../lib/validate";
 import { fillForm, readForm, showErrors } from "./form";
 import { initGallery } from "./gallery";
@@ -255,10 +256,10 @@ function examToForm(e: Exam): FormInput {
   };
 }
 
-function openExam(exam?: Exam): void {
+function openExam(exam?: Exam, title = t("form.addExam")): void {
   showTab("countdown");
   editingExam = exam?.id ?? null;
-  $("exam-form-title").textContent = exam ? t("form.editItem", { name: examName(exam) }) : t("form.addExam");
+  $("exam-form-title").textContent = exam ? t("form.editItem", { name: examName(exam) }) : title;
   fillForm(examForm, exam ? examToForm(exam) : {});
   examDialog.showModal();
 }
@@ -351,6 +352,22 @@ $("log-clear").addEventListener("click", () => {
 });
 
 // ---- General ----------------------------------------------------------------------------
+async function startOver(kind: StartKind): Promise<void> {
+  const counts = { exams: data.exams.length, links: data.resources.length };
+  if (!confirm(t(kind === "blank" ? "start.confirmBlank" : "start.confirmExample", counts))) return;
+  const fresh = startData(kind, data);
+  try {
+    await saveAll(fresh);
+    data = fresh;
+    renderAll();
+    toast(t(kind === "blank" ? "start.doneBlank" : "start.doneExample"));
+  } catch (err) {
+    toast(describeSaveError(err));
+  }
+}
+$("start-blank").addEventListener("click", () => void startOver("blank"));
+$("start-example").addEventListener("click", () => void startOver("example"));
+
 for (const radio of Array.from(document.querySelectorAll<HTMLInputElement>('input[name="language"]')))
   radio.addEventListener("change", () => {
     const language = radio.value as Language;
@@ -422,6 +439,7 @@ function followHash(): void {
   const tab = TABS.find((name) => location.hash === `#${name}`);
   if (target) openExam(target);
   else if (location.hash === "#add-exam") openExam();
+  else if (location.hash === "#add-module") openExam(undefined, t("form.addModule")); // a module comes with its exam; the date can wait
   else if (hash.has("add-resource"))
     openResource(undefined, { module: hash.get("module") ?? "", category: hash.get("category") ?? "", title: hash.get("title") ?? "" });
   else showTab(tab ?? "countdown");

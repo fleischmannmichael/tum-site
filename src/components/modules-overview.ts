@@ -13,6 +13,15 @@ function when(state: ReturnType<typeof examClock>): string {
 /** One card per module: its exams with dates and days left, checklist progress and how many links it has. */
 export function renderModulesOverview(root: HTMLElement, data: StoredData, now: number): void {
   const ids = data.exams.map((e) => e.id);
+  if (!data.exams.length) {
+    // A blank page: say how modules come about, and offer to add one.
+    const li = el("li", "overview-empty glass-card");
+    const add = el("a", "detail__edit", t("empty.addModule"));
+    add.href = "settings/index.html#add-module";
+    li.append(el("p", "", t("empty.modules")), add);
+    root.replaceChildren(li);
+    return;
+  }
   root.replaceChildren(
     ...modulesInOrder(data.exams).map((exams) => {
       const first = exams[0]!;
