@@ -70,3 +70,11 @@ npm run assets   # → public/hero/<name>/ (full.webp + 48/96 px load-in version
 The site shows a picture for the current season (Munich, meteorological
 seasons: Mar–May, Jun–Aug, Sep–Nov, Dec–Feb), rotating daily if there are
 several, and falls back to `any-…` pictures, then to whatever exists.
+
+Optional crops for other screens use the same name plus a suffix:
+`fall_hero_mobile.jpg` for phones / portrait windows and `fall_hero_21x9.jpg`
+for ultrawide (21:9) screens. The site switches to the crop that fits the
+window (also on rotate/resize) and otherwise shows the main picture.
+
+Uploading a picture to `assets/heroes/` on github.com is enough: the deploy
+runs `npm run assets` itself.

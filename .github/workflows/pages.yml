@@ -32,6 +32,8 @@ jobs:
           enablement: true
 
       - run: npm ci
+      # Pictures added to assets/heroes/ (e.g. uploaded on github.com) are prepared here, so no local step is needed.
+      - run: npm run assets
       - run: npm test
       - run: npm run build # typecheck + website → dist/
 

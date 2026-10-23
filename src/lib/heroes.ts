@@ -1,8 +1,24 @@
 import { TIMEZONE, zonedParts } from "./countdown";
 
 export type Season = "spring" | "summer" | "autumn" | "winter";
-/** `path` is relative to the site root, e.g. "hero/autumn/". */
-export type Hero = { name: string; season: Season | "any"; path: string };
+export type HeroVariant = "mobile" | "wide";
+/**
+ * `path` is relative to the site root, e.g. "hero/autumn/". `variants` lists
+ * extra crops in sub-folders: mobile/ (portrait screens), wide/ (21:9).
+ */
+export type Hero = { name: string; season: Season | "any"; path: string; variants?: HeroVariant[] };
+
+/** Window shapes that get their own crop: portrait (phones) and ultrawide (21:9 ≈ 2.33). */
+export const VARIANT_MEDIA: Record<HeroVariant, string> = {
+  mobile: "(max-aspect-ratio: 3/4)",
+  wide: "(min-aspect-ratio: 2/1)",
+};
+
+/** Folder of the crop that suits the window, or the main picture's. */
+export function heroFolder(hero: Hero, matches: (query: string) => boolean): string {
+  const variant = hero.variants?.find((v) => matches(VARIANT_MEDIA[v]));
+  return variant ? `${hero.path}${variant}/` : hero.path;
+}
 
 /** Meteorological seasons in Munich: spring Mar–May, summer Jun–Aug, autumn Sep–Nov, winter Dec–Feb. */
 export function seasonOf(now: number, tz = TIMEZONE): Season {

@@ -5,9 +5,15 @@
 //   any-night.jpg ("any" = usable all year). Then run `npm run assets` and rebuild.
 // Several pictures per season are fine; the new tab rotates through them by day.
 //
+// Optional crops for other screens: same name plus a suffix —
+//   fall_hero_mobile.jpg  phones / portrait screens  (also: -phone, -portrait)
+//   fall_hero_21x9.jpg    ultrawide screens, 21:9    (also: -wide, -ultrawide)
+// The site picks the one that fits the window and falls back to the main picture.
+//
 // For each picture this writes public/hero/<name>/ with:
 //   full.webp  the picture itself (max 2400 px wide)
 //   48.png, 96.png  tiny versions for the depixelate-in effect
+// (plus mobile/ and wide/ with the same three files for each crop there is)
 // and lists them all in src/lib/heroes.generated.ts.
 import { mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -24,16 +30,42 @@ const STEPS = [48, 96];
 const files = (await readdir(SRC)).filter((f) => /\.(jpe?g|png|webp)$/i.test(f)).sort();
 if (!files.length) throw new Error(`No pictures in ${SRC}`);
 
+// "fall_hero_21x9.jpg" → base "fall-hero", variant "wide".
+const VARIANTS = { mobile: ["mobile", "phone", "portrait"], wide: ["21x9", "21-9", "wide", "ultrawide"] };
+function parse(file) {
+  const slug = file.replace(/\.[^.]+$/, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  for (const [variant, suffixes] of Object.entries(VARIANTS))
+    for (const suffix of suffixes) if (slug.endsWith(`-${suffix}`)) return { name: slug.slice(0, -suffix.length - 1), variant };
+  return { name: slug, variant: "main" };
+}
+
 await rm(OUT, { recursive: true, force: true }); // drop pictures that were removed
-const heroes = [];
+const groups = new Map();
 for (const file of files) {
-  const name = file.replace(/\.[^.]+$/, "").toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+  const { name, variant } = parse(file);
+  const group = groups.get(name) ?? {};
+  if (group[variant]) throw new Error(`${file} and ${group[variant]} are both the ${variant} picture of "${name}"`);
+  groups.set(name, { ...group, [variant]: file });
+}
+
+const heroes = [];
+for (const [name, group] of groups) {
   const prefix = name.split("-")[0];
   const alias = { fall: "autumn" }[prefix] ?? prefix;
   const season = SEASONS.includes(alias) ? alias : "any";
-  if (!SEASONS.includes(alias)) console.warn(`! ${file}: name doesn't start with a season, using it all year`);
+  if (!SEASONS.includes(alias)) console.warn(`! ${name}: name doesn't start with a season, using it all year`);
+  if (!group.main) throw new Error(`"${name}" has crops (${Object.values(group).join(", ")}) but no main picture`);
 
-  const dir = `${OUT}${name}/`;
+  const variants = [];
+  for (const [variant, file] of Object.entries(group)) {
+    const dir = variant === "main" ? `${OUT}${name}/` : `${OUT}${name}/${variant}/`;
+    await prepare(file, dir, `${name}${variant === "main" ? "" : ` [${variant}]`} (${season})`);
+    if (variant !== "main") variants.push(variant);
+  }
+  heroes.push({ name, season, path: `hero/${name}/`, ...(variants.length ? { variants: variants.sort() } : {}) }); // relative to the site root
+}
+
+async function prepare(file, dir, label) {
   await mkdir(dir, { recursive: true });
   const img = sharp(`${SRC}${file}`).rotate();
   const { width, height } = await img.metadata();
@@ -41,8 +73,7 @@ for (const file of files) {
   for (const w of STEPS) await img.clone().resize({ width: w, kernel: "mitchell" }).png({ compressionLevel: 9 }).toFile(`${dir}${w}.png`);
 
   const sizes = await Promise.all(["full.webp", ...STEPS.map((w) => `${w}.png`)].map(async (f) => `${f} ${((await stat(dir + f)).size / 1024).toFixed(1)} KB`));
-  console.log(`${name} (${season}, ${width}×${height}): ${sizes.join(", ")}`);
-  heroes.push({ name, season, path: `hero/${name}/` }); // relative to the site root
+  console.log(`${label} ${width}×${height}: ${sizes.join(", ")}`);
 }
 
 await writeFile(

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { zonedToInstant } from "./countdown";
-import { pickHero, seasonOf, type Hero } from "./heroes";
+import { pickHero, seasonOf, type Hero, heroFolder, VARIANT_MEDIA } from "./heroes";
 
 const at = (y: number, m: number, d: number, h = 12) => zonedToInstant({ y, m, d, h });
 const hero = (name: string, season: Hero["season"]): Hero => ({ name, season, path: `/hero/${name}/` });
@@ -32,5 +32,21 @@ describe("pickHero", () => {
     expect(pickHero(all, at(2027, 7, 1))?.name).toBe("any-night");
     expect(pickHero([hero("autumn", "autumn")], at(2027, 7, 1))?.name).toBe("autumn");
     expect(pickHero([], at(2027, 7, 1))).toBeUndefined();
+  });
+});
+
+describe("heroFolder", () => {
+  const hero = { name: "fall-hero", season: "autumn", path: "hero/fall-hero/", variants: ["mobile", "wide"] } as const;
+  const shape = (matching: string) => (query: string) => query === matching;
+
+  it("uses the crop that fits the window shape", () => {
+    expect(heroFolder({ ...hero, variants: [...hero.variants] }, shape(VARIANT_MEDIA.mobile))).toBe("hero/fall-hero/mobile/");
+    expect(heroFolder({ ...hero, variants: [...hero.variants] }, shape(VARIANT_MEDIA.wide))).toBe("hero/fall-hero/wide/");
+  });
+
+  it("falls back to the main picture", () => {
+    expect(heroFolder({ ...hero, variants: [...hero.variants] }, () => false)).toBe("hero/fall-hero/");
+    expect(heroFolder({ ...hero, variants: ["wide"] }, shape(VARIANT_MEDIA.mobile))).toBe("hero/fall-hero/");
+    expect(heroFolder({ name: "x", season: "any", path: "hero/x/" }, () => true)).toBe("hero/x/");
   });
 });

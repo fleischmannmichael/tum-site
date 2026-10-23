@@ -6,7 +6,7 @@ import { applyRoute, currentRoute, initModulesMenu, renderModulesMenu } from "..
 import { generalGroups } from "../components/resource-grid";
 import { applyAccent } from "../lib/accent";
 import { HEROES } from "../lib/heroes.generated";
-import { pickHero } from "../lib/heroes";
+import { VARIANT_MEDIA, heroFolder, pickHero } from "../lib/heroes";
 import { summarize } from "../lib/countdown";
 import { loadAll, onDataChanged } from "../lib/storage";
 import type { StoredData } from "../lib/types";
@@ -59,14 +59,22 @@ function tick(force = false): void {
 }
 
 /** Today's picture (by season), set before anything waits on storage so it paints first. */
+/** Uses the phone or 21:9 crop when there is one and the window has that shape. */
 function applyHero(): void {
   const hero = pickHero(HEROES, Date.now());
   if (!hero) return;
+  const folder = heroFolder(hero, (query) => matchMedia(query).matches);
   const style = document.querySelector<HTMLElement>(".hero")!.style;
   for (const [layer, file] of [["48", "48.png"], ["96", "96.png"], ["full", "full.webp"]])
     // Relative to the page, so it works at the site root, under /tum-site/ on GitHub Pages, and in the extension.
-    style.setProperty(`--hero-${layer}`, `url("${new URL(hero.path + file, document.baseURI).href}")`);
+    style.setProperty(`--hero-${layer}`, `url("${new URL(folder + file, document.baseURI).href}")`);
+  // The default focus point keeps the tower in frame on the main picture; a crop made for the screen is centred.
+  if (folder === hero.path) style.removeProperty("--hero-position");
+  else style.setProperty("--hero-position", "50% 50%");
 }
+
+// Rotating a phone or resizing the window can switch crops.
+for (const query of Object.values(VARIANT_MEDIA)) matchMedia(query).addEventListener("change", applyHero);
 
 applyHero();
 initModulesMenu();
