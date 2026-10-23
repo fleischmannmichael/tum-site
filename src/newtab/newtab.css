@@ -1,3 +1,5 @@
-/* M1 placeholder; tokens and real styling arrive in M3. */
+/* Unstyled until M3; just readable on dark. */
 html { background: #0b0f1a; color: #f2f3f5; font-family: system-ui, sans-serif; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; }
+body { margin: 0 auto; max-width: 40rem; padding: 2rem 1rem; }
+.days { font-size: 2rem; margin: 0; }
+.detail { font-variant-numeric: tabular-nums; opacity: 0.6; }
