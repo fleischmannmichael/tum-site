@@ -3,7 +3,8 @@
 @import "../styles/base.css";
 @import "../components/glass-card.css";
 @import "../components/pill-nav.css";
-@import "../components/exam-list.css";
+@import "../components/exam-grid.css";
+@import "../components/exam-detail.css";
 @import "../styles/motion.css";
 
 /* ---- Hero ---- */
@@ -29,7 +30,7 @@
 
 .hero__layer--48 { background-image: url("/hero/hero-48.png"); }
 .hero__layer--96 { background-image: url("/hero/hero-96.png"); }
-.hero__layer--192 { background-image: url("/hero/hero-192.png"); }
+.hero__layer--384 { background-image: url("/hero/hero-384.png"); }
 
 .hero__overlay {
   background: var(--hero-overlay);
@@ -52,7 +53,7 @@
 
 main {
   width: 100%;
-  max-width: var(--content-width);
+  max-width: var(--content-width-wide);
 }
 
 .view:not([hidden]) {
@@ -68,7 +69,7 @@ main {
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
-  padding-block: clamp(var(--space-7), 14vh, 10rem) var(--space-2);
+  padding-block: clamp(var(--space-6), 9vh, 7rem) var(--space-2);
   text-align: center;
   text-shadow: var(--text-shadow-hero);
 }
@@ -122,7 +123,19 @@ main {
 
 /* ---- Placeholder view ---- */
 .placeholder {
+  width: 100%;
+  max-width: var(--content-width);
   margin-top: var(--space-8);
+  padding: var(--space-3);
+}
+
+.placeholder__title {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 .placeholder__text {

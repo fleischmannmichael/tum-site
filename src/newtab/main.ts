@@ -1,17 +1,31 @@
+import { initExamDetail } from "../components/exam-detail";
+import { initPillNav } from "../components/pill-nav";
 import { summarize } from "../lib/countdown";
 import { loadAll, onDataChanged } from "../lib/storage";
 import type { StoredData } from "../lib/types";
-import { initPillNav } from "../components/pill-nav";
-import { render } from "./render";
+import { renderExams, renderHeadline } from "./render";
 
 let data: StoredData;
 let timer: number | undefined;
+let tilesKey = "";
+
+const detail = initExamDetail(document.getElementById("exam-detail") as HTMLDialogElement, () => data.exams);
 
 /** Renders now, then re-renders on the next whole second (or minute). */
 function tick(): void {
   window.clearTimeout(timer);
   const now = Date.now();
-  render(summarize(data.exams, now), data.exams, data.settings.showSeconds);
+  const summary = summarize(data.exams, now);
+  renderHeadline(summary, data.settings.showSeconds);
+
+  // Day counts only change at midnight or when data changes.
+  const key = JSON.stringify([data.exams, summary.upcoming.map((u) => u.days), summary.done.map((e) => e.id)]);
+  if (key !== tilesKey) {
+    tilesKey = key;
+    renderExams(summary, data.exams);
+    detail.refresh();
+  }
+
   const step = data.settings.showSeconds ? 1000 : 60_000;
   timer = window.setTimeout(tick, step - (now % step) + 5);
 }

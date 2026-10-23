@@ -1,6 +1,6 @@
 {
   "name": "exam-tab",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "assets": "node scripts/pixelate.mjs"
+    "assets": "node scripts/draw-hero.mjs"
   },
   "devDependencies": {
     "@types/chrome": "^0.3.6",

@@ -14,6 +14,7 @@
   --color-accent-soft: rgb(106 168 236 / 0.18);
   --color-warm: #f2b366; /* "exam soon" (≤ 7 days) */
   --color-warm-soft: rgb(242 179 102 / 0.16);
+  --color-accent-border: rgb(106 168 236 / 0.55);
   --color-focus: #9cc8ff;
 
   /* Fallback dot colours for exams without their own `color`. */
@@ -28,16 +29,20 @@
   /* Dark tint under the white sheen: over the bright flags, white-only glass
      can't keep muted text at WCAG AA. */
   --glass-tint: rgb(var(--color-bg-rgb) / 0.5);
+  --glass-tint-strong: rgb(var(--color-bg-rgb) / 0.82);
   --glass-fill-hover: rgb(255 255 255 / 0.09);
   --glass-border: rgb(255 255 255 / 0.12);
+  --glass-border-strong: rgb(255 255 255 / 0.22);
   --glass-blur: blur(20px) saturate(140%);
   --glass-shadow: 0 24px 64px -16px rgb(0 0 0 / 0.55), 0 2px 8px rgb(0 0 0 / 0.25);
   --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.08);
   --hairline: 1px;
+  --backdrop: rgb(var(--color-bg-rgb) / 0.55);
+  --backdrop-blur: blur(6px);
 
   /* ---- Radius ---- VERIFY */
   --radius-card: 24px;
-  --radius-row: 14px;
+  --radius-tile: 20px;
   --radius-pill: 999px;
 
   /* ---- Type ---- VERIFY: families/weights/tracking */
@@ -71,6 +76,10 @@
   --space-8: 4rem;
   --gutter: clamp(1rem, 0.6rem + 1.8vw, 2rem);
   --content-width: 36rem;
+  --content-width-wide: 72rem;
+  --tile-min-height: 8.5rem;
+  --detail-width: 34rem;
+  --detail-label-width: 10rem;
   --tap-target: 44px;
   --dot-size: 0.625rem;
 

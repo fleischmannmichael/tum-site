@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Exam Tab",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A calm, dark new tab with a countdown to your next exam.",
   "chrome_url_overrides": {
     "newtab": "newtab/index.html"

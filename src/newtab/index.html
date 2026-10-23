@@ -7,7 +7,7 @@
     <title>New Tab</title>
     <link rel="preload" href="/hero/hero-48.png" as="image" />
     <link rel="preload" href="/hero/hero-96.png" as="image" />
-    <link rel="preload" href="/hero/hero-192.png" as="image" />
+    <link rel="preload" href="/hero/hero-384.png" as="image" />
     <link rel="stylesheet" href="./newtab.css" />
   </head>
   <body>
@@ -15,7 +15,7 @@
     <div class="hero" aria-hidden="true">
       <div class="hero__layer hero__layer--48"></div>
       <div class="hero__layer hero__layer--96"></div>
-      <div class="hero__layer hero__layer--192"></div>
+      <div class="hero__layer hero__layer--384"></div>
       <div class="hero__overlay"></div>
     </div>
 
@@ -43,24 +43,33 @@
             <p id="detail" class="countdown__detail"></p>
           </section>
 
-          <section class="exam-card glass-card" aria-labelledby="upcoming-title">
-            <h2 id="upcoming-title" class="exam-card__title">Upcoming</h2>
-            <ul id="upcoming" class="exam-list"></ul>
+          <section class="exams" aria-labelledby="exams-title">
+            <h2 id="exams-title" class="visually-hidden">All exams</h2>
+            <ul id="exam-grid" class="exam-grid"></ul>
             <details id="done-section" class="done-list" hidden>
               <summary class="done-list__summary">Done (<span id="done-count">0</span>)</summary>
-              <ul id="done" class="exam-list"></ul>
+              <ul id="done-grid" class="exam-grid"></ul>
             </details>
           </section>
         </div>
 
         <div id="view-resources" class="view" hidden>
-          <section class="exam-card glass-card placeholder" aria-labelledby="resources-title">
-            <h1 id="resources-title" class="exam-card__title">Resources</h1>
+          <section class="glass-card placeholder" aria-labelledby="resources-title">
+            <h1 id="resources-title" class="placeholder__title">Resources</h1>
             <p class="placeholder__text">Study links arrive in M5.</p>
           </section>
         </div>
       </main>
     </div>
+    <dialog id="exam-detail" class="detail glass-card" aria-labelledby="detail-title">
+      <div class="detail__inner">
+        <form method="dialog">
+          <button class="detail__close" aria-label="Close">✕</button>
+        </form>
+        <div class="detail__body"></div>
+        <p class="detail__hint">Details are editable once the settings page lands (M4).</p>
+      </div>
+    </dialog>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

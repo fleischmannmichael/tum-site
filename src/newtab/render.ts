@@ -1,4 +1,4 @@
-import { doneRows, SOON_DAYS, upcomingRows } from "../components/exam-list";
+import { doneTiles, examTiles, SOON_DAYS } from "../components/exam-grid";
 import type { Summary } from "../lib/countdown";
 import { formatDateDE, formatDuration } from "../lib/format";
 import type { Exam } from "../lib/types";
@@ -12,15 +12,15 @@ function setDays(days: number): void {
   $("days").replaceChildren(num, document.createTextNode(days === 1 ? " day" : " days"));
 }
 
-export function render(summary: Summary, exams: Exam[], showSeconds: boolean): void {
+/** Headline; cheap enough to run every tick. */
+export function renderHeadline(summary: Summary, showSeconds: boolean): void {
   const { state } = summary;
   const eyebrow = $("eyebrow");
   const headline = $("headline");
   const days = $("days");
   const detail = $("detail");
-  const section = headline.closest(".countdown")!;
 
-  section.classList.toggle("countdown--soon", state.kind !== "none" && state.next.days <= SOON_DAYS);
+  headline.closest(".countdown")!.classList.toggle("countdown--soon", state.kind !== "none" && state.next.days <= SOON_DAYS);
 
   if (state.kind === "none") {
     eyebrow.textContent = "Next exam";
@@ -40,10 +40,17 @@ export function render(summary: Summary, exams: Exam[], showSeconds: boolean): v
     setDays(state.next.days);
     detail.textContent = `Starts in ${formatDuration(state.remaining, showSeconds)}`;
   }
+}
 
+/** Tiles; only re-rendered when their content changes, so focus isn't lost every tick. */
+export function renderExams(summary: Summary, exams: Exam[]): void {
   const ids = exams.map((e) => e.id);
-  $("upcoming").replaceChildren(...upcomingRows(summary.upcoming, summary.tba, ids));
+  const focusedId = (document.activeElement as HTMLElement | null)?.dataset?.examId;
+
+  $("exam-grid").replaceChildren(...examTiles(summary, ids));
   $("done-section").hidden = summary.done.length === 0;
   $("done-count").textContent = String(summary.done.length);
-  $("done").replaceChildren(...doneRows(summary.done, ids));
+  $("done-grid").replaceChildren(...doneTiles(summary, ids));
+
+  if (focusedId) document.querySelector<HTMLElement>(`[data-exam-id="${CSS.escape(focusedId)}"]`)?.focus();
 }
