@@ -31,7 +31,7 @@ for (const file of files) {
   const prefix = name.split("-")[0];
   const alias = { fall: "autumn" }[prefix] ?? prefix;
   const season = SEASONS.includes(alias) ? alias : "any";
-  if (season !== prefix) console.warn(`! ${file}: name doesn't start with a season, using it all year`);
+  if (!SEASONS.includes(alias)) console.warn(`! ${file}: name doesn't start with a season, using it all year`);
 
   const dir = `${OUT}${name}/`;
   await mkdir(dir, { recursive: true });
