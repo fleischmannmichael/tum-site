@@ -84,12 +84,10 @@
   --dot-size: 0.625rem;
 
   /* ---- Hero ---- */
-  /* Portrait/tablet: ~30% keeps the clock tower in frame down to 360px.
-     Landscape (see below): the full photo height fits, so shift it left
-     instead; otherwise the clock would sit right behind the card. */
-  --hero-position: 28% 62%;
+  /* ~30% keeps the clock tower in frame from 360px to wide screens. */
+  --hero-position: 30% 50%;
   /* Lighter in the middle so the tower and clock stay visible; the headline
-     relies on the vignette + text shadow, the card on its own glass. */
+     relies on the vignette + text shadow, the tiles on their own glass. */
   --hero-overlay:
     radial-gradient(120% 90% at 50% 40%, transparent 45%, rgb(var(--color-bg-rgb) / 0.6) 100%),
     linear-gradient(
@@ -107,10 +105,4 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out: ease-out;
   --hero-step: 180ms; /* each depixelate stage */
-}
-
-@media (min-aspect-ratio: 4/3) {
-  :root {
-    --hero-position: 70% 50%;
-  }
 }

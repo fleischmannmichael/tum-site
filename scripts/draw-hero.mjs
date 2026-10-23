@@ -1,340 +1,271 @@
-// Draws the hero as native pixel art: the TUM Thiersch tower and flags on a
-// snowy winter night. Composition follows assets/source/tum-campus.jpg, but
-// every pixel is drawn here; the photo itself is never sampled.
-// Usage: npm run assets
+// Turns the campus photo into pixel art that matches it closely.
+//   1. smooth the photo and shrink it to the art size
+//   2. reduce it to a small palette (k-means), then clean stray pixels so
+//      areas read as flat, deliberate shapes
+//   3. redraw what must be crisp by hand at its measured spot in the photo:
+//      the TUM logos, the clocks, the railing and signals on the tower
+//   4. optional night grade for dark mode
+// Usage: npm run assets            (MODE=day npm run assets for daylight)
 import { mkdir, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 // ---- Tweak these ------------------------------------------------------------
-const W = 384; // native art size; 48:25 like the old hero, so CSS positions carry over
+const MODE = process.env.MODE ?? "night"; // "night" (dark-mode hero) or "day" (as photographed)
+const W = 384; // art size; 48:25 crop of the 1920×1016 photo
 const H = 200;
-const SEED = 7; // changes stars, snowflakes and which windows are lit
-const STAR_COUNT = 140;
-const SNOW_COUNT = 260;
-const LIT_WINDOW_SHARE = 0.55;
-const STEP_WIDTHS = [48, 96]; // depixelate stages; the full-size art is the last
+const COLORS = 20; // palette size
+const CLEANUP_PASSES = 2; // majority filter passes; more = flatter shapes
+const NIGHT = { brightness: 0.75, skyFactor: 0.45, saturation: 0.95, tint: [45, 75, 170], tintStrength: 0.72, gamma: 1.25 };
+const STEP_WIDTHS = [48, 96]; // depixelate stages; the full art is the last
 
-const P = {
-  sky: ["#070b22", "#0c1434", "#132049", "#1b2c5e", "#263b72", "#334a84"],
-  star: "#f4f6ff",
-  starDim: "#8f9cd6",
-  snow: "#e9eefb",
-  snowShade: "#aab8dc",
-  snowDeep: "#7584b4",
-  patina: "#3f6a66",
-  patinaLight: "#5b8c83",
-  patinaDark: "#26413f",
-  patinaDeep: "#172a2a",
-  stoneLine: "#1c3030",
-  glass: "#0d1822",
-  lit: "#ffd27a",
-  litWarm: "#f2a446",
-  litDim: "#9b6430",
-  gold: "#f0c157",
-  goldDark: "#a9792a",
-  clockFace: "#14262a",
-  flag: "#1f5ca8",
-  flagLight: "#2f73c4",
-  flagShade: "#174886",
-  flagDeep: "#0f3062",
-  logo: "#eef4ff",
-  rod: "#9aa5bb",
-  building: "#141c33",
-  buildingEdge: "#1d2847",
-  pine: "#0f2229",
-  pineMid: "#183640",
-  pineEdge: "#22495a",
-};
+const SRC = fileURLToPath(new URL("../assets/source/tum-campus.jpg", import.meta.url));
+const OUT = fileURLToPath(new URL(process.env.OUT_DIR ?? "../public/hero/", import.meta.url));
+const SRC_W = 1920;
+const CROP_TOP = 8; // 1016 → 1000 rows, centred
+const S = W / SRC_W; // photo px → art px
 
-// ---- Tiny raster toolkit ------------------------------------------------------
+// ---- 1. Shrink ----------------------------------------------------------------
+const { data: px } = await sharp(SRC)
+  .extract({ left: 0, top: CROP_TOP, width: SRC_W, height: SRC_W / (W / H) })
+  .median(5) // drops leaf-level noise before shrinking
+  .resize(W, H, { kernel: "lanczos3" })
+  .removeAlpha()
+  .raw()
+  .toBuffer({ resolveWithObject: true });
+
+// ---- 2. Palette + cleanup -------------------------------------------------------
+// Weighted RGB distance: close enough to perceptual for picking palette entries.
+const dist = (a, b) => 2 * (a[0] - b[0]) ** 2 + 4 * (a[1] - b[1]) ** 2 + 3 * (a[2] - b[2]) ** 2;
+const pixels = [];
+for (let i = 0; i < W * H; i++) pixels.push([px[i * 3], px[i * 3 + 1], px[i * 3 + 2]]);
+
+function kmeans(points, k) {
+  // Deterministic farthest-point init, then Lloyd iterations.
+  const centers = [points[Math.floor(points.length / 2)]];
+  while (centers.length < k) {
+    let best = 0;
+    let bestD = -1;
+    for (let i = 0; i < points.length; i += 7) {
+      const d = Math.min(...centers.map((c) => dist(points[i], c)));
+      if (d > bestD) [best, bestD] = [i, d];
+    }
+    centers.push(points[best]);
+  }
+  const assign = new Uint8Array(points.length);
+  for (let iter = 0; iter < 15; iter++) {
+    const sums = centers.map(() => [0, 0, 0, 0]);
+    points.forEach((p, i) => {
+      let bi = 0;
+      for (let c = 1; c < k; c++) if (dist(p, centers[c]) < dist(p, centers[bi])) bi = c;
+      assign[i] = bi;
+      sums[bi][0] += p[0];
+      sums[bi][1] += p[1];
+      sums[bi][2] += p[2];
+      sums[bi][3]++;
+    });
+    sums.forEach((s, c) => s[3] && (centers[c] = [s[0] / s[3], s[1] / s[3], s[2] / s[3]].map(Math.round)));
+  }
+  return { centers, assign };
+}
+
+const { centers: palette, assign } = kmeans(pixels, COLORS);
+let idx = assign;
+
+// Majority filter: a pixel takes the most common colour of its 3×3 block
+// (only if that colour clearly wins), which removes speckle but keeps edges.
+for (let pass = 0; pass < CLEANUP_PASSES; pass++) {
+  const next = idx.slice();
+  for (let y = 1; y < H - 1; y++)
+    for (let x = 1; x < W - 1; x++) {
+      const counts = new Map();
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          const v = idx[(y + dy) * W + x + dx];
+          counts.set(v, (counts.get(v) ?? 0) + 1);
+        }
+      let [best, n] = [idx[y * W + x], 0];
+      for (const [v, c] of counts) if (c > n) [best, n] = [v, c];
+      if (n >= 5) next[y * W + x] = best;
+    }
+  idx = next;
+}
+
+const img = new Uint8Array(W * H * 3);
+idx.forEach((c, i) => img.set(palette[c], i * 3));
+
+// ---- 3. Hand-drawn details -------------------------------------------------------
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-const buf = new Uint8Array(W * H * 3);
-const BAYER = [
-  [0, 8, 2, 10],
-  [12, 4, 14, 6],
-  [3, 11, 1, 9],
-  [15, 7, 13, 5],
-];
-/** Ordered dither: true on a share `t` (0..1) of pixels, in a stable pattern. */
-const dither = (x, y, t) => t * 16 > BAYER[y & 3][x & 3] + 0.5;
-
-function px(x, y, color) {
+/** Pixels drawn here skip most of the night grade so they stay legible/bright. */
+const keepBright = new Uint8Array(W * H);
+function set(x, y, color, bright = false) {
   x = Math.round(x);
   y = Math.round(y);
   if (x < 0 || y < 0 || x >= W || y >= H) return;
-  const [r, g, b] = typeof color === "string" ? hex(color) : color;
-  buf.set([r, g, b], (y * W + x) * 3);
+  img.set(typeof color === "string" ? hex(color) : color, (y * W + x) * 3);
+  keepBright[y * W + x] = bright ? 1 : 0;
 }
-function rect(x0, y0, x1, y1, color) {
-  for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) px(x, y, color);
+function rect(x0, y0, x1, y1, color, bright = false) {
+  for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) set(x, y, color, bright);
 }
-function disc(cx, cy, r, color) {
-  for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r + r * 0.6) px(cx + x, cy + y, color);
+const at = (x, y) => [...img.subarray((y * W + x) * 3, (y * W + x) * 3 + 3)];
+/** Photo coordinates (1920×1016) → art coordinates. */
+const ax = (x) => Math.round(x * S);
+const ay = (y) => Math.round((y - CROP_TOP) * S);
+
+/**
+ * The TUM logo, from the official mark: five equal vertical strokes, gaps
+ * ≈ 1.19 × stroke, T bar from the far left over strokes 1–2 (stem is
+ * stroke 1, offset by one stroke), U bottom joining strokes 2–3, M bar over
+ * strokes 3–5. Snapped to whole pixels so every stroke has the same width.
+ */
+function tumLogo(x0, y0, w, h, color, clipRight = Infinity) {
+  const s = Math.max(1, Math.round(w / 10.76)); // stroke width
+  const g = Math.max(1, Math.round((w - 6 * s) / 4)); // gap
+  const t = Math.max(1, Math.round(h / 5.78)); // bar thickness
+  const width = 6 * s + 4 * g;
+  const left = x0 + Math.round((w - width) / 2);
+  const v = [1, 2, 3, 4, 5].map((n) => left + n * s + (n - 1) * g); // stroke x starts
+  const clip = (a, b, ya, yb) => rect(a, ya, Math.min(b, clipRight), yb, color, true);
+  clip(left, v[1] + s, y0, y0 + t); // T bar
+  clip(v[2], v[4] + s, y0, y0 + t); // M bar
+  for (const sx of v) clip(sx, sx + s, y0, y0 + h); // strokes
+  clip(v[1], v[2] + s, y0 + h - t, y0 + h); // U bottom
 }
-/** Dithered halo: lights a fading share of pixels around a point. */
-function glow(cx, cy, r, color, strength = 0.5) {
-  for (let y = -r; y <= r; y++)
-    for (let x = -r; x <= r; x++) {
-      const d = Math.hypot(x, y) / r;
-      if (d < 1 && dither(cx + x, cy + y, (1 - d) ** 2 * strength)) px(cx + x, cy + y, color);
+
+const luma = ([r, g, b]) => 0.299 * r + 0.587 * g + 0.114 * b;
+
+/** Removes the photo's blurry logo: light pixels take the flag colour to their left, so fabric folds survive. */
+function eraseLogo(x0, y0, x1, y1) {
+  for (let y = y0; y < y1; y++) {
+    let fill = at(Math.max(x0 - 1, 0), y);
+    for (let x = x0; x < x1; x++) {
+      const c = at(x, y);
+      if (luma(c) > 160) set(x, y, fill);
+      else fill = c;
     }
+  }
 }
-function rng(seed) {
-  let s = seed >>> 0;
-  return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
-}
-const rand = rng(SEED);
 
-// ---- Sky ----------------------------------------------------------------------
-function sky() {
-  const stops = P.sky;
-  for (let y = 0; y < H; y++) {
-    const t = Math.min(y / (H * 0.78), 1) * (stops.length - 1);
-    const i = Math.min(Math.floor(t), stops.length - 2);
-    for (let x = 0; x < W; x++) px(x, y, dither(x, y, t - i) ? stops[i + 1] : stops[i]);
+function logos() {
+  const white = MODE === "night" ? "#e6edf8" : "#ffffff";
+  // [x0, x1, y0, y1] in photo px (measured), plus the flag's right edge for clipping.
+  const boxes = [
+    [800, 910, 700, 782, 925],
+    [1002, 1139, 551, 640, 1140],
+    [1225, 1389, 342, 432, 1400],
+    [1486, 1678, 104, 203, 1780],
+  ];
+  for (const [x0, x1, y0, y1, edge] of boxes) {
+    eraseLogo(ax(x0) - 2, ay(y0) - 2, Math.min(ax(x1) + 3, ax(edge)), ay(y1) + 3);
+    tumLogo(ax(x0), ay(y0), ax(x1) - ax(x0), ay(y1) - ay(y0), white, ax(edge));
   }
-  for (let i = 0; i < STAR_COUNT; i++) {
-    const x = rand() * W;
-    const y = rand() ** 1.6 * H * 0.6; // denser near the top
-    px(x, y, rand() < 0.3 ? P.star : P.starDim);
+}
+
+function disc(cx, cy, r, color, bright) {
+  for (let y = -r - 1; y <= r + 1; y++)
+    for (let x = -r - 1; x <= r + 1; x++) if (x * x + y * y <= r * r + r * 0.5) set(cx + x, cy + y, color, bright);
+}
+
+function clocks() {
+  const gold = "#e7bf5a";
+  const goldDark = "#9c7426";
+  const face = "#1d3130";
+  const cx = ax(612);
+  const cy = ay(808);
+  const r = Math.round(80 * S);
+  disc(cx, cy, r + 1, goldDark, true);
+  disc(cx, cy, r, gold, true);
+  disc(cx, cy, r - 2, face, false);
+  // Roman numerals, reduced to gold ticks.
+  for (let h = 0; h < 12; h++) {
+    const a = (h / 12) * Math.PI * 2;
+    for (const k of [3, 4]) set(cx + Math.sin(a) * (r - k), cy - Math.cos(a) * (r - k), gold, true);
   }
-  // A few four-point sparkles.
-  for (const [x, y, r] of [[300, 30, 4], [62, 30, 2], [190, 92, 2], [356, 60, 2], [20, 52, 1]]) {
-    glow(x, y, r * 3, P.starDim, 0.45);
-    for (let k = -r; k <= r; k++) {
-      px(x + k, y, Math.abs(k) === r ? P.starDim : P.star);
-      px(x, y + k, Math.abs(k) === r ? P.starDim : P.star);
+  const hand = (deg, len) => {
+    const a = (deg / 180) * Math.PI;
+    for (let k = 0; k <= len; k++) set(cx + Math.sin(a) * k, cy - Math.cos(a) * k, gold, true);
+  };
+  hand(20, r - 7); // hands as in the photo: roughly 12:19
+  hand(100, r - 4);
+  set(cx, cy, gold, true);
+  // Side clock, seen almost edge-on.
+  const sx = ax(326);
+  const sy = ay(838);
+  for (let y = -16; y <= 16; y++)
+    for (let x = -4; x <= 4; x++) {
+      const d = (x / 4) ** 2 + (y / 16) ** 2;
+      if (d <= 1) set(sx + x, sy + y, d > 0.55 ? gold : face, d > 0.55);
     }
-  }
-}
-
-// ---- Distant building with lit windows (behind the flags) -------------------------
-function backBuilding() {
-  const top = 166;
-  rect(150, top, W, H, P.building);
-  rect(150, top, W, top + 1, P.buildingEdge);
-  rect(150, top - 2, W, top, P.snowDeep); // snow on the roof edge
-  for (let y = top + 6; y < H; y += 7)
-    for (let x = 154; x < W - 2; x += 6) {
-      const r = rand();
-      if (r < LIT_WINDOW_SHARE * 0.8) rect(x, y, x + 3, y + 4, r < 0.15 ? P.lit : P.litDim);
-    }
-}
-
-// ---- Thiersch tower -------------------------------------------------------------
-// Architecture sits in the lower half so the headline always has calm sky behind it.
-const T = { side0: 60, front0: 76, front1: 152, top: 118, clockX: 114, clockY: 166, clockR: 14 };
-
-function towerBody() {
-  // Side face (in shadow), front face (moonlit).
-  rect(T.side0, T.top, T.front0, H, P.patinaDark);
-  rect(T.front0, T.top, T.front1, H, P.patina);
-  // Pilasters: lighter vertical strips with a shadow edge.
-  for (const x of [T.front0, 100, 126, T.front1 - 4]) {
-    rect(x, T.top, x + 4, H, P.patinaLight);
-    rect(x + 4, T.top, x + 5, H, P.patinaDark);
-  }
-  for (const x of [T.side0, 68]) rect(x, T.top, x + 2, H, P.patina);
-  // Horizontal stone courses.
-  for (const y of [T.top + 23, T.clockY + 22]) {
-    rect(T.side0, y, T.front1 + 2, y + 2, P.patinaDark);
-    rect(T.front0, y, T.front1 + 2, y + 1, P.patinaLight);
-  }
 }
 
 function towerTop() {
-  // Cornice, wider than the body, then a parapet with railing and corner blocks.
-  rect(T.side0 - 3, T.top - 6, T.front1 + 4, T.top, P.patinaLight);
-  rect(T.side0 - 3, T.top - 2, T.front1 + 4, T.top, P.patinaDark);
-  rect(T.side0 - 3, T.top - 8, T.front1 + 4, T.top - 6, P.snow); // snow on the cornice
-  rect(T.side0 - 3, T.top - 6, T.front1 + 4, T.top - 5, P.snowShade);
-  // Railing.
-  rect(T.side0 + 2, T.top - 20, T.front1 - 2, T.top - 19, P.patinaLight);
-  for (let x = T.side0 + 2; x < T.front1 - 2; x += 3) rect(x, T.top - 19, x + 1, T.top - 8, P.patinaDeep);
-  // Corner blocks with snow caps.
-  for (const [x0, x1] of [[T.side0 - 2, T.side0 + 12], [T.front1 - 12, T.front1 + 2]]) {
-    rect(x0, T.top - 22, x1, T.top - 8, P.patina);
-    rect(x0, T.top - 22, x0 + 2, T.top - 8, P.patinaLight);
-    rect(x0, T.top - 24, x1, T.top - 21, P.snow);
-  }
-  // Small rooftop hut and the diamond-shaped weather signals from the photo.
-  rect(92, T.top - 26, 108, T.top - 19, P.patinaDark);
-  rect(91, T.top - 28, 109, T.top - 26, P.snow);
-  rect(130, T.top - 34, 131, T.top - 20, P.rod);
-  for (const [x, y] of [[124, T.top - 34], [136, T.top - 34], [130, T.top - 38]]) {
-    px(x, y - 1, P.rod); px(x - 1, y, P.rod); px(x + 1, y, P.rod); px(x, y + 1, P.rod); px(x, y, P.snowShade);
+  // Railing and the three diamond signals, too thin to survive the shrink.
+  const rail = "#24403a";
+  const y0 = ay(440);
+  const y1 = ay(500);
+  rect(ax(412), y0, ax(772), y0 + 1, rail);
+  for (let x = ax(412); x < ax(772); x += 3) rect(x, y0, x + 1, y1, rail);
+  for (const [x, y] of [[672, 457], [740, 457], [797, 455]]) {
+    const [cx, cy] = [ax(x), ay(y)];
+    for (const [dx, dy] of [[0, -2], [-1, -1], [0, -1], [1, -1], [-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]])
+      set(cx + dx, cy + dy, "#c9ccd3");
+    rect(cx, cy + 3, cx + 1, y0 + 1, rail);
   }
 }
 
-function towerWindows() {
-  // Upper row: four tall windows between the pilasters.
-  const lit = () => (rand() < LIT_WINDOW_SHARE ? (rand() < 0.5 ? P.lit : P.litWarm) : P.glass);
-  for (const x of [82, 91, 107, 116, 131, 140]) {
-    const c = lit();
-    rect(x, T.top + 4, x + 6, T.top + 19, c);
-    rect(x, T.top + 11, x + 6, T.top + 12, P.stoneLine); // transom
-    if (c !== P.glass) glow(x + 3, T.top + 11, 9, c, 0.25);
-  }
-  // Side face windows (narrow, in shadow).
-  for (let y = T.top + 4; y < H; y += 26) rect(63, y, 67, y + 14, rand() < 0.4 ? P.litDim : P.glass);
-  // Round windows flanking the clock.
-  for (const x of [88, 140]) {
-    disc(x, T.clockY - 2, 5, P.patinaDeep);
-    disc(x, T.clockY - 2, 4, rand() < 0.6 ? P.litWarm : P.glass);
-    rect(x - 4, T.clockY - 2, x + 5, T.clockY - 1, P.stoneLine);
-  }
-  // Lower row.
-  for (const x of [82, 107, 131]) {
-    const c = lit();
-    const y0 = T.clockY + 26;
-    rect(x, y0, x + 15, H, c);
-    for (let k = x + 4; k < x + 15; k += 5) rect(k, y0, k + 1, H, P.stoneLine);
-    if (c !== P.glass) glow(x + 7, y0 + 6, 12, c, 0.2);
-  }
-}
-
-function clock() {
-  const { clockX: cx, clockY: cy, clockR: r } = T;
-  glow(cx, cy, r + 12, P.goldDark, 0.55);
-  disc(cx, cy, r + 2, P.patinaDeep);
-  disc(cx, cy, r, P.gold);
-  disc(cx, cy, r - 2, P.goldDark);
-  disc(cx, cy, r - 3, P.clockFace);
-  // Hour marks (the photo's roman numerals, reduced to ticks).
-  for (let h = 0; h < 12; h++) {
-    const a = (h / 12) * Math.PI * 2;
-    const len = h % 3 === 0 ? 3 : 2;
-    for (let k = 0; k < len; k++) px(cx + Math.sin(a) * (r - 4 - k), cy - Math.cos(a) * (r - 4 - k), P.gold);
-  }
-  // Hands at ten past ten.
-  const hand = (a, len) => {
-    for (let k = 0; k <= len; k++) px(cx + Math.sin(a) * k, cy - Math.cos(a) * k, P.gold);
+function windows() {
+  // Window grid of the tower, measured from the photo (x0, x1, y0, y1).
+  const glass = "#17242a";
+  const frame = "#3b5a55";
+  const panes = (x0, x1, y0, y1, cols, rows) => {
+    rect(ax(x0), ay(y0), ax(x1), ay(y1), glass);
+    for (let c = 1; c < cols; c++) {
+      const x = Math.round(ax(x0) + ((ax(x1) - ax(x0)) * c) / cols);
+      rect(x, ay(y0), x + 1, ay(y1), frame);
+    }
+    for (let r = 1; r < rows; r++) {
+      const y = Math.round(ay(y0) + ((ay(y1) - ay(y0)) * r) / rows);
+      rect(ax(x0), y, ax(x1), y + 1, frame);
+    }
   };
-  hand((-2 / 12) * Math.PI * 2, 6);
-  hand((2 / 12) * Math.PI * 2, 9);
-  px(cx, cy, P.lit);
-  // Second clock on the side face, foreshortened to an ellipse.
-  for (let y = -12; y <= 12; y++)
-    for (let x = -4; x <= 4; x++) {
-      const d = (x / 4.5) ** 2 + (y / 12.5) ** 2;
-      if (d <= 1) px(68 + x, cy + y, d > 0.6 ? P.goldDark : P.clockFace);
-    }
-}
-
-// ---- TUM flags ------------------------------------------------------------------
-// The logo as a 15×5 bitmap: T, then U and M sharing strokes.
-const LOGO = ["#####.#########", "..#...#...#...#", "..#...#...#...#", "..#...#...#...#", "..#####...#...#"];
-
-function flag(x0, x1, top, scale) {
-  const w = x1 - x0;
-  for (let y = top; y < H; y++)
-    for (let x = x0; x < x1; x++) {
-      // Fabric folds: soft vertical light/dark bands, darker toward the right edge.
-      const fold = Math.sin(((x - x0) / w) * Math.PI * 3.2);
-      const tones = [P.flagDeep, P.flagShade, P.flag, P.flagLight];
-      let i = fold > 0.6 ? 3 : fold < -0.6 ? 1 : 2;
-      if (dither(x, y, (y - (H - 60)) / 16)) i -= 1; // night falls toward the ground
-      if (x > x1 - 3) i = 0;
-      px(x, y, tones[Math.max(i, 0)]);
-    }
-  rect(x0 - 2, top - 2, x1 + 2, top, P.rod); // top rod
-  rect(x0 - 2, top - 3, x1 + 2, top - 2, P.snow);
-  const lw = LOGO[0].length * scale;
-  const lx = x0 + Math.round((w - lw) / 2);
-  const ly = top + Math.round(w * 0.32);
-  LOGO.forEach((row, ry) =>
-    [...row].forEach((ch, rx) => {
-      if (ch === "#") rect(lx + rx * scale, ly + ry * scale, lx + (rx + 1) * scale, ly + (ry + 1) * scale, P.logo);
-    }),
-  );
-}
-
-function flags() {
-  rect(352, 70, 354, H, P.rod); // flag pole
-  rect(351, 68, 355, 70, P.rod);
-  flag(156, 190, 150, 2);
-  flag(194, 236, 128, 2);
-  flag(242, 292, 104, 3);
-  flag(296, 350, 80, 3);
-}
-
-// ---- Snowy pines and foreground --------------------------------------------------
-function pine(cx, base, height, width) {
-  const tiers = Math.max(3, Math.round(height / 16));
-  const tierH = height / tiers;
-  for (let t = 0; t < tiers; t++) {
-    const yTop = base - height + t * tierH * 0.8;
-    const yBot = yTop + tierH * 1.35;
-    const halfW = (width / 2) * (0.35 + 0.65 * ((t + 1) / tiers));
-    const slope = (yBot - yTop) / halfW;
-    for (let x = Math.round(cx - halfW); x <= cx + halfW; x++) {
-      const edgeY = yTop + Math.abs(x - cx) * slope; // top surface of this tier
-      const snowDepth = 2 + (rand() < 0.35 ? 1 : 0) + (rand() < 0.12 ? 2 : 0); // occasional drips
-      for (let y = Math.ceil(edgeY); y < yBot; y++) {
-        const right = x > cx;
-        let c = right ? P.pine : P.pineMid;
-        if (x >= cx + halfW - 1) c = P.pineEdge;
-        if (y - edgeY < snowDepth) c = y - edgeY < 1 && !right ? P.snow : right ? P.snowShade : P.snow;
-        else if (y - edgeY < snowDepth + 1) c = P.snowDeep;
-        px(x, y, c);
-      }
-    }
-  }
-  rect(cx - 1, base - 4, cx + 2, base, P.pine);
-}
-
-function bushes() {
-  // Snow-covered shrubs along the bottom edge: snow on top, shade, then dark.
-  for (let x = -8; x < W + 8; x += 14 + Math.floor(rand() * 10)) {
-    const r = 8 + Math.floor(rand() * 7);
-    const cy = H - 2 + Math.floor(rand() * 4);
-    for (let y = -r; y <= r; y++)
-      for (let k = -r - 3; k <= r + 3; k++) {
-        if ((k / (r + 3)) ** 2 + (y / r) ** 2 > 1) continue;
-        const f = (y + r) / (2 * r); // 0 top → 1 bottom
-        const c = f < 0.3 ? (k < 0 ? P.snow : P.snowShade) : f < 0.42 ? P.snowShade : f < 0.5 ? P.snowDeep : P.pine;
-        px(x + k, cy + y, c);
-      }
+  for (const [x0, x1] of [[485, 522], [555, 593], [627, 664], [697, 734]]) panes(x0, x1, 557, 634, 2, 3);
+  for (const [x0, x1] of [[430, 493], [572, 637], [716, 745]]) panes(x0, x1, 905, 1016, 3, 3);
+  // Round windows beside the clock.
+  for (const [x, y, r] of [[463, 806, 30], [730, 815, 26]]) {
+    disc(ax(x), ay(y), Math.round(r * S) + 1, "#2b4744", false);
+    disc(ax(x), ay(y), Math.round(r * S), glass, false);
   }
 }
 
-function snowfall() {
-  for (let i = 0; i < SNOW_COUNT; i++) {
-    const x = rand() * W;
-    const y = rand() * H;
-    const big = rand() < 0.12;
-    px(x, y, rand() < 0.5 ? P.snow : P.snowShade);
-    if (big) {
-      px(x + 1, y, P.snowShade);
-      px(x, y + 1, P.snowShade);
-    }
-  }
-}
-
-// ---- Compose -------------------------------------------------------------------------
-sky();
-backBuilding();
-towerBody();
 towerTop();
-towerWindows();
-clock();
-flags();
-pine(22, H + 6, 130, 56);
-pine(372, H + 4, 104, 48);
-pine(46, H + 8, 70, 30);
-bushes();
-snowfall();
+windows();
+clocks();
+logos();
 
-const OUT = fileURLToPath(new URL(process.env.OUT_DIR ?? "../public/hero/", import.meta.url));
+// ---- 4. Night grade -----------------------------------------------------------------
+function grade([r, g, b], bright) {
+  const n = NIGHT;
+  // Saturated colours (flags, leaves) keep more light than the pale sky;
+  // a uniform darkening would make the blue flags melt into a navy sky.
+  const max = Math.max(r, g, b);
+  const sat = max ? (max - Math.min(r, g, b)) / max : 0;
+  const k = bright ? 0.82 : n.brightness * (n.skyFactor + (1 - n.skyFactor) * Math.min(sat / 0.6, 1.4));
+  let c = [r, g, b].map((v) => 255 * (v / 255) ** n.gamma * k);
+  const grey = 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
+  c = c.map((v) => grey + (v - grey) * n.saturation);
+  if (!bright) c = c.map((v, i) => v * (1 - n.tintStrength * (1 - n.tint[i] / 255)));
+  return c.map((v) => Math.max(0, Math.min(255, Math.round(v))));
+}
+
+if (MODE === "night") for (let i = 0; i < W * H; i++) img.set(grade(at(i % W, Math.floor(i / W)), keepBright[i]), i * 3);
+
+// ---- Output ---------------------------------------------------------------------------
 await mkdir(OUT, { recursive: true });
-const art = sharp(Buffer.from(buf), { raw: { width: W, height: H, channels: 3 } });
-const outputs = [
-  ...STEP_WIDTHS.map((w) => [w, art.clone().resize({ width: w, kernel: "mitchell" })]),
-  [W, art.clone()],
-];
-for (const [w, img] of outputs) {
+const art = sharp(Buffer.from(img), { raw: { width: W, height: H, channels: 3 } });
+const outputs = [...STEP_WIDTHS.map((w) => [w, art.clone().resize({ width: w, kernel: "mitchell" })]), [W, art.clone()]];
+for (const [w, image] of outputs) {
   const file = `${OUT}hero-${w}.png`;
-  await img.png({ compressionLevel: 9, adaptiveFiltering: true }).toFile(file);
+  await image.png({ compressionLevel: 9, adaptiveFiltering: true }).toFile(file);
   console.log(`hero-${w}.png  ${w}×${Math.round((w * H) / W)}  ${(await stat(file)).size} B`);
 }
