@@ -130,3 +130,30 @@ describe("website storage (localStorage)", () => {
     expect(calls).toBe(2);
   });
 });
+
+describe("example updates", () => {
+  const oldMidterm = { id: "schaltungstheorie-midterm", module: "Schaltungstheorie", label: "Midterm", date: null, notes: "Etwa im Dezember; genauer Termin folgt." };
+
+  it("updates a never-edited midterm, adds its registration link once, and saves that", async () => {
+    await save("exams", [SEED.exams[0]!, oldMidterm]);
+    await save("resources", [SEED.resources[0]!]);
+    const data = await loadAll();
+    const midterm = data.exams.find((e) => e.id === "schaltungstheorie-midterm")!;
+    expect(midterm).toMatchObject({ date: "2026-12-04", time: "13:15", room: "Audimax", durationMin: 90, registrationDeadline: "2026-11-30" });
+    expect(data.resources.map((r) => r.id)).toEqual(["tumonline", "schaltungstheorie-semestrale-anmeldung"]);
+    // Saved: deleting the link afterwards keeps it deleted.
+    await save("resources", [SEED.resources[0]!]);
+    expect((await loadAll()).resources.map((r) => r.id)).toEqual(["tumonline"]);
+  });
+
+  it("leaves an edited midterm alone", async () => {
+    const mine = { ...oldMidterm, notes: "Meine Notiz" };
+    await save("exams", [mine]);
+    expect((await loadAll()).exams).toEqual([mine]);
+  });
+
+  it("the new example passes the form's checks", () => {
+    const midterm = SEED.exams.find((e) => e.id === "schaltungstheorie-midterm")!;
+    expect(midterm.allowedAids!.every((a) => a.length <= 120) && midterm.description!.length <= 2000 && midterm.notes!.length <= 2000).toBe(true);
+  });
+});

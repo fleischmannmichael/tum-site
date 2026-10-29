@@ -1,5 +1,5 @@
 import { t } from "./i18n";
-import { SEED, upgradeSeed } from "./seed";
+import { SEED, upgradeExample, upgradeSeed } from "./seed";
 import { storageArea } from "./storage-area";
 import type { StoredData } from "./types";
 
@@ -35,9 +35,19 @@ function decode(all: Record<string, unknown>, key: Key): unknown {
 /** Reads everything; keys never written yet fall back to the seed. */
 export async function loadAll(): Promise<StoredData> {
   const all = await storageArea().get(null);
-  return {
+  const stored = {
     exams: upgradeSeed((decode(all, "exams") as StoredData["exams"] | undefined) ?? SEED.exams),
     resources: (decode(all, "resources") as StoredData["resources"] | undefined) ?? SEED.resources,
+  };
+  // Example entries with newer details (e.g. a date that was TBA): update the
+  // never-edited ones and save that once, so it isn't redone on every load.
+  const upgraded = upgradeExample(stored);
+  if (upgraded !== stored && "exams" in all) {
+    await save("exams", upgraded.exams).catch(() => {});
+    if (upgraded.resources !== stored.resources) await save("resources", upgraded.resources).catch(() => {});
+  }
+  return {
+    ...upgraded,
     settings: { ...SEED.settings, ...(decode(all, "settings") as Partial<StoredData["settings"]> | undefined) },
     focusLog: (decode(all, "focusLog") as StoredData["focusLog"] | undefined) ?? [],
     checklists: (decode(all, "checklists") as StoredData["checklists"] | undefined) ?? {},

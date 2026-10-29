@@ -27,7 +27,7 @@ describe("chooseHeadline", () => {
   it("fills motivational templates with the next exam", () => {
     const n = MOTIVATION.en.length;
     const titles = Array.from({ length: n }, (_, i) => chooseHeadline(settings({ mode: "motivation" }), summary, i / n).title);
-    expect(titles.some((t) => /^Analysis 1 in 114 days\. Today counts\.$/.test(t))).toBe(true);
+    expect(titles.some((t) => /^Schaltungstheorie in 41 days\. Today counts\.$/.test(t))).toBe(true);
     expect(titles).toContain("6 exams. One at a time.");
     expect(titles.every((t) => t && !t.includes("undefined"))).toBe(true);
   });

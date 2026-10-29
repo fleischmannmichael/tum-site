@@ -43,8 +43,16 @@ export const SEED: StoredData = {
       id: "schaltungstheorie-midterm",
       module: "Schaltungstheorie",
       label: "Midterm",
-      date: null,
-      notes: "Etwa im Dezember; genauer Termin folgt.",
+      date: "2026-12-04",
+      time: "13:15",
+      room: "Audimax",
+      durationMin: 90,
+      registrationDeadline: "2026-11-30",
+      allowedAids: ["Alle Vorlesungs- und Übungsunterlagen", "Handschriftliche Notizen"],
+      description:
+        "Semestrale: Probeklausur mit Stoff bis einschließlich Kapitel 4. Freiwillig – kein Einfluss auf die Note, kein offizieller Leistungsnachweis. Zum Prüfen des eigenen Wissensstands und um den Prüfungsablauf kennenzulernen.",
+      notes:
+        "Anmeldung 16.11.2026 – 30.11.2026, 23:59 über CampusTUM (Lehrveranstaltung „Schaltungstheorie Semestrale“). Hilfsmittel hier anders als in der echten Prüfung. Nach dem Termin: Angabe und Musterlösung im Moodle-Kurs.",
     },
     {
       id: "digitaltechnik",
@@ -78,6 +86,13 @@ export const SEED: StoredData = {
     { id: "moodle", title: "Moodle", url: "https://www.moodle.tum.de/", category: "Portals" },
     { id: "artemis", title: "Artemis", url: "https://artemis.tum.de/", category: "Portals" },
     { id: "tum-live", title: "TUM-Live", url: "https://live.rbg.tum.de/", category: "Portals" },
+    {
+      id: "schaltungstheorie-semestrale-anmeldung",
+      title: "Semestrale-Anmeldung (CampusTUM)",
+      url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950943935",
+      module: "Schaltungstheorie",
+      category: "Anmeldung",
+    },
   ],
   settings: { showSeconds: true },
   focusLog: [],
@@ -88,6 +103,35 @@ export const SEED: StoredData = {
 const FIRST_SEED_IDS = ["analysis-1", "linear-algebra", "schaltungstheorie", "digitaltechnik", "computertechnik", "schaltungstheorie-2"];
 /** Removed later: the Schaltungstheorie midterm belongs to the one module. */
 const RETIRED_SEED_IDS = ["schaltungstheorie-2"];
+
+/**
+ * Earlier versions of example entries. A stored entry that still equals one
+ * of them exactly (never edited) is brought up to date; edited ones stay.
+ */
+const PREVIOUS: Exam[] = [
+  { id: "schaltungstheorie-midterm", module: "Schaltungstheorie", label: "Midterm", date: null, notes: "Etwa im Dezember; genauer Termin folgt." },
+];
+/** Example links that arrived together with an updated entry (added once, with it). */
+const LINKS_WITH: Record<string, string[]> = { "schaltungstheorie-midterm": ["schaltungstheorie-semestrale-anmeldung"] };
+
+/** JSON with sorted keys, so stored objects compare equal regardless of key order. */
+const canonical = (v: unknown): string =>
+  JSON.stringify(v, (_k, x) => (x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => a.localeCompare(b))) : x));
+const isPrevious = (e: Exam) => PREVIOUS.some((p) => p.id === e.id && canonical(p) === canonical(e));
+
+/**
+ * Updates never-edited example entries to their current version, and adds
+ * the example links that came with that update (unless already there).
+ */
+export function upgradeExample(data: Pick<StoredData, "exams" | "resources">): Pick<StoredData, "exams" | "resources"> {
+  const updated = data.exams.filter(isPrevious).map((e) => e.id);
+  if (!updated.length) return data;
+  const exams = data.exams.map((e) => (isPrevious(e) ? structuredClone(SEED.exams.find((s) => s.id === e.id) ?? e) : e));
+  const have = new Set(data.resources.map((r) => r.id));
+  const links = updated.flatMap((id) => LINKS_WITH[id] ?? []).filter((id) => !have.has(id));
+  const resources = [...data.resources, ...structuredClone(SEED.resources.filter((r) => links.includes(r.id)))];
+  return { exams, resources };
+}
 
 /** Still exactly as first seeded: just id, module and no date. */
 const untouched = (e: Exam) => e.date === null && Object.keys(e).length === 3;

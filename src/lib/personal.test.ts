@@ -3,12 +3,15 @@ import { summarize, zonedToInstant } from "./countdown";
 import { greeting, personalLines } from "./personal";
 import { SEED } from "./seed";
 
+/** The end-of-semester exams (without the December midterm), which these tests were written around. */
+const FINALS = SEED.exams.filter((e) => e.id !== "schaltungstheorie-midterm");
+
 const at = (y: number, m: number, d: number, h = 12, min = 0) => zonedToInstant({ y, m, d, h, min });
 const input = (now: number, extra: Partial<Parameters<typeof personalLines>[0]> = {}) => ({
   name: "Michael",
   lang: "en" as const,
   now,
-  summary: summarize(SEED.exams, now),
+  summary: summarize(FINALS, now),
   focusLog: [],
   checklists: {},
   ...extra,
@@ -69,5 +72,13 @@ describe("a blank page", () => {
     const lines = personalLines({ name: "Alex", lang: "en", now, summary: summarize([], now), focusLog: [], checklists: {} });
     expect(lines[0]).toBe("A blank page, Alex. Add your first exam in Settings — the date can wait.");
     expect(lines.some((l) => l.startsWith("All exams done"))).toBe(false);
+  });
+});
+
+describe("with the full example", () => {
+  it("the midterm on 4 December is next", () => {
+    const now = at(2026, 10, 29, 12);
+    const lines = personalLines({ name: "Michael", lang: "en", now, summary: summarize(SEED.exams, now), focusLog: [], checklists: {} });
+    expect(lines[0]).toBe("36 days until Schaltungstheorie, Michael. Plenty of time — if today counts.");
   });
 });
